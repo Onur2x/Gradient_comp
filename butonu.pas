@@ -5,9 +5,10 @@ unit butonu;
 interface
 
 uses
-  Classes, LMessages,{$IFDEF UNIX}unix{$ELSE} Windows{$ENDIF}, SysUtils, strutils, LResources, Forms,
-  Controls, Graphics, Messages, Dialogs, ExtCtrls, fpimage,
-  LCLType, LCLIntf, Types, LazUTF8;
+  Classes, LMessages,
+  {$IFDEF UNIX}unix{$ELSE} Windows{$ENDIF}, SysUtils,
+  Forms, Controls, Graphics, Messages, Dialogs,
+  ExtCtrls, Types,LCLType,  LazUTF8;
 
 
 
@@ -816,7 +817,7 @@ type
     Flist: TStrings;
     findex,fstateindex: integer;
     Fstate:Tobutonstate;
-    Fchecklist: TList;
+    Fstatelist,Fchecklist: TList;
     fvert, fhorz: ToScrollBar;
     FItemsShown, FitemHeight, Fitemoffset: integer;
     //fcheckwidth:integer;
@@ -829,6 +830,7 @@ type
     function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): Boolean;   override;
     function GetItemAt(Pos: TPoint): integer;
     function GetItemIndex: integer;
+    function getstatenumber(index: integer): integer;
     function ItemRect(Item: integer): TRect;
     function CheckBoxRect( Index : Integer ) : TRect;
     procedure LinesChanged(Sender: TObject);
@@ -842,6 +844,8 @@ type
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
       X: integer; Y: integer); override;
     procedure MouseEnter; override;
+    procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseLeave; override;
     procedure Scrollchange(Sender: TObject);
     procedure KeyDown(var Key: word; Shift: TShiftState);
     procedure SetString(AValue: TStrings);
@@ -872,6 +876,12 @@ type
     property Selectedcolor    : Tcolor      read Fselectedcolor write Fselectedcolor;
     property OnCheck 	      : TCheckEvent read FOnCheck       write FOnCheck;
     property OnUncheck 	      : TCheckEvent read FOnUncheck     write FOnUnCheck;
+    property ColorEnter       : Tocolor     read obenter        write obenter;
+    property ColorLeave       : Tocolor     read obleave        write obleave;
+    property ColorDown        : Tocolor     read obdown         write obdown;
+    property ColorDisable     : Tocolor     read obdisabled     write obdisabled;
+    property ColorCheckEnter  : Tocolor     read obcheckenters  write obcheckenters;
+    property ColorCheckLeave  : Tocolor     read obcheckleaves  write obcheckleaves;
     property AllChecked       : Boolean     read GetAllChecked;
     property NoneChecked      : Boolean     read GetNoneChecked;
     property Background;
@@ -5470,7 +5480,8 @@ begin
   Fitemoffset  := 0;
   Flist := TStringList.Create;
   TStringList(Flist).OnChange := @LinesChanged;
-  Fchecklist:=TList.Create;
+  Fchecklist := TList.Create;
+  Fstatelist := Tlist.Create;
   fvert := ToScrollBar.Create(self);
   with fvert do
   begin
@@ -5492,18 +5503,18 @@ destructor ToChecklistbox.Destroy;
 begin
   FreeAndNil(Flist);
   FreeAndNil(Fchecklist);
+  FreeAndNil(Fstatelist);
   FreeAndNil(fvert);
   inherited Destroy;
 end;
 
 procedure ToChecklistbox.paint;
 var
-  a, b, k, i: integer;
+  a, b, k, i,p: integer;
   gr1,gr2:TRect;//color;
-  obstart,obend,oborder:Tcolor;
+  obstart,obend,oborder,checkendstart,checkedend:Tcolor;
   fborderWidth:integer;
   chechrect:Trect;
-  t:Tocolor;
 begin
   inherited paint;
   if Flist.Count > 0 then
@@ -5534,7 +5545,6 @@ begin
 
 
     a := Background.Border;
- //   fcheckwidth :=20;
     b := a;
     canvas.Brush.Style := bsClear;
 
@@ -5542,143 +5552,147 @@ begin
     begin
       if i < Flist.Count then
       begin
-    //    if Fchecklist[i]='true' then
-   //      gr
+        Fstate:=obleaves;
+        case getstatenumber(i)of
+        0:Fstate:=obenters;
+        1:Fstate:=obleaves;
+        2:Fstate:=obdowns;
+        end;
+
+
+
+          if Enabled = False then
+          begin
+            obstart := obdisabled.Startcolor;
+            obend := obdisabled.Stopcolor;
+            oborder := obdisabled.Bordercolor;
+            fborderWidth := obdisabled.Border;
+            canvas.Font.Color := obdisabled.Fontcolor;
+            if (IsChecked(i)) and (fstateindex=i) then
+            begin
+              checkendstart := obcheckenters.Startcolor;
+              checkedend := obcheckenters.Stopcolor;
+            end;
+          end
+          else
+          begin
+             if (IsChecked(i)) and (fstateindex=i) then
+             begin
+                case fstate of
+                  obenters:
+                  begin
+                    obstart := obenter.Startcolor;
+                    obend := obenter.Stopcolor;
+                    checkendstart := obcheckenters.Startcolor;
+                    checkedend := obcheckenters.Stopcolor;
+                    oborder := obenter.Bordercolor;
+                    fborderWidth := obenter.Border;
+                    canvas.Font.Color := obcheckenters.Fontcolor;
+                  end;
+                  obleaves:
+                  begin
+                    obstart := obleave.Startcolor;
+                    obend := obleave.Stopcolor;
+                    checkendstart := obcheckleaves.Startcolor;
+                    checkedend := obcheckleaves.Stopcolor;
+                    oborder := obcheckleaves.Bordercolor;
+                    fborderWidth := obleave.Border;
+                    canvas.Font.Color := obcheckleaves.Fontcolor;
+                  end;
+                  obdowns:
+                  begin
+                    obstart := obdown.Startcolor;
+                    obend := obdown.Stopcolor;
+                    fborderWidth := obdown.Border;
+                    oborder := obdown.Bordercolor;
+                    canvas.Font.Color := obdown.Fontcolor;
+                  end;
+                end;
+              end
+              else
+              begin
+                case fstate of
+                  obenters:
+                  begin
+                    obstart := obenter.Startcolor;
+                    obend := obenter.Stopcolor;
+                    oborder := obenter.Bordercolor;
+                    fborderWidth := obenter.Border;
+                    canvas.Font.Color := obenter.Fontcolor;
+                  end;
+                  obleaves:
+                  begin
+                    obstart := obleave.Startcolor;
+                    obend := obleave.Stopcolor;
+                    oborder := obleave.Bordercolor;
+                    fborderWidth := obleave.Border;
+                    canvas.Font.Color := obleave.Fontcolor;
+                  end;
+                  obdowns:
+                  begin
+                    obstart := obdown.Startcolor;
+                    obend := obdown.Stopcolor;
+                    oborder := obdown.Bordercolor;
+                    fborderWidth := obdown.Border;
+                    canvas.Font.Color := obdown.Fontcolor;
+                  end;
+                end;
+              end;
+          end;
+
+
+
+
 
 
         if i = findex then
         begin
           canvas.Brush.Color := Fselectedcolor;
           canvas.Brush.Style := bsSolid;
-     //      a := Background.Border;
 
-         if IsChecked(I) then
-          a:=a+FitemHeight;
+       //  if IsChecked(I) then
+       //   a:=a+FitemHeight;
 
           if Assigned(fvert) then
            canvas.FillRect(a, b, self.Width-(fvert.Width+ (a*2)),b + FitemHeight)
           else
           canvas.FillRect(a, b, self.Width - a,b + FitemHeight);
+        end;
+        //else
+       // begin     /// not selected
 
 
-
-    //      if IsChecked(I) then
-    //      a:=a+fcheckwidth;
-
-          canvas.Brush.Style := bsClear;
-          Canvas.TextOut(a, b, Flist[i]);
-        end
-        else
-        begin     /// not selected
-
-              if Enabled = False then
-              begin
-              //  t:=obdisabled;
-                obstart := obdisabled.Startcolor;
-                obend := obdisabled.Stopcolor;
-                oborder := obdisabled.Bordercolor;
-                fborderWidth := obdisabled.Border;
-                canvas.Font.Color := obdisabled.Fontcolor;
-            //    if Checked = True then
-            //    begin
-           //       checkendstart := obcheckenters.Startcolor;
-            //      checkedend := obcheckenters.Stopcolor;
-            //    end;
-              end
-              else
-              begin
-                if (IsChecked(fstateindex)) and (fstateindex=i) then //Checked = True then
-                begin
-
-                  case fstate of
-                    obenters:// t:=obenter;
-                    begin
-                      obstart := obenter.Startcolor;
-                      obend := obenter.Stopcolor;
-                    //  checkendstart := obcheckenters.Startcolor;
-                   //   checkedend := obcheckenters.Stopcolor;
-                      oborder := obenter.Bordercolor;
-                      fborderWidth := obenter.Border;
-                      canvas.Font.Color := obcheckenters.Fontcolor;
-                    end;
-                    obleaves: //t:=obleave;
-                    begin
-                      obstart := obleave.Startcolor;
-                      obend := obleave.Stopcolor;
-                   //   checkendstart := obcheckleaves.Startcolor;
-                   //   checkedend := obcheckleaves.Stopcolor;
-                      oborder := obcheckleaves.Bordercolor;
-                      fborderWidth := obleave.Border;
-                      canvas.Font.Color := obcheckleaves.Fontcolor;
-                    end;
-                    obdowns: //t:=obdown;
-                    begin
-                      obstart := obdown.Startcolor;
-                      obend := obdown.Stopcolor;
-                      fborderWidth := obdown.Border;
-                      oborder := obdown.Bordercolor;
-                      canvas.Font.Color := obdown.Fontcolor;
-                    end;
-                  end;
-                end
-                else
-                begin
-                  case fstate of
-                    obenters:
-                    begin
-                      obstart := obenter.Startcolor;
-                      obend := obenter.Stopcolor;
-                      oborder := obenter.Bordercolor;
-                      fborderWidth := obenter.Border;
-                      canvas.Font.Color := obenter.Fontcolor;
-                    end;
-                    obleaves:
-                    begin
-                      obstart := obleave.Startcolor;
-                      obend := obleave.Stopcolor;
-                      oborder := obleave.Bordercolor;
-                      fborderWidth := obleave.Border;
-                      canvas.Font.Color := obleave.Fontcolor;
-                    end;
-                    obdowns:
-                    begin
-                      obstart := obdown.Startcolor;
-                      obend := obdown.Stopcolor;
-                      oborder := obdown.Bordercolor;
-                      fborderWidth := obdown.Border;
-                      canvas.Font.Color := obdown.Fontcolor;
-                    end;
-                  end;
-                end;
-              end;
 
            chechrect:= Rect(fborderWidth,b,fborderWidth+FitemHeight,b+(FitemHeight));
            canvas.Brush.Color:=oborder;
-           Canvas.FillRect(chechrect);
-                                       //16+1                              16+4
-           gr1:=rect(fborderWidth,b+fborderWidth,FitemHeight-fborderWidth,b+(FitemHeight div 2));//chechrect.Left+fborderWidth,chechrect.Top+fborderWidth,chechrect.Right-fborderWidth,chechrect.bottom div 2);
-           gr2:=rect(gr1.Left,gr1.Bottom,gr1.Right,gr1.Bottom+(FitemHeight div 2));
-           //16+4                                           16+8+1
-          // gr2:=rect(fborderWidth,b+(FitemHeight div 2),FitemHeight-fborderWidth,b+(FitemHeight+fborderWidth));
-           //  gr2:=rect(chechrect.Left+fborderWidth,chechrect.Bottom div 2,chechrect.Right-fborderWidth,chechrect.bottom-fborderWidth);
+           Canvas.FillRect(chechrect);  /// for border
 
+
+           // background
+           gr1:=rect(fborderWidth,b+fborderWidth,FitemHeight-fborderWidth,b+(FitemHeight div 2));
+           gr2:=rect(gr1.Left,gr1.Bottom,gr1.Right,gr1.Bottom+(FitemHeight div 2));
            canvas.GradientFill(gr1, obstart,obend, gdVertical);
            canvas.GradientFill(gr2, obend,obstart,  gdVertical);
-        //   Drawtorect(Canvas,chechrect,t,kind);
-       //   canvas.Brush.Color := Fselectedcolor;
-       //   canvas.Brush.Style := bsCross;
-        //  Canvas.FillRect(a,b,fcheckwidth,b+FitemHeight); // checkbox canvas
-          canvas.Brush.Style := bsClear;
-          Canvas.TextOut(fborderWidth+FitemHeight, b, Flist[i]+'        '+inttostr(fstateindex)+'     '+inttostr(Fchecklist.Count));
-        end;
+
+           // if checked?
+          if (IsChecked(i)) then
+          begin
+            chechrect:= Rect(fborderWidth*2,b+5,fborderWidth+FitemHeight-5,b+(FitemHeight)-5);
+            canvas.Brush.Color := oborder;
+            canvas.FillRect(chechrect);
+            chechrect := Rect(chechrect.Left + fborderWidth, chechrect.top +
+              fborderWidth, chechrect.Right - fborderWidth, chechrect.Bottom - fborderWidth);
+            canvas.GradientFill(chechrect, checkendstart, checkedend, gdVertical);
+            //√
+          end;
+       // end;
+
+        canvas.Brush.Style := bsClear;
+        Canvas.TextOut(a+(FitemHeight * 2), b, Flist[i]);
+
         b := b + FitemHeight;
         if (b >= Height) then Break;
-
-
-
       end;
-
-
     end;
   end;
 end;
@@ -5743,8 +5757,8 @@ begin
     Result := ItemRect( Index );
   with Result do
     begin
-      Inc( Left , 2 );
-    //  left:=Background.Border+1;
+    //  Inc( Left , 2 );
+      left:=Background.Border+1;
       Top := Top + ( ( Bottom - Top ) - FitemHeight ) div 2;
       Right := Left + FitemHeight div 2 ;
       Bottom := Top + FitemHeight;
@@ -5772,7 +5786,8 @@ inherited MouseDown(Button, Shift, X, Y);
        begin
      	    Toggle(fIndex );
             fstateindex:=findex; // for state index painting;
-            Fstate:=obdowns;
+           // Fstate:=obdowns;
+            Fstatelist.Items[findex]:=Pointer(2);
             invalidate;{ Toggle the item's checked state }
             //	Canvas.DrawFocusRect( ItemRect(fIndex ) );	{ draw focus rectangle }
        end;
@@ -5785,7 +5800,7 @@ procedure ToChecklistbox.MouseUp(Button: TMouseButton; Shift: TShiftState;
 var
   Rect:TRect;
 begin
-  inherited MouseUp(Button, Shift, X, Y);
+ { inherited MouseUp(Button, Shift, X, Y);
   if ( Button = mbLeft ) then
    begin
    fstateindex := GetItemAt(Point( X , Y ));
@@ -5807,7 +5822,7 @@ begin
             //	Canvas.DrawFocusRect( ItemRect(fIndex ) );	{ draw focus rectangle }
        end;
     end;
-  end;
+  end; }
 end;
 
 procedure ToChecklistbox.MouseEnter;
@@ -5815,9 +5830,11 @@ var
   rect:Trect;
   t:Point;
 begin
+  {
   GetCursorPos(t);
   ScreenToClient(t);
  fstateindex := GetItemAt(t);
+
 
     if ( fstateindex > -1 ) then
     begin
@@ -5832,12 +5849,44 @@ begin
        {     if IsChecked(fstateindex) then
             Fstate:=obcheckenters
             else }
+
             Fstate := obenters;
-         //   invalidate;{ Toggle the item's checked state }
-            //	Canvas.DrawFocusRect( ItemRect(fIndex ) );	{ draw focus rectangle }
+         //   invalidate;
        end;
     end;
-     invalidate;
+     invalidate;   }
+end;
+
+procedure ToChecklistbox.MouseMove(Shift: TShiftState; X, Y: Integer);
+ var
+  rect:Trect;
+  i: Integer;
+begin
+  inherited MouseMove(Shift, X, Y);
+
+  for i:=0 to Fstatelist.Count-1 do      // clear state
+  if integer(Fstatelist.Items[i])<>2 then
+  Fstatelist.Items[i]:=Pointer(1);
+
+  fstateindex := GetItemAt(point(X,Y));
+  if ( fstateindex > -1 ) then
+  begin
+    Rect := ItemRect(fstateindex);  // item click
+    if PtInRect( Rect , point(x,Y) ) then
+    Fstatelist.Items[fstateindex]:=Pointer(0);
+  end;
+  invalidate;
+end;
+
+procedure ToChecklistbox.MouseLeave;
+var
+  i: Integer;
+begin
+  inherited MouseLeave;
+  for i:=0 to Fstatelist.Count-1 do
+  if integer(Fstatelist.Items[i])<>2 then
+  Fstatelist.Items[i]:=Pointer(1);
+  Invalidate;
 end;
 
 procedure ToChecklistbox.Scrollchange(Sender: TObject);
@@ -5857,6 +5906,13 @@ begin
   Flist.Assign(AValue);
 end;
 
+function ToChecklistbox.getstatenumber(index:integer):integer;
+begin
+ result:= 1;
+ Result := integer(Fstatelist.Items[index]);
+
+end;
+
 function ToChecklistbox.IsChecked(Index: Integer): Boolean;
 begin
     Result := Fchecklist.IndexOf(Pointer(Index)) > -1;
@@ -5867,16 +5923,16 @@ begin
   if IsChecked( Index ) <> AChecked then
     begin
       if not AChecked then
-        Fchecklist.Delete( Fchecklist.IndexOf(Pointer(Index)))
-      else
+        begin
+        Fchecklist.Delete( Fchecklist.IndexOf(Pointer(Index)));
+        Fstatelist.Items[index]:=Pointer(1);
+       end else
+       begin
         Fchecklist.Add(pointer(Index));
+        Fstatelist.Items[index]:=Pointer(2);
+       end;
 
- 		{	if ( Selected[ Index ] ) then   			{ if the item is selected, it must be drawn accordingly }
- 				State := [ odSelected ]
-       else
-       	State := [];}
-  //     DrawCheckBox( Index , State );				{ draw the check box }
-       if ( AChecked ) then                  { generate appropriate event }
+       if ( AChecked ) then
        	CheckEvent( Index )
        else
        	UnCheckEvent( Index );
@@ -5954,7 +6010,13 @@ begin
 end;
 
 procedure ToChecklistbox.LinesChanged(Sender: TObject);
+var
+i:integer;
 begin
+ Fstatelist.Clear;
+ for i:=0 to flist.count-1 do
+ Fstatelist.Add(Pointer(1));
+ writeln('aaa');
   Invalidate;
 end;
 
