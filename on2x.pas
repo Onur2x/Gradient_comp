@@ -8,15 +8,16 @@ unit on2x;
 interface
 
 uses
-  butonu, ongrid, LazarusPackageIntf;
+  butonu, ongrid, databasecontrol, LazarusPackageIntf;
 
 implementation
 
-procedure Register;
+procedure register;
 begin
-  RegisterUnit('butonu', @butonu.Register);
+  registerunit('butonu', @butonu.register);
+  registerunit('databasecontrol', @databasecontrol.register);
 end;
 
 initialization
-  RegisterPackage('on2x', @Register);
+  registerpackage('on2x', @register);
 end.

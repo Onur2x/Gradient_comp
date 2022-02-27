@@ -162,6 +162,7 @@ type
     property OnStartDrag;
     property ParentFont;
     property ParentShowHint;
+    property ParentColor;
     property PopupMenu;
     property ShowHint;
     property Visible;
@@ -224,6 +225,7 @@ type
     property OnStartDrag;
     property ParentFont;
     property ParentShowHint;
+    property ParentColor;
     property PopupMenu;
     property ShowHint;
     property Visible;
@@ -287,9 +289,56 @@ type
     property ParentFont;
     property ParentShowHint;
     property PopupMenu;
+    property ParentColor;
     property ShowHint;
     property Visible;
 
+  end;
+
+  { TOGraphicPanel }
+
+  TOGraphicPanel = class(ToGraphicControl)
+  public
+    procedure paint; override;
+  published
+    property Background;
+    property Kind;
+    property Caption;
+    property Transparent;
+    property Action;
+    property Align;
+    property Anchors;
+    property AutoSize;
+    property BidiMode;
+    property Constraints;
+    property DragCursor;
+    property DragKind;
+    property DragMode;
+    property Enabled;
+    property Font;
+    property ParentBidiMode;
+    property OnChangeBounds;
+    property OnClick;
+    property OnContextPopup;
+    property OnDragDrop;
+    property OnDragOver;
+    property OnEndDrag;
+    property OnMouseDown;
+    property OnMouseEnter;
+    property OnMouseLeave;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnMouseWheel;
+    property OnMouseWheelDown;
+    property OnMouseWheelUp;
+    property OnResize;
+    property OnStartDrag;
+    property ParentFont;
+    property ParentShowHint;
+    property ParentColor;
+    property PopupMenu;
+    property ShowHint;
+    property Visible;
   end;
 
 
@@ -501,6 +550,7 @@ type
     property OnStartDrag;
     property ParentFont;
     property ParentShowHint;
+    property ParentColor;
     property PopupMenu;
     property ShowHint;
     property Visible;
@@ -549,6 +599,7 @@ type
     property OnStartDrag;
     property ParentFont;
     property ParentShowHint;
+    property ParentColor;
     property PopupMenu;
     property ShowHint;
     property Visible;
@@ -633,6 +684,7 @@ type
     property OnStartDrag;
     property ParentFont;
     property ParentShowHint;
+    property ParentColor;
     property PopupMenu;
     property ShowHint;
     property Visible;
@@ -719,6 +771,7 @@ type
     property OnStartDrag;
     property ParentFont;
     property ParentShowHint;
+    property ParentColor;
     property PopupMenu;
     property ShowHint;
     property Visible;
@@ -741,6 +794,7 @@ type
     function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): Boolean;   override;
 
     function GetItemAt(Pos: TPoint): integer;
+    function getitemheight: integer;
     function GetItemIndex: integer;
     function ItemRect(Item: integer): TRect;
     procedure LinesChanged(Sender: TObject);
@@ -748,12 +802,14 @@ type
     procedure MoveEnd;
     procedure MoveHome;
     procedure MoveUp;
+    procedure setitemheight(avalue: integer);
     procedure SetItemIndex(Avalue: integer);
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
       X: integer; Y: integer); override;
     procedure Scrollchange(Sender: TObject);
-    procedure KeyDown(var Key: word; Shift: TShiftState);
-    procedure SetString(AValue: TStrings);
+  protected
+    procedure KeyDown(var Key: word; Shift: TShiftState);virtual;
+    procedure SetString(AValue: TStrings); virtual;
    // procedure KeyDown(var Key: word; Shift: TShiftState); override;
   public
     constructor Create(Aowner: TComponent); override;
@@ -765,6 +821,7 @@ type
   published
     property Items            : TStrings    read Flist          write SetString;
     property ItemIndex        : integer     read GetItemIndex   write SetItemIndex;
+    property ItemHeight       : integer     read GetItemHeight  write SetItemHeight;
     property HorizontalScroll : ToScrollBar read fhorz          write fhorz;
     property VertialScroll    : ToScrollBar read fvert          write fvert;
     property Selectedcolor    : Tcolor      Read Fselectedcolor write Fselectedcolor;
@@ -820,7 +877,7 @@ type
     Fstatelist,Fchecklist: TList;
     fvert, fhorz: ToScrollBar;
     FItemsShown, FitemHeight, Fitemoffset: integer;
-    //fcheckwidth:integer;
+    Fbuttonheight:integer;
     Fselectedcolor:Tcolor;
     FOnCheck 	  : TCheckEvent;
     FOnUnCheck    : TCheckEvent;
@@ -828,6 +885,7 @@ type
     FClickInBox   : Boolean;
     function DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): Boolean; override;
     function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): Boolean;   override;
+    function getbuttonheight: integer;
     function GetItemAt(Pos: TPoint): integer;
     function GetItemIndex: integer;
     function getstatenumber(index: integer): integer;
@@ -838,6 +896,7 @@ type
     procedure MoveEnd;
     procedure MoveHome;
     procedure MoveUp;
+    procedure setbuttonheight(avalue: integer);
     procedure SetItemIndex(Avalue: integer);
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
       X: integer; Y: integer); override;
@@ -871,6 +930,7 @@ type
   published
     property Items            : TStrings    read Flist          write SetString;
     property ItemIndex        : integer     read GetItemIndex   write SetItemIndex;
+    property ButtonHeight     : integer     read GetButtonHeight write SetButtonHeight;
     property HorizontalScroll : ToScrollBar read fhorz          write fhorz;
     property VertialScroll    : ToScrollBar read fvert          write fvert;
     property Selectedcolor    : Tcolor      read Fselectedcolor write Fselectedcolor;
@@ -981,107 +1041,10 @@ type
     FNumbersOnly: boolean;
     Fcharcase: ToCharCase;
     fEchoMode: TOEchoMode;
-  {  totalcharlngth: integer;
-    totalcharwidgt: integer;
-    screentotalcharlngth: integer;
-    screentotalcharwidgt: integer;
-    caretpositiontocharL: integer;
-
-    TextOffsetSymbols: integer;
-    { position of cursor in symbols, begin from 1 }
-    FPosCursorSymbols: integer;
-    { absolut position of cursor relatively first symbol }
-    PosCursorPixels: integer;
-    { position of selector's rect }
-    StartSelectedPixels: integer;
-    { width of selector's rect }
-    WidthSelectedPixels: integer;
-
-    FChracterleftwidthtoselfwidth:integer;
-    FChracterleftwidth:integer;
-
-    screentext: WideString;
-    totaltext: WideString;
-    caretleftchar: integer;
-    caretrightchar: integer;
-    fbackground: Tocolor;
-    Ftext: string;//widestring;
-    fborderWidth: integer;
-    selectcolor: Tcolor;
-    FCarets: Toncaret;
-    fSelEnd: integer;
-    fSelStart: integer;
-    fSelText: WideString;
-    fpassword: char;
-    fselected: boolean;
-    temptexti: WideString;
-    fReadOnly: boolean;
-    FNumbersOnly: boolean;
-    Fcharcase: ToCharCase;
-    fEchoMode: TOEchoMode;
-    FOnChange: TNotifyEvent;
-    function CarettoCharlengt(tp: byte): integer;
-{    procedure ClearSelection;
-    procedure DecCursor;
-    procedure DeleteSymbol;
-    procedure DrawSelector;
-    function FindOffsetOfchar(Index: integer; Start: integer=1): integer;
-  }  function GetNumbersOnly: boolean;
-    function getpassword: char;
-    function GetReadonly: boolean;
-    function gettexsize: integer;
-    function gettext: WideString;
-{    procedure IncCursor;
-    procedure InsertSymbol(Symbol: WideChar);
-}
-
-    procedure screentochar;
-{    procedure Select(Count: integer);
-    procedure SetCursorPosition(const Value: Integer);
-    procedure SetNewCursorPos(IndexSymbol, InPixels: integer);
-    function GetCursorPosFromX(X: integer; out Pixels: integer): integer;
- }
-    function textbol: WideString;
-    //    procedure Textfinish;
-    //    function textsizetolength: integer;
-    function GetSelEnd: integer;
-    function GetSelStart: integer;
-    function GetSelText: WideString;
-    //    function caretpositiontochar:integer;
-    //    function Charpositiontocaret(startx,finish:integer):integer;
-    function GetCharCase: ToCharCase;
-    function GetEchoMode: TOEchoMode;
-    procedure SetEchoMode(const Value: TOEchoMode);
-    procedure SetCharCase(const Value: ToCharCase);
-    procedure setpassword(const Value: char);
-    procedure settext(const Value: WideString);
-    procedure SetSelEnd(const Value: integer);
-    procedure SetSelStart(const Value: integer);
-    procedure SetReadonly(const Value: boolean);
-    procedure SetNumbersOnly(const Value: boolean);
-    procedure delSelected;
-//    procedure UpdateCursorPos;
-    procedure WMEraseBkgnd(var Message: TWMEraseBkgnd); message WM_ERASEBKGND;
-    procedure CreateParams(var Params: TCreateParams);
-    procedure CMonmouseenter(var Messages: Tmessage); message CM_MOUSEENTER;
-    procedure CMonmouseleave(var Messages: Tmessage); message CM_MOUSELEAVE;
-    //    procedure WMKeyDown(var Message: TLMKeyDown); message LM_KEYDOWN;
-    //    procedure WMKeyUp(var Message: TLMKeyUp); message LM_KEYUP;
-    procedure WndProc(var Message: TLMessage); override;
-    procedure WMSetFocus(var Message: TLMSetFocus); message LM_SETFOCUS;
-    procedure WMKillFocus(var Message: TLMKILLFOCUS); message LM_KILLFOCUS;
-    procedure WMChar(var Message: TLMChar); message LM_CHAR;
-   }
-
-
-
     DragDropStarted: boolean;
-    //FCaretTimer: TTimer;
     FLines: TStrings;
     FOnChange: TNotifyEvent;
     FReadOnly: boolean;
-    //    fborderWidth :integer;
-    //    fbackground: Tocolor;
     FCarets: Toncaret;
     function Caretttopos(leftch: integer): integer;
     procedure DrawCaret;
@@ -1091,9 +1054,9 @@ type
     function GetEchoMode: TOEchoMode;
     function GetLeftTextMargin: integer;
     function GetMultiLine: boolean;
-    function GetNumbersOnly: boolean;
+
+
     function GetRightTextMargin: integer;
-    function GetText: string;
     function GetPasswordChar: char;
     //    procedure HandleCaretTimer(Sender: TObject);
     procedure DoDeleteSelection;
@@ -1105,7 +1068,8 @@ type
     procedure SetLeftTextMargin(AValue: integer);
     procedure SetLines(AValue: TStrings);
     procedure SetMultiLine(AValue: boolean);
-    procedure SetNumbersOnly(const Value: boolean);
+    procedure SetNumberOnly(const Value: boolean);
+
     procedure SetRightTextMargin(AValue: integer);
     procedure SetText(AValue: string);
     procedure SetPasswordChar(AValue: char);
@@ -1113,7 +1077,12 @@ type
     function IsSomethingSelected: boolean;
 //    function GetMeasures(AMeasureID: integer): integer;// virtual; abstract;
   protected
+    function GetText: string; virtual;
+    function GetNumberOnly: boolean; virtual;
+    function GetReadOnly: boolean; virtual;
+    procedure setreadonly(avalue: boolean); virtual;
     procedure RealSetText(const Value: TCaption); override;
+
     // to update on caption changes, don't change this as it might break descendents
     // for descendents to override
     procedure DoChange; virtual;
@@ -1132,19 +1101,7 @@ type
     procedure MouseLeave; override;
     procedure WMSetFocus(var Message: TLMSetFocus); message LM_SETFOCUS;
     procedure WMKillFocus(var Message: TLMKILLFOCUS); message LM_KILLFOCUS;
-  {  constructor Create(Aowner: TComponent); override;
-    destructor Destroy; override;
-    procedure paint; override;
-    procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
-      X, Y: integer) override;
-    procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: integer) override;
-    procedure MouseMove(Shift: TShiftState; X, Y: integer); override;
-//    procedure DblClick; override;
-    procedure KeyPress(var Key: char); override;
-    procedure KeyDown(var Key: word; Shift: TShiftState); override;
-    procedure SelectAll;
-    procedure Clear;
-    }
+
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -1165,31 +1122,18 @@ type
       write SetPasswordChar default #0;
     procedure paint; override;
   published
- {   property Carets: Toncaret read FCarets write FCarets;
-
-    property Text: WideString read gettext write settext;
-    property Selstart: integer read GetSelStart write SetSelStart;
-    property SelEnd: integer read GetSelEnd write SetSelEnd;
-    property SelText: WideString read fSelText write fSelText;
-    property PasswordChar: char read getpassword write setpassword;
-    property ReadOnly: boolean read GetReadonly write SetReadonly;
-    property NumberOnly: boolean read GetNumbersOnly write SetNumbersOnly;
-    property CharCase: ToCharCase read GetCharCase write SetCharcase;
-    property EchoMode: TOEchoMode read GetEchoMode write SetEchoMode;
-    property OnChange: TNotifyEvent read FOnChange write FOnChange; }
     property Background: Tocolor read fbackground write fbackground;
-
-
-    property ReadOnly: boolean read FReadOnly
-      write FReadOnly default False;
+    property ReadOnly: boolean read GetReadOnly   write SetReadOnly default False;
     property Text: string read GetText
       write SetText stored False; // This is already stored in Lines
+    property NumberOnly: boolean read GetNumberOnly write SetNumberOnly;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property Action;
     property Align;
     property Anchors;
     property AutoSize;
     property BidiMode;
+    property CharCase: ToCharCase read GetCharCase write SetCharCase;
     property Constraints;
     property DragCursor;
     property DragKind;
@@ -1326,6 +1270,88 @@ type
   end;
 
 
+
+  { ToSpinEdit }
+
+  ToSpinEdit = class(ToCustomcontrol)
+  private
+   Fdbutton       : Tobuton;
+   Fubutton       : Tobuton;
+   Fedit          : Toedit;
+   Fonchange      : TNotifyEvent;
+   fReadOnly      : Boolean;
+   fvalue         : integer;
+   fmin,Fmax      : integer;
+   Fbuttonwidth   : integer;
+   Fbuttonheight  : integer;
+   procedure feditchange(sender: tobject);
+   function getbuttonheight: integer;
+   function getbuttonwidth: integer;
+   function Getmax: integer;
+   function Getmin: integer;
+   procedure kclick(Sender: TObject);
+   function Gettext: integer;
+   procedure setbuttonheight(avalue: integer);
+   procedure setbuttonwidth(avalue: integer);
+   procedure Setmax(AValue: integer);
+   procedure Setmin(AValue: integer);
+   procedure Settext(Avalue: integer);
+   procedure KeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
+   procedure Resize;override;
+   public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy;override;
+    procedure Paint;override;
+  published
+    property Value         : integer       read Gettext         write SetText;
+    property MaxValue      : integer       read Getmin          write Setmin;
+    property MinValue      : integer       read Getmax          write Setmax;
+    property Buttonwidth   : integer       read GetButtonwidth  write SetButtonwidth;
+    property Buttonheight  : integer       read GetButtonheight write SetButtonheight;
+    property OnChange      : TNotifyEvent  read FOnChange       write FOnChange;
+    property ReadOnly      : boolean       read freadonly       write freadonly;
+{    property ButtonEnter   : Tocolor      read fobenter       write fobenter;
+    property ButtonLeave   : Tocolor      read fobleave       write fobleave;
+    property ButtonDown    : Tocolor      read fobdown        write fobdown;
+    property ButtonDisable : Tocolor      read ffdisabled     write ffdisabled;     }
+  //  property Background;
+    property Action;
+    property Align;
+    property Anchors;
+    property AutoSize;
+    property BidiMode;
+    property Constraints;
+    property DragCursor;
+    property DragKind;
+    property DragMode;
+    property Enabled;
+    property Font;
+    property TabStop;
+    property TabOrder;
+    property ParentBidiMode;
+    property OnChangeBounds;
+    property ParentFont;
+    property ParentShowHint;
+    property OnClick;
+    property OnContextPopup;
+    property OnDragDrop;
+    property OnDragOver;
+    property OnEndDrag;
+    property OnMouseDown;
+    property OnMouseEnter;
+    property OnMouseLeave;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnMouseWheel;
+    property OnMouseWheelDown;
+    property OnMouseWheelUp;
+    property OnResize;
+    property OnStartDrag;
+    property PopupMenu;
+    property ShowHint;
+    property Visible;
+  end;
+
   { Tocombobox }
 
   Tocombobox = class(ToCustomcontrol)
@@ -1376,10 +1402,10 @@ type
     property ReadOnly      : boolean      read freadonly      write freadonly;
     property Itemindex     : integer      read Getitemindex   write Setitemindex;
     property Selectedcolor : Tcolor       read Fselectedcolor write Fselectedcolor;
-    property BurronEnter   : Tocolor      read fobenter       write fobenter;
-    property BurronLeave   : Tocolor      read fobleave       write fobleave;
-    property BurronDown    : Tocolor      read fobdown        write fobdown;
-    property BurronDisable : Tocolor      read ffdisabled     write ffdisabled;
+    property ButtonEnter   : Tocolor      read fobenter       write fobenter;
+    property ButtonLeave   : Tocolor      read fobleave       write fobleave;
+    property ButtonDown    : Tocolor      read fobdown        write fobdown;
+    property ButtonDisable : Tocolor      read ffdisabled     write ffdisabled;
   //  property Background;
     property Action;
     property Align;
@@ -1453,8 +1479,10 @@ procedure Register;
 begin
   RegisterComponents('Standard', [Tobuton]);
   RegisterComponents('Standard', [Topanel]);
+  RegisterComponents('Standard', [TOGraphicPanel]);
   RegisterComponents('Standard', [TCollapExpandpanel]);
   RegisterComponents('Standard', [Toedit]);
+  RegisterComponents('Standard', [ToSpinEdit]);
   RegisterComponents('Standard', [Tomemo]);
   RegisterComponents('Standard', [Tocombobox]);
   RegisterComponents('Standard', [Tocheckbox]);
@@ -1465,7 +1493,10 @@ begin
   RegisterComponents('Standard', [ToListBox]);
   RegisterComponents('Standard', [ToChecklistbox]);
 
+
 end;
+
+
 
 
 
@@ -1523,6 +1554,8 @@ begin
   PopupForm.Show;
   PopupForm.KeepInView(APosition);   // must be after Show for PopupForm.AutoSize to be in effect.
 end;
+
+
 
 
 { Tpopupformcombobox }
@@ -1806,6 +1839,7 @@ begin
   Fkind := oHorizontal;
   Transparent := True;
   backgroundcolored := True;
+  ParentColor:=true;
 end;
 
 destructor TOGraphicControl.Destroy;
@@ -1953,6 +1987,25 @@ begin
   end;
 end;
 
+
+
+
+{ TOGraphicPanel }
+
+procedure Tographicpanel.paint;
+var
+  textx, Texty: integer;
+begin
+  inherited paint;
+  if Length(Caption) > 0 then
+  begin
+    self.Canvas.Font.Color := fbackground.fontcolor;
+    textx := (Width div 2) - (self.canvas.TextWidth(Caption) div 2);
+    Texty := (Height div 2) - (self.canvas.TextHeight(Caption) div 2);
+    self.canvas.Brush.Style := bsClear;
+    self.canvas.TextOut(Textx, Texty, (Caption));
+  end;
+end;
 
 { TOCustomTrackBar }
 
@@ -2403,30 +2456,43 @@ begin
   Drawtorect(self.canvas, frbuttonrect, Getcolors(frbutons), Kind);
   Drawtorect(self.canvas, fcenterbuttonarea, Getcolors(fcbutons), Kind);
 
-
-
- // canvas.Font.Name := 'Webdings';
-
-  textx := (flbuttonrect.Width div 2) - (self.canvas.TextWidth('∇') div 2);
-  Texty := (flbuttonrect.Height div 2) - (self.canvas.TextHeight('∇') div 2);
+  canvas.Font.Name:='arial';
+  textx := (flbuttonrect.Width div 2) - (self.canvas.TextWidth('◄') div 2);
+  Texty := (flbuttonrect.Height div 2) - (self.canvas.TextHeight('▲') div 2);
 
   self.canvas.Brush.Style := bsClear;
   if Kind = oHorizontal then
-    self.canvas.TextOut(Textx, Texty, '⊲')//'3')
+    self.canvas.TextOut(Textx, Texty, '◄')//'3')
   else
-    self.canvas.TextOut(Textx, Texty, '∆');//'5');   ⊳ ⊲  ∇ ∆
+    self.canvas.TextOut(Textx, Texty, '▲');//'5');
 
 
   textx := (frbuttonrect.Right - frbuttonrect.Width div 2) -
-    (self.canvas.TextWidth('⊳') div 2);
+    (self.canvas.TextWidth('◄') div 2);
   Texty := (frbuttonrect.bottom - frbuttonrect.Height div 2) -
-    (self.canvas.TextHeight('⊳') div 2);
+    (self.canvas.TextHeight('▼') div 2);
 
   self.canvas.Brush.Style := bsClear;
   if Kind = oHorizontal then
-    self.canvas.TextOut(Textx, Texty, '⊳')//'4')
+    self.canvas.TextOut(Textx, Texty, '►')//'4')
   else
-    self.canvas.TextOut(Textx, Texty, '∇');//'6');
+    self.canvas.TextOut(Textx, Texty, '▼');//▲ ▼ ► ◄ ‡ // ALT+30 ALT+31 ALT+16 ALT+17 ALT+0135
+
+
+
+   textx := 2+ (fcenterbuttonarea.Right - fcenterbuttonarea.Width div 2) -
+    (self.canvas.TextWidth('◄') div 2);
+  Texty := (fcenterbuttonarea.bottom - fcenterbuttonarea.Height div 2) -
+    (self.canvas.TextHeight('▼') div 2);
+  // self.canvas.TextOut(Textx, Texty, '‡‡');
+
+
+    self.canvas.Brush.Style := bsClear;
+  if Kind = oHorizontal then
+    self.canvas.TextOut(Textx, Texty, '=')//'4')
+  else
+    self.canvas.TextOut(Textx, Texty, '||');//▲ ▼ ► ◄ ‡ // ALT+30 ALT+31 ALT+16 ALT+17 ALT+0135
+
 
 end;
 
@@ -2953,18 +3019,6 @@ end;
 
 { Tocustomedit }
 
-procedure Tocustomedit.SetNumbersOnly(const Value: boolean);
-begin
-  if FNumbersOnly <> Value then
-  begin
-    FNumbersOnly := Value;
-  end;
-end;
-
-function Tocustomedit.GetNumbersOnly: boolean;
-begin
-  Result := FNumbersOnly;
-end;
 
 {
 function Tocustomedit.getpassword: char;
@@ -2987,17 +3041,17 @@ begin
   paint;
 end;
  }
-function Tocustomedit.GetCharCase: ToCharCase;
+function tocustomedit.getcharcase: tocharcase;
 begin
   Result := FCharCase;
 end;
 
-function Tocustomedit.GetEchoMode: TOEchoMode;
+function tocustomedit.getechomode: toechomode;
 begin
   Result := fEchoMode;
 end;
 
-procedure Tocustomedit.SetEchoMode(const Value: TOEchoMode);
+procedure tocustomedit.setechomode(const value: toechomode);
 begin
   if fEchoMode = Value then
     exit;
@@ -3013,7 +3067,7 @@ begin
   Invalidate;
 end;
 
-procedure Tocustomedit.SetCharCase(const Value: ToCharCase);
+procedure tocustomedit.setcharcase(const value: tocharcase);
 begin
   if FCharCase <> Value then
   begin
@@ -3022,14 +3076,14 @@ begin
   end;
 end;
 
-procedure Tocustomedit.SetLeftTextMargin(AValue: integer);
+procedure tocustomedit.setlefttextmargin(avalue: integer);
 begin
   if FLeftTextMargin = AValue then Exit;
   FLeftTextMargin := AValue;
   Invalidate;
 end;
 
-procedure Tocustomedit.SetLines(AValue: TStrings);
+procedure tocustomedit.setlines(avalue: tstrings);
 begin
   if FLines = AValue then Exit;
   FLines.Assign(AValue);
@@ -3037,26 +3091,36 @@ begin
   Invalidate;
 end;
 
-procedure Tocustomedit.SetMultiLine(AValue: boolean);
+procedure tocustomedit.setmultiline(avalue: boolean);
 begin
   if FMultiLine = AValue then Exit;
   FMultiLine := AValue;
   Invalidate;
 end;
 
-procedure Tocustomedit.SetRightTextMargin(AValue: integer);
+procedure tocustomedit.setnumberonly(const value: boolean);
+begin
+ if FNumbersOnly<>value then FNumbersOnly:=value;
+end;
+
+procedure tocustomedit.setreadonly(avalue: boolean);
+begin
+  if FReadOnly<>avalue then FReadOnly:=avalue;
+end;
+
+procedure tocustomedit.setrighttextmargin(avalue: integer);
 begin
   if FRightTextMargin = AValue then Exit;
   FRightTextMargin := AValue;
   Invalidate;
 end;
 
-procedure Tocustomedit.SetText(AValue: string);
+procedure tocustomedit.settext(avalue: string);
 begin
   Lines.Text := aValue;
 end;
 
-procedure Tocustomedit.SetPasswordChar(AValue: char);
+procedure tocustomedit.setpasswordchar(avalue: char);
 begin
   if AValue = FPasswordChar then Exit;
   FPasswordChar := AValue;
@@ -3075,15 +3139,16 @@ begin
   FStateEx := FEditState;
 end;
 }
-procedure Tocustomedit.RealSetText(const Value: TCaption);
+procedure tocustomedit.realsettext(const value: tcaption);
 begin
   inherited RealSetText(Value);
   Lines.Text := Value;
   Invalidate;
 end;
 
-procedure Tocustomedit.DoChange;
+procedure tocustomedit.dochange;
 begin
+  Changed;
   if Assigned(FOnChange) then FOnChange(Self);
 end;
 
@@ -3100,27 +3165,37 @@ begin
   Invalidate;
 end;    }
 
-function Tocustomedit.GetLeftTextMargin: integer;
+function tocustomedit.getlefttextmargin: integer;
 begin
   Result := FLeftTextMargin;
 end;
 
-function Tocustomedit.GetCaretPos: TPoint;
+function tocustomedit.getcaretpos: tpoint;
 begin
   Result := FCarets.CaretPos;//FEditState.CaretPos;
 end;
 
-function Tocustomedit.GetMultiLine: boolean;
+function tocustomedit.getmultiline: boolean;
 begin
   Result := FMultiLine;
 end;
 
-function Tocustomedit.GetRightTextMargin: integer;
+function tocustomedit.getreadonly: boolean;
+begin
+  Result:=FReadOnly;
+end;
+
+function tocustomedit.getnumberonly: boolean;
+begin
+ Result:= FNumbersOnly;
+end;
+
+function tocustomedit.getrighttextmargin: integer;
 begin
   Result := FRightTextMargin;
 end;
 
-function Tocustomedit.GetText: string;
+function tocustomedit.gettext: string;
 begin
   if Multiline then
     Result := Lines.Text
@@ -3130,12 +3205,12 @@ begin
     Result := Lines[0];
 end;
 
-function Tocustomedit.GetPasswordChar: char;
+function tocustomedit.getpasswordchar: char;
 begin
   Result := FPasswordChar;
 end;
 
-procedure Tocustomedit.DoDeleteSelection;
+procedure tocustomedit.dodeleteselection;
 var
   lSelLeftPos, lSelRightPos, lSelLength: integer;
   lControlText, lTextLeft, lTextRight: string;
@@ -3168,7 +3243,7 @@ begin
   DoClearSelection;
 end;
 
-procedure Tocustomedit.DoClearSelection;
+procedure tocustomedit.doclearselection;
 begin
   FSelStart.X := 1;
   FSelStart.Y := 0;
@@ -3177,7 +3252,7 @@ end;
 
 // Imposes sanity limits to the visible text start
 // and also imposes sanity limits on the caret
-procedure Tocustomedit.DoManageVisibleTextStart;
+procedure tocustomedit.domanagevisibletextstart;
 var
   lVisibleText, lLineText: string;
   lVisibleTextCharCount: integer;
@@ -3211,7 +3286,7 @@ begin
   FCarets.CaretPos.Y := Max(FCarets.CaretPos.Y{FCaretPos.Y}, 0);
 end;
 
-procedure Tocustomedit.SetCaretPost(AValue: TPoint);
+procedure tocustomedit.setcaretpost(avalue: tpoint);
 begin
   // FCaretPos.X
   FCarets.CaretPos.X := AValue.X;
@@ -3229,7 +3304,7 @@ begin
 
 end;
 // Result.X -> returns a zero-based position of the caret
-function Tocustomedit.MousePosToCaretPos(X, Y: integer): TPoint;
+function tocustomedit.mousepostocaretpos(x, y: integer): tpoint;
 var
   lStrLen, i: PtrInt;
   lVisibleStr, lCurChar: string;
@@ -3288,14 +3363,14 @@ begin
   Result.X := Min(Result.X, FVisibleTextStart.X + lStrLen - 1);
 end;
 
-function Tocustomedit.IsSomethingSelected: boolean;
+function tocustomedit.issomethingselected: boolean;
 begin
   Result := FSelLength <> 0;
 end;
 
 
 
-procedure Tocustomedit.DoEnter;
+procedure tocustomedit.doenter;
 begin
   //  FCaretTimer.Enabled := True;
   FCarets.Visible := True;
@@ -3303,7 +3378,7 @@ begin
   inherited DoEnter;
 end;
 
-procedure Tocustomedit.DoExit;
+procedure tocustomedit.doexit;
 begin
   //  FCaretTimer.Enabled := False;
   FCarets.Visible := False;
@@ -3312,13 +3387,14 @@ begin
   inherited DoExit;
 end;
 
-procedure Tocustomedit.KeyDown(var Key: word; Shift: TShiftState);
+procedure tocustomedit.keydown(var key: word; shift: tshiftstate);
 var
   lLeftText, lRightText, lOldText: string;
   lOldTextLength: PtrInt;
   lKeyWasProcessed: boolean = True;
 begin
   inherited KeyDown(Key, Shift);
+
 
   lOldText := GetCurrentLine();
   lOldTextLength := UTF8Length(lOldText);
@@ -3562,7 +3638,7 @@ begin
   end;
 end;
 
-procedure Tocustomedit.KeyUp(var Key: word; Shift: TShiftState);
+procedure tocustomedit.keyup(var key: word; shift: tshiftstate);
 begin
   inherited KeyUp(Key, Shift);
 
@@ -3577,7 +3653,7 @@ begin
   end;
 end;
 
-procedure Tocustomedit.UTF8KeyPress(var UTF8Key: TUTF8Char);
+procedure tocustomedit.utf8keypress(var utf8key: tutf8char);
 var
   lLeftText, lRightText, lOldText: string;
 begin
@@ -3592,7 +3668,12 @@ begin
   if (UTF8Key[1] in [#0..#$1F, #$7F]) or ((UTF8Key[1] = #$c2) and
     (UTF8Key[2] in [#$80..#$9F])) then Exit;
 
-  DoDeleteSelection;
+  if (FNumbersOnly=true) and not ((UTF8Key[1] in [#30..#$39])  or (UTF8Key[1]=#$2e) or (UTF8Key[1]=#$2c)) then exit;
+  // (UTF8Key[1] in [#30..#$39, #$2e, #$2c])  then Exit;
+
+
+
+  DoDeleteSelection;                          //▲ ▼ ► ◄ ‡ // ALT+30 ALT+31 ALT+16 ALT+17 ALT+0135
 
   // Normal characters
   lOldText := GetCurrentLine();
@@ -3606,8 +3687,8 @@ begin
   Invalidate;
 end;
 
-procedure Tocustomedit.MouseDown(Button: TMouseButton; Shift: TShiftState;
-  X, Y: integer);
+procedure tocustomedit.mousedown(button: tmousebutton; shift: tshiftstate; x,
+  y: integer);
 begin
   inherited MouseDown(Button, Shift, X, Y);
   DragDropStarted := True;
@@ -3626,7 +3707,7 @@ begin
   Invalidate;
 end;
 
-procedure Tocustomedit.MouseMove(Shift: TShiftState; X, Y: integer);
+procedure tocustomedit.mousemove(shift: tshiftstate; x, y: integer);
 begin
   inherited MouseMove(Shift, X, Y);
 
@@ -3643,33 +3724,34 @@ begin
   end;
 end;
 
-procedure Tocustomedit.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: integer);
+procedure tocustomedit.mouseup(button: tmousebutton; shift: tshiftstate; x,
+  y: integer);
 begin
   inherited MouseUp(Button, Shift, X, Y);
   DragDropStarted := False;
 end;
 
-procedure Tocustomedit.MouseEnter;
+procedure tocustomedit.mouseenter;
 begin
   inherited MouseEnter;
 end;
 
-procedure Tocustomedit.MouseLeave;
+procedure tocustomedit.mouseleave;
 begin
   inherited MouseLeave;
 end;
 
-procedure Tocustomedit.WMSetFocus(var Message: TLMSetFocus);
+procedure tocustomedit.wmsetfocus(var message: tlmsetfocus);
 begin
  DoEnter;
 end;
 
-procedure Tocustomedit.WMKillFocus(var Message: TLMKILLFOCUS);
+procedure tocustomedit.wmkillfocus(var message: tlmkillfocus);
 begin
   DoExit;
 end;
 
-constructor Tocustomedit.Create(AOwner: TComponent);
+constructor tocustomedit.create(aowner: tcomponent);
 begin
   inherited Create(AOwner);
   parent := TWinControl(Aowner);
@@ -3696,7 +3778,7 @@ begin
 
 end;
 
-destructor Tocustomedit.Destroy;
+destructor tocustomedit.destroy;
 begin
   FreeAndNil(fbackground);
 
@@ -3705,7 +3787,7 @@ begin
   //FCaretTimer.Free; Don't free here because it is assigned with a owner
 end;
 
-function Tocustomedit.GetCurrentLine(): string;
+function tocustomedit.getcurrentline: string;
 begin
   if (FLines.Count = 0) or (FCarets.CaretPos.Y{FCaretPos.Y} >= FLines.Count) then
     Result := ''
@@ -3713,7 +3795,7 @@ begin
     Result := FLines.Strings[FCarets.CaretPos.Y{FCaretPos.Y}];
 end;
 
-procedure Tocustomedit.SetCurrentLine(AStr: string);
+procedure tocustomedit.setcurrentline(astr: string);
 begin
   if (FLines.Count = 0) or (FCarets.CaretPos.Y{FCaretPos.Y} >= FLines.Count) then
   begin
@@ -3730,28 +3812,28 @@ begin
   DoChange();
 end;
 
-function Tocustomedit.GetSelStartX: integer;
+function tocustomedit.getselstartx: integer;
 begin
   Result := FSelStart.X;
 end;
 
-function Tocustomedit.GetSelLength: integer;
+function tocustomedit.getsellength: integer;
 begin
   Result := FSelLength;
   if Result < 0 then Result := Result * -1;
 end;
 
-procedure Tocustomedit.SetSelStartX(ANewX: integer);
+procedure tocustomedit.setselstartx(anewx: integer);
 begin
   FSelStart.X := ANewX;
 end;
 
-procedure Tocustomedit.SetSelLength(ANewLength: integer);
+procedure tocustomedit.setsellength(anewlength: integer);
 begin
   FSelLength := ANewLength;
 end;
 
-function Tocustomedit.Caretttopos(leftch: integer): integer;
+function tocustomedit.caretttopos(leftch: integer): integer;
 var
   a, i: integer;
 begin
@@ -3764,10 +3846,11 @@ begin
   end;
 end;
 
-procedure Tocustomedit.paint;
+procedure tocustomedit.paint;
 var
-  gradienrect1, gradienrect2, Selrect, caretrect: Trect;
-  textx, Texty, i, a: integer;
+//  gradienrect1, gradienrect2, Selrect,
+  caretrect: Trect;
+//  textx, Texty, i, a: integer;
   lControlText, lTmpText: string;
   lCaretPixelPos: integer;
   lTextBottomSpacing, lTextTopSpacing, lCaptionHeight, lLineHeight, lLineTop: integer;
@@ -3850,7 +3933,7 @@ begin
 
 end;
 
-procedure Tocustomedit.DrawCaret;
+procedure tocustomedit.drawcaret;
 //(ADest: TCanvas; ADestPos: TPoint; ASize: TSize; AState: TCDControlState; AStateEx: TCDEditStateEx);
 var
   lTextTopSpacing, lCaptionHeight, lLineHeight, lLineTop: integer;
@@ -3899,7 +3982,7 @@ end;
 
 
 
-procedure Tocustomedit.DrawText;
+procedure tocustomedit.drawtext;
 //  ASize: TSize; AState: TCDControlState; AStateEx: TCDEditStateEx);
 var
   lVisibleText, lControlText: TCaption;
@@ -4853,13 +4936,13 @@ begin
   begin
     if Assigned(FOnCollapse) then FOnCollapse(Self);
     FStatus := oCollapsed;
-    FExpandButton.Caption := '∇'; //⊳ ⊲  ∇ ∆
+    FExpandButton.Caption := '▼'; //▲ ▼ ► ◄  // ALT+30 ALT+31 ALT+16 ALT+17
   end
   else
   begin
     if Assigned(FOnExpand) then FOnExpand(Self);
     FStatus := oExpanded;
-    FExpandButton.Caption := '∆';//'6';
+    FExpandButton.Caption := '▲';//▲ ▼ ► ◄  // ALT+30 ALT+31 ALT+16 ALT+17
   end;
 
 
@@ -4948,7 +5031,7 @@ begin
       Left := self.Width - (Width + self.Background.Border);
       top := self.Background.border + 1;
       Font.Size := 12;
-      Caption := '∆';//'6'; ⊳ ⊲  ∇ ∆
+      Caption := '▲'; //▲ ▼ ► ◄  // ALT+30 ALT+31 ALT+16 ALT+17
     //  Font.Name := 'Webdings';
       OnClick := @OnMyButtonClick;
       ColorDown := fbutondown;
@@ -5010,7 +5093,7 @@ end;
 
 
 
-constructor ToListBox.Create(Aowner: TComponent);
+constructor tolistbox.create(aowner: tcomponent);
 begin
   inherited Create(Aowner);
   parent       := TWinControl(Aowner);
@@ -5045,7 +5128,7 @@ begin
 
 end;
 
-destructor ToListBox.Destroy;
+destructor tolistbox.destroy;
 begin
   if Assigned(fvert) then
     FreeAndNil(fvert);
@@ -5056,12 +5139,12 @@ begin
 end;
 
 
-function ToListBox.GetItemIndex: integer;
+function tolistbox.getitemindex: integer;
 begin
   Result := findex;
 end;
 
-procedure ToListBox.SetItemIndex(Avalue: integer);
+procedure tolistbox.setitemindex(avalue: integer);
 var
  Shown: integer;
 begin
@@ -5085,7 +5168,7 @@ begin
   Invalidate;
 end;
 
-function ToListBox.GetItemAt(Pos: TPoint): integer;
+function tolistbox.getitemat(pos: tpoint): integer;
 begin
   Result := -1;
   if Pos.Y >= 0 then
@@ -5096,8 +5179,18 @@ begin
   end;
 end;
 
-procedure ToListBox.MouseDown(Button: TMouseButton; Shift: TShiftState;
-  X: integer; Y: integer);
+function tolistbox.getitemheight: integer;
+begin
+ Result:=FitemHeight;
+end;
+
+procedure tolistbox.setitemheight(avalue: integer);
+begin
+ if avalue<>FitemHeight then FitemHeight:=avalue;
+end;
+
+procedure tolistbox.mousedown(button: tmousebutton; shift: tshiftstate;
+  x: integer; y: integer);
 var
   ClickedItem: integer;
 begin
@@ -5113,7 +5206,8 @@ begin
 end;
 
 
-function ToListBox.DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): Boolean;
+function tolistbox.domousewheeldown(shift: tshiftstate; mousepos: tpoint
+  ): boolean;
 begin
   inherited;
   if not Fvert.visible then exit;
@@ -5125,7 +5219,8 @@ end;
 
 // -----------------------------------------------------------------------------
 
-function ToListBox.DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): Boolean;
+function tolistbox.domousewheelup(shift: tshiftstate; mousepos: tpoint
+  ): boolean;
 begin
   inherited;
   if not Fvert.visible then exit;
@@ -5136,13 +5231,13 @@ begin
 end;
 
 
-procedure ToListBox.Scrollchange(Sender: TObject);
+procedure tolistbox.scrollchange(sender: tobject);
 begin
   FItemOffset := fvert.Position;
   Invalidate;
 end;
 
-function ToListBox.ItemRect(Item: integer): TRect;
+function tolistbox.itemrect(item: integer): trect;
 var
   r: TRect;
 begin
@@ -5170,7 +5265,7 @@ end;
 
 
 
-procedure ToListBox.paint;
+procedure tolistbox.paint;
 var
   a, b, k, i: integer;
 begin
@@ -5232,28 +5327,28 @@ begin
   end;
 end;
 
-procedure ToListBox.BeginUpdate;
+procedure tolistbox.beginupdate;
 begin
   Flist.BeginUpdate;
 end;
 
-procedure ToListBox.EndUpdate;
+procedure tolistbox.endupdate;
 begin
   Flist.EndUpdate;
 end;
 
 
-procedure ToListBox.Clear;
+procedure tolistbox.clear;
 begin
   Flist.Clear;
 end;
 
-procedure ToListBox.LinesChanged(Sender: TObject);
+procedure tolistbox.lineschanged(sender: tobject);
 begin
  Invalidate;
 end;
 
-procedure ToListBox.KeyDown(var Key: word; Shift: TShiftState);
+procedure tolistbox.keydown(var key: word; shift: tshiftstate);
 var
   x: integer;
 begin
@@ -5309,7 +5404,7 @@ begin
 inherited;
 end;
 
-procedure ToListBox.SetString(AValue: TStrings);
+procedure tolistbox.setstring(avalue: tstrings);
 begin
   if Flist=AValue then Exit;
   Flist.Assign(AValue);
@@ -5321,7 +5416,7 @@ end;
 
 
 
-procedure ToListBox.MoveUp;
+procedure tolistbox.moveup;
 var
   Shift: boolean;
 begin
@@ -5346,9 +5441,11 @@ begin
   end;
 end;
 
+
+
 // -----------------------------------------------------------------------------
 
-procedure ToListBox.MoveDown;
+procedure tolistbox.movedown;
 var
   Shift: boolean;
 begin
@@ -5373,7 +5470,7 @@ end;
 
 // -----------------------------------------------------------------------------
 
-procedure ToListBox.MoveHome;
+procedure tolistbox.movehome;
 var
   i: integer;
 begin
@@ -5386,7 +5483,7 @@ end;
 
 // -----------------------------------------------------------------------------
 
-procedure ToListBox.MoveEnd;
+procedure tolistbox.moveend;
 var
   i: integer;
 begin
@@ -5404,7 +5501,7 @@ end;
 
 
 
-constructor ToChecklistbox.Create(Aowner: TComponent);
+constructor tochecklistbox.create(aowner: tcomponent);
 begin
   inherited Create(AOwner);
   parent := TWinControl(Aowner);
@@ -5474,6 +5571,7 @@ begin
     stopcolor := $005D5D5D;
     Fontcolor := $002C2C2C;
   end;
+  Fbuttonheight := 10;
   findex := -1;
   FItemsShown  := 0;
   FitemHeight  := self.canvas.TextExtent('Çİ').cy;
@@ -5499,7 +5597,7 @@ begin
   end;
 end;
 
-destructor ToChecklistbox.Destroy;
+destructor tochecklistbox.destroy;
 begin
   FreeAndNil(Flist);
   FreeAndNil(Fchecklist);
@@ -5508,7 +5606,7 @@ begin
   inherited Destroy;
 end;
 
-procedure ToChecklistbox.paint;
+procedure tochecklistbox.paint;
 var
   a, b, k, i,p: integer;
   gr1,gr2:TRect;//color;
@@ -5543,7 +5641,7 @@ begin
       fvert.Visible := False;
 
 
-
+    Fbuttonheight:=FitemHeight-3;
     a := Background.Border;
     b := a;
     canvas.Brush.Style := bsClear;
@@ -5661,9 +5759,20 @@ begin
         //else
        // begin     /// not selected
 
+        //   chechrect:= Rect(fborderWidth,b,fborderWidth+FitemHeight,b+(FitemHeight));
+           chechrect:= Rect(fborderWidth,b,fborderWidth+Fbuttonheight,b+(Fbuttonheight));
+           canvas.Brush.Color:=oborder;
+           Canvas.FillRect(chechrect);  /// for border
 
 
-           chechrect:= Rect(fborderWidth,b,fborderWidth+FitemHeight,b+(FitemHeight));
+           // background
+           gr1:=rect(fborderWidth,b+fborderWidth,Fbuttonheight,b+Fbuttonheight div 2); //FitemHeight-fborderWidth,b+(FitemHeight div 2));
+           gr2:=rect(gr1.Left,gr1.Bottom,gr1.Right,gr1.Bottom+(Fbuttonheight div 2));//(FitemHeight div 2));
+           canvas.GradientFill(gr1, obstart,obend, gdVertical);
+           canvas.GradientFill(gr2, obend,obstart,  gdVertical);
+
+
+         {  chechrect:= Rect(fborderWidth,b+fborderWidth,fborderWidth+FitemHeight,b+(FitemHeight));
            canvas.Brush.Color:=oborder;
            Canvas.FillRect(chechrect);  /// for border
 
@@ -5671,18 +5780,29 @@ begin
            // background
            gr1:=rect(fborderWidth,b+fborderWidth,FitemHeight-fborderWidth,b+(FitemHeight div 2));
            gr2:=rect(gr1.Left,gr1.Bottom,gr1.Right,gr1.Bottom+(FitemHeight div 2));
+        //    gr1:=rect(fborderWidth,b+fborderWidth,Fbuttonheight,Fbuttonheight div 2);
+        //    gr2:=rect(gr1.Left,gr1.Bottom,gr1.Right,gr1.Bottom+(Fbuttonheight div 2));
            canvas.GradientFill(gr1, obstart,obend, gdVertical);
            canvas.GradientFill(gr2, obend,obstart,  gdVertical);
-
+         }
            // if checked?
           if (IsChecked(i)) then
           begin
-            chechrect:= Rect(fborderWidth*2,b+5,fborderWidth+FitemHeight-5,b+(FitemHeight)-5);
+            chechrect:= Rect(fborderWidth*2,b+fborderWidth,fborderWidth+Fbuttonheight-fborderWidth,b+(Fbuttonheight)-fborderWidth);
             canvas.Brush.Color := oborder;
             canvas.FillRect(chechrect);
+
             chechrect := Rect(chechrect.Left + fborderWidth, chechrect.top +
               fborderWidth, chechrect.Right - fborderWidth, chechrect.Bottom - fborderWidth);
             canvas.GradientFill(chechrect, checkendstart, checkedend, gdVertical);
+            {chechrect:= Rect(fborderWidth*2,b+5,fborderWidth+FitemHeight-5,b+(FitemHeight)-5);
+            canvas.Brush.Color := oborder;
+            canvas.FillRect(chechrect);
+
+            chechrect := Rect(chechrect.Left + fborderWidth, chechrect.top +
+              fborderWidth, chechrect.Right - fborderWidth, chechrect.Bottom - fborderWidth);
+            canvas.GradientFill(chechrect, checkendstart, checkedend, gdVertical);
+            }
             //√
           end;
        // end;
@@ -5697,19 +5817,24 @@ begin
   end;
 end;
  
-function ToChecklistbox.DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint
-  ): Boolean;
+function tochecklistbox.domousewheeldown(shift: tshiftstate; mousepos: tpoint
+  ): boolean;
 begin
   Result:=inherited DoMouseWheelDown(Shift, MousePos);
 end;
 
-function ToChecklistbox.DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint
-  ): Boolean;
+function tochecklistbox.domousewheelup(shift: tshiftstate; mousepos: tpoint
+  ): boolean;
 begin
   Result:=inherited DoMouseWheelUp(Shift, MousePos);
 end;
 
-function ToChecklistbox.GetItemAt(Pos: TPoint): integer;
+function tochecklistbox.getbuttonheight: integer;
+begin
+  Result:=Fbuttonheight;
+end;
+
+function tochecklistbox.getitemat(pos: tpoint): integer;
 begin
 Result := -1;
   if Pos.Y >= 0 then
@@ -5720,12 +5845,12 @@ Result := -1;
   end;
 end;
 
-function ToChecklistbox.GetItemIndex: integer;
+function tochecklistbox.getitemindex: integer;
 begin
   Result := findex;
 end;
 
-function ToChecklistbox.ItemRect(Item: integer): TRect;
+function tochecklistbox.itemrect(item: integer): trect;
 var
   r: TRect;
 begin
@@ -5752,7 +5877,7 @@ begin
 
 end;
 
-function ToChecklistbox.CheckBoxRect(Index: Integer): TRect;
+function tochecklistbox.checkboxrect(index: integer): trect;
 begin
     Result := ItemRect( Index );
   with Result do
@@ -5767,8 +5892,8 @@ end;
 
 
 
-procedure ToChecklistbox.MouseDown(Button: TMouseButton; Shift: TShiftState;
-  X: integer; Y: integer);
+procedure tochecklistbox.mousedown(button: tmousebutton; shift: tshiftstate;
+  x: integer; y: integer);
   var
  Rect      : TRect;
 begin
@@ -5785,79 +5910,26 @@ inherited MouseDown(Button, Shift, X, Y);
        if PtInRect( Rect , Point( X , Y ) ) then { if the user clicked inside the check box }
        begin
      	    Toggle(fIndex );
-            fstateindex:=findex; // for state index painting;
-           // Fstate:=obdowns;
+            fstateindex:=findex;
             Fstatelist.Items[findex]:=Pointer(2);
-            invalidate;{ Toggle the item's checked state }
-            //	Canvas.DrawFocusRect( ItemRect(fIndex ) );	{ draw focus rectangle }
+            invalidate;
        end;
     end;
   end;
 end;
 
-procedure ToChecklistbox.MouseUp(Button: TMouseButton; Shift: TShiftState;
-  X: integer; Y: integer);
-var
-  Rect:TRect;
+procedure tochecklistbox.mouseup(button: tmousebutton; shift: tshiftstate;
+  x: integer; y: integer);
 begin
- { inherited MouseUp(Button, Shift, X, Y);
-  if ( Button = mbLeft ) then
-   begin
-   fstateindex := GetItemAt(Point( X , Y ));
-    if ( fstateindex > -1 ) then
-    begin
-      //  if MustClickInBox then  // only check click ?
-       //   Rect := CheckBoxRect( Index )
-       // else
-      Rect := ItemRect(fstateindex);  // item click
-       if PtInRect( Rect , Point( X , Y ) ) then { if the user clicked inside the check box }
-       begin
-     	//    Toggle(fIndex );
-            //fstateindex:=findex; // for state index painting;
-       //     if IsChecked(fstateindex) then
-       //     Fstate:=obcheckleaves
-        //    else
-            Fstate := obleaves;
-            invalidate;{ Toggle the item's checked state }
-            //	Canvas.DrawFocusRect( ItemRect(fIndex ) );	{ draw focus rectangle }
-       end;
-    end;
-  end; }
+
 end;
 
-procedure ToChecklistbox.MouseEnter;
-var
-  rect:Trect;
-  t:Point;
+procedure tochecklistbox.mouseenter;
 begin
-  {
-  GetCursorPos(t);
-  ScreenToClient(t);
- fstateindex := GetItemAt(t);
 
-
-    if ( fstateindex > -1 ) then
-    begin
-      //  if MustClickInBox then  // only check click ?
-       //   Rect := CheckBoxRect( Index )
-       // else
-      Rect := ItemRect(fstateindex);  // item click
-       if PtInRect( Rect , t ) then { if the user clicked inside the check box }
-       begin
-     	//    Toggle(fIndex );
-            //fstateindex:=findex; // for state index painting;
-       {     if IsChecked(fstateindex) then
-            Fstate:=obcheckenters
-            else }
-
-            Fstate := obenters;
-         //   invalidate;
-       end;
-    end;
-     invalidate;   }
 end;
 
-procedure ToChecklistbox.MouseMove(Shift: TShiftState; X, Y: Integer);
+procedure tochecklistbox.mousemove(shift: tshiftstate; x, y: integer);
  var
   rect:Trect;
   i: Integer;
@@ -5878,7 +5950,7 @@ begin
   invalidate;
 end;
 
-procedure ToChecklistbox.MouseLeave;
+procedure tochecklistbox.mouseleave;
 var
   i: Integer;
 begin
@@ -5889,36 +5961,36 @@ begin
   Invalidate;
 end;
 
-procedure ToChecklistbox.Scrollchange(Sender: TObject);
+procedure tochecklistbox.scrollchange(sender: tobject);
 begin
   FItemOffset := fvert.Position;
   Invalidate;
 end;
 
-procedure ToChecklistbox.KeyDown(var Key: word; Shift: TShiftState);
+procedure tochecklistbox.keydown(var key: word; shift: tshiftstate);
 begin
 
 end;
 
-procedure ToChecklistbox.SetString(AValue: TStrings);
+procedure tochecklistbox.setstring(avalue: tstrings);
 begin
  if Flist=AValue then Exit;
   Flist.Assign(AValue);
 end;
 
-function ToChecklistbox.getstatenumber(index:integer):integer;
+function tochecklistbox.getstatenumber(index: integer): integer;
 begin
  result:= 1;
  Result := integer(Fstatelist.Items[index]);
 
 end;
 
-function ToChecklistbox.IsChecked(Index: Integer): Boolean;
+function tochecklistbox.ischecked(index: integer): boolean;
 begin
     Result := Fchecklist.IndexOf(Pointer(Index)) > -1;
 end;
 
-procedure ToChecklistbox.Check(Index: Integer; AChecked: Boolean);
+procedure tochecklistbox.check(index: integer; achecked: boolean);
 begin
   if IsChecked( Index ) <> AChecked then
     begin
@@ -5940,52 +6012,52 @@ begin
 
 end;
 
-function ToChecklistbox.GetAllChecked: Boolean;
+function tochecklistbox.getallchecked: boolean;
 begin
   Result := Fchecklist.Count = Items.Count;
 end;
 
-function ToChecklistbox.GetNoneChecked: Boolean;
+function tochecklistbox.getnonechecked: boolean;
 begin
   Result := Fchecklist.Count = 0;
 end;
 
-procedure ToChecklistbox.CheckEvent(Index: Integer);
+procedure tochecklistbox.checkevent(index: integer);
 begin
   if ( Assigned( FOnCheck ) ) then
     OnCheck( Self , Index );
 end;
 
-procedure ToChecklistbox.UnCheckEvent(Index: Integer);
+procedure tochecklistbox.uncheckevent(index: integer);
 begin
   if ( Assigned( FOnUncheck ) ) then
    OnUnCheck( Self , Index );
 end;
 
-procedure ToChecklistbox.SetItemIndex(Avalue: integer);
+procedure tochecklistbox.setitemindex(avalue: integer);
 begin
   if Flist.Count = 0 then exit;
   if Avalue = findex then exit;
   findex := Avalue;
 end;
 
-procedure ToChecklistbox.BeginUpdate;
+procedure tochecklistbox.beginupdate;
 begin
 Flist.BeginUpdate;
 end;
 
-procedure ToChecklistbox.EndUpdate;
+procedure tochecklistbox.endupdate;
 begin
  Flist.EndUpdate;
 end;
 
-procedure ToChecklistbox.Clear;
+procedure tochecklistbox.clear;
 begin
   Flist.Clear;
   Fchecklist.Clear;
 end;
 
-procedure ToChecklistbox.CheckSelection(AChecked: Boolean);
+procedure tochecklistbox.checkselection(achecked: boolean);
 var
 	Index : Integer;
 begin
@@ -5996,12 +6068,12 @@ begin
  }
 end;
 
-procedure ToChecklistbox.Toggle(Index: Integer);
+procedure tochecklistbox.toggle(index: integer);
 begin
  Checked[ Index ] := not Checked[ Index ];
 end;
 
-procedure ToChecklistbox.CheckAll(AChecked: Boolean);
+procedure tochecklistbox.checkall(achecked: boolean);
 var
 Index : Integer;
 begin
@@ -6009,35 +6081,39 @@ begin
     Checked[ Index ] := AChecked;
 end;
 
-procedure ToChecklistbox.LinesChanged(Sender: TObject);
+procedure tochecklistbox.lineschanged(sender: tobject);
 var
 i:integer;
 begin
  Fstatelist.Clear;
  for i:=0 to flist.count-1 do
  Fstatelist.Add(Pointer(1));
- writeln('aaa');
-  Invalidate;
+ Invalidate;
 end;
 
-procedure ToChecklistbox.MoveDown;
+procedure tochecklistbox.movedown;
 begin
 
 end;
 
-procedure ToChecklistbox.MoveEnd;
+procedure tochecklistbox.moveend;
 begin
 
 end;
 
-procedure ToChecklistbox.MoveHome;
+procedure tochecklistbox.movehome;
 begin
 
 end;
 
-procedure ToChecklistbox.MoveUp;
+procedure tochecklistbox.moveup;
 begin
 
+end;
+
+procedure tochecklistbox.setbuttonheight(avalue: integer);
+begin
+if Fbuttonheight<>avalue then Fbuttonheight:=avalue;
 end;
 
 
@@ -6109,9 +6185,9 @@ procedure Tocombobox.LstPopupShowHide(Sender: TObject);
 begin
   fdropdown := (Sender as Tpopupformcombobox).Visible;
   if fdropdown=true then
-  Fbutton.Caption :='∆'
+  Fbutton.Caption :='▲'      //▲ ▼ ► ◄  // ALT+30 ALT+31 ALT+16 ALT+17
  else
-  Fbutton.Caption :='∇';
+  Fbutton.Caption :='▼';     //▲ ▼ ► ◄  // ALT+30 ALT+31 ALT+16 ALT+17
   Invalidate;
 end;
 
@@ -6238,7 +6314,7 @@ begin
    Align  := alRight;
    Width  := Height;
    OnClick :=@kclick;
-   Caption :='∇';
+   Caption :='▼';         //▲ ▼ ► ◄  // ALT+30 ALT+31 ALT+16 ALT+17
  {  ColorDown:=fobdown;
    ColorEnter:=fobenter;
    ColorLeave:=fobleave;
@@ -6458,6 +6534,185 @@ begin
     else
       FItemOffset := 0;
   end;
+end;
+
+
+
+
+
+
+{ ToSpinEdit }
+
+procedure tospinedit.kclick(sender: tobject);
+begin
+  if sender=Fubutton then
+       inc(fvalue)
+  else if sender=Fdbutton then
+       dec(fvalue);
+ Fedit.Text:=inttostr(fvalue);
+ Invalidate;
+end;
+
+function tospinedit.getmax: integer;
+begin
+  result:=Fmax;
+end;
+
+function tospinedit.getmin: integer;
+begin
+  result:=Fmin;
+end;
+
+function tospinedit.gettext: integer;
+begin
+  Result:=strtoint(Fedit.Text);
+end;
+
+procedure tospinedit.setbuttonheight(avalue: integer);
+begin
+  if Fbuttonheight<>AValue then Fbuttonheight:=AValue;
+end;
+
+procedure tospinedit.setbuttonwidth(avalue: integer);
+begin
+   if Fbuttonwidth<>AValue then Fbuttonwidth:=AValue;
+end;
+
+procedure tospinedit.setmax(avalue: integer);
+begin
+ if Fmax<>AValue then Fmax:=AValue;
+end;
+
+procedure tospinedit.setmin(avalue: integer);
+begin
+ if Fmin<>AValue then Fmin:=AValue;
+end;
+
+procedure tospinedit.settext(avalue: integer);
+begin
+ fvalue:=Avalue;//ValueRange(fvalue,fmin,fmax);
+ fedit.Text:=IntToStr(fvalue);
+end;
+
+procedure tospinedit.keydown(sender: tobject; var key: word; shift: tshiftstate
+  );
+begin
+ inherited KeyDown(Key, Shift);
+ if Key=VK_UP then
+ Inc(fvalue)
+ else
+ if Key=VK_DOWN then
+ dec(fvalue);
+
+
+  if (key=VK_UP) or (key=VK_DOWN) then
+  Settext(fvalue);
+end;
+
+procedure tospinedit.resize;
+begin
+ if Assigned(Fubutton) then
+   fubutton.SetBounds((self.Width-(Fbuttonwidth+(self.Background.Border*2))),self.Background.Border,Fbuttonwidth,Fbuttonheight);
+
+ if Assigned(Fdbutton) then
+   fdbutton.SetBounds((self.Width-(Fbuttonwidth+(self.Background.Border*2))),self.Height-(Fbuttonheight+self.Background.Border),Fbuttonwidth,Fbuttonheight);
+
+
+  if Assigned(Fedit) then
+  with Fedit do
+  begin
+   Width  := self.Width-(Fubutton.Width+self.Background.Border);
+   Height := self.Height-(self.Background.Border *2);
+   Left   := self.Background.Border;
+   top    := self.Background.Border;
+  end;
+end;
+
+constructor tospinedit.create(aowner: tcomponent);
+begin
+  inherited Create(AOwner);
+   Backgroundcolored:=False;
+  parent := TWinControl(Aowner);
+  Width := 100;
+  Height := 25;
+  ControlStyle := ControlStyle - [csAcceptsControls] +
+    [csParentBackground, csClickEvents, csCaptureMouse, csDoubleClicks];
+
+  Fbuttonwidth  := 11;
+  Fbuttonheight := 11;
+
+
+  fubutton := Tobuton.Create(self);
+  with fubutton do
+  begin
+   parent := self;
+   Width  := self.Height div 2;
+   Height := Width;
+   Left   := self.Width-(Width+self.Background.Border);
+   top    := self.Background.Border;
+   OnClick :=@kclick;
+   Caption :='▲';     //► ◄ ▲ ▼  // ALT+30 ALT+31 ALT+16 ALT+17
+  end;
+
+
+  Fdbutton := Tobuton.Create(self);
+  with Fdbutton do
+  begin
+   parent := self;
+   Width  := self.Height div 2;
+   Height := Width;
+   Left   := self.Width-(Width+self.Background.Border);
+   top    := fdbutton.Height+self.Background.Border;
+   OnClick :=@kclick;
+   Caption :='▼';
+  end;
+
+  Fedit:=Toedit.Create(self);
+  with Fedit do
+  begin
+    Parent := Self;
+   Enabled:= true;
+   Width  := self.Width-(Fubutton.Width+self.Background.Border);
+   Height := self.Height-(self.Background.Border *2);
+   Left   := self.Background.Border;
+   top    := self.Background.Border;
+   text   := '0';
+   NumberOnly:=true;
+   onChange:=@Feditchange;
+  end;
+  fedit.onKeyDown :=@KeyDown;
+
+ fmin := 0;
+ fmax := 0;
+ fvalue:= 0;
+end;
+
+destructor tospinedit.destroy;
+begin
+  if Assigned(Fedit) then FreeAndNil(Fedit);
+  if Assigned(Fdbutton) then FreeAndNil(Fdbutton);
+  if Assigned(Fubutton) then FreeAndNil(Fubutton);
+  inherited Destroy;
+end;
+
+procedure tospinedit.feditchange(sender: tobject);
+begin
+  fvalue:=strtoint(Fedit.Text);
+end;
+
+function tospinedit.getbuttonheight: integer;
+begin
+  Result:=Fbuttonheight;
+end;
+
+function tospinedit.getbuttonwidth: integer;
+begin
+  Result:=Fbuttonwidth;
+end;
+
+procedure tospinedit.paint;
+begin
+  inherited Paint;
 end;
 
 
