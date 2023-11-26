@@ -1,6 +1,6 @@
 unit butonu;
 
-{$mode ObjFPC}{$H+}
+ {$mode ObjFPC} {$H+}
 
 interface
 
@@ -8,7 +8,7 @@ uses
   Classes, LMessages,
   {$IFDEF UNIX}unix{$ELSE} Windows{$ENDIF}, SysUtils,
   Forms, Controls, Graphics, Messages, Dialogs,
-  ExtCtrls, Types,LCLType,  LazUTF8;
+  ExtCtrls, Types,LCLType,  LazUTF8,StdCtrls;
 
 
 
@@ -20,6 +20,7 @@ type
   Tcapdirection = (ocup, ocdown, ocleft, ocright);
   Tbutondirection = (obleft, obright);
   Tokindstate = (oVertical, oHorizontal);
+  ToswichState = (fon,foff);
 
   { TOcolors }
   TOPersistent = class(TPersistent)
@@ -50,6 +51,8 @@ type
     property Bordercolor: TColor read getbordercolor write setbordercolor;
     property Fontcolor: TColor read getfontcolor write Setfontcolor;
   end;
+
+
 
   { ToCustomcontrol }
 
@@ -89,6 +92,7 @@ type
     property ParentBidiMode;
     property OnChangeBounds;
     property OnClick;
+    property OnDblClick;
     property OnContextPopup;
     property OnDragDrop;
     property OnDragOver;
@@ -168,6 +172,62 @@ type
     property Visible;
   end;
 
+  { TOled }
+ type
+
+ // TledStyle = (fHorz, fVert, fRectangle, fDiagonal, fCircle);
+  TOled = class(TOGraphicControl)
+  private
+   //Fbar: Tocolor;
+   fcheck:boolean;
+   foncolor: Tocolor;
+   foffcolor: Tocolor;
+   FOnChange: TNotifyEvent;
+   procedure Setoncolor(const Val: Tocolor);
+   procedure Setoffcolor(const Val: Tocolor);
+   procedure Setledonoff(val:boolean);
+  public
+    constructor Create(Aowner: TComponent); override;
+    destructor Destroy; override;
+    procedure paint; override;
+  published
+    property Background;
+    property Oncolor: Tocolor read foncolor write Setoncolor;
+    property Offcolor: Tocolor read foffcolor write Setoffcolor;
+    Property LedOnOff:Boolean Read fcheck write Setledonoff;
+    property Onchange: TNotifyEvent read FOnChange write FOnChange;
+    property Transparent;
+    property Action;
+    property Align;
+    property Anchors;
+    property AutoSize;
+    property BidiMode;
+    property Constraints;
+    property Enabled;
+    property ParentBidiMode;
+    property OnChangeBounds;
+    property OnClick;
+    property OnContextPopup;
+    property OnDragDrop;
+    property OnDragOver;
+    property OnEndDrag;
+    property OnMouseDown;
+    property OnMouseEnter;
+    property OnMouseLeave;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnMouseWheel;
+    property OnMouseWheelDown;
+    property OnMouseWheelUp;
+    property OnResize;
+    property OnStartDrag;
+    property ParentFont;
+    property ParentShowHint;
+    property ParentColor;
+    property PopupMenu;
+    property ShowHint;
+    property Visible;
+  End;
 
   { TOCustomProgressBar }
 
@@ -238,6 +298,11 @@ type
     fenter, fleave, fdown, fdisabled: Tocolor;
     fstate: Tobutonstate;
     //    fonstatechange: Tobutonstatechange;
+    procedure SetenterC(val:Tocolor);
+    procedure SetLeaveC(val:Tocolor);
+    procedure SetDownC(val:Tocolor);
+    procedure SetDisableC(val:Tocolor);
+
   protected
     procedure CMonmouseenter(var Messages: Tmessage); message CM_MOUSEENTER;
     procedure CMonmouseleave(var Messages: Tmessage); message CM_MOUSELEAVE;
@@ -251,10 +316,10 @@ type
     destructor Destroy; override;
     procedure paint; override;
   published
-    property ColorEnter: Tocolor read fenter write fenter;
-    property ColorLeave: Tocolor read fleave write fleave;
-    property ColorDown: Tocolor read fdown write fdown;
-    property ColorDisable: Tocolor read fdisabled write fdisabled;
+    property ColorEnter: Tocolor read fenter write SetenterC;
+    property ColorLeave: Tocolor read fleave write SetLeaveC;
+    property ColorDown: Tocolor read fdown write SetDownC;
+    property ColorDisable: Tocolor read fdisabled write SetDisableC;
     property State: Tobutonstate read fstate write fstate;
     property Caption;
     property Transparent;
@@ -319,6 +384,7 @@ type
     property ParentBidiMode;
     property OnChangeBounds;
     property OnClick;
+    property OnDblClick;
     property OnContextPopup;
     property OnDragDrop;
     property OnDragOver;
@@ -364,6 +430,7 @@ type
     property ParentBidiMode;
     property OnChangeBounds;
     property OnClick;
+    property OnDblClick;
     property OnContextPopup;
     property OnDragDrop;
     property OnDragOver;
@@ -471,7 +538,224 @@ type
   end;
 
 
+  { Toswich }
 
+  Toswich = class(ToGraphicControl)
+   private
+    obenter, obleave, obdown, obdisabled: ToColor;
+    fstate      : Tobutonstate;
+    fswichstate : ToswichState;
+    fcheckwidth : integer;
+    froundx,froundy : integer;
+    fcaptionoff,fcaptionon:string;
+   // fchecked    : boolean;
+   // fcaptiondirection : Tcapdirection;
+    FOnChange : TNotifyEvent;
+    function GetChecWidth: integer;
+    procedure SetChecWidth(AValue: integer);
+   // procedure SetCaptionmod(const val: Tcapdirection);
+   // procedure SetChecked(const Value: boolean);
+   // function GetChecked: boolean;
+    procedure SetState(const Value: Tobutonstate);
+    function GetState: Tobutonstate;
+    procedure SetSwState(const Value: ToswichState);
+    function GetSwState: ToswichState;
+  protected
+    procedure CMonmouseenter(var Messages: Tmessage); message CM_MOUSEENTER;
+    procedure CMonmouseleave(var Messages: Tmessage); message CM_MOUSELEAVE;
+    procedure WMEraseBkgnd(var Message: TWMEraseBkgnd); message WM_ERASEBKGND;
+    procedure CreateParams(var Params: TCreateParams);
+    procedure CMHittest(var msg: TCMHIttest);
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
+      X: integer; Y: integer); override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
+      X: integer; Y: integer); override;
+    procedure DoOnChange; virtual;
+  public
+    constructor Create(Aowner: TComponent); override;
+    destructor Destroy; override;
+    procedure paint; override;
+  published
+    property ColorEnter: Tocolor read obenter write obenter;
+    property ColorLeave: Tocolor read obleave write obleave;
+    property ColorDown: Tocolor read obdown write obdown;
+    property ColorDisable: Tocolor read obdisabled write obdisabled;
+    property CaptionOn  : String read fcaptionon write fcaptionon;
+    property CaptionOff : String read fcaptionoff write fcaptionoff;
+    property State: Tobutonstate read GetState write SetState;
+    property SwichState: ToswichState read GetSwState write SetSwState;
+    property RoundX : integer read froundx write froundx;
+    property RoundY : integer read froundy write froundy;
+
+  //  property Checked: boolean read GetChecked write SetChecked;
+    property ChecWidth: integer read GetChecWidth write SetChecWidth;
+  //  property CaptionDirection: Tcapdirection read GetCaptionmod write SetCaptionmod;
+    property Transparent;
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property Action;
+    property Align;
+    property Anchors;
+    property AutoSize;
+    property BidiMode;
+    property Constraints;
+    property DragCursor;
+    property DragKind;
+    property DragMode;
+    property Enabled;
+    property Font;
+    property ParentBidiMode;
+    property OnChangeBounds;
+    property OnClick;
+    property OnContextPopup;
+    property OnDragDrop;
+    property OnDragOver;
+    property OnEndDrag;
+    property OnMouseDown;
+    property OnMouseEnter;
+    property OnMouseLeave;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnMouseWheel;
+    property OnMouseWheelDown;
+    property OnMouseWheelUp;
+    property OnResize;
+    property OnStartDrag;
+    property ParentFont;
+    property ParentShowHint;
+    property ParentColor;
+    property PopupMenu;
+    property ShowHint;
+    property Visible;
+  end;
+
+
+  { Toswich }
+
+   { ToImgradio }
+
+   ToImgradio = class(TGraphicControl)
+   private
+    fkind          : Tokindstate;
+    fres           : TPortableNetworkGraphic;//TPicture;
+    FOnChange      : TNotifyEvent;
+    fframe,fframee : integer;
+    Function Getitemat(Pos: Tpoint): Integer;
+    function GetTransparent: boolean;
+    procedure setbitmap(const AValue: TPortableNetworkGraphic);// TPicture);
+    Procedure Setfframe(Avalue: Integer);
+    Procedure Setframe(Const Avalue: Integer);
+    procedure SetTransparent(const AValue: boolean);
+    procedure ImageSet(Sender: TObject);
+  protected
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
+      X: integer; Y: integer); override;
+    Procedure Change; Virtual;
+
+  public
+    constructor Create(Aowner: TComponent); override;
+    destructor Destroy; override;
+    procedure paint; override;
+  published
+    property Picture: TPortableNetworkGraphic{ TPicture} read fres write Setbitmap;
+    property PictureKind : Tokindstate read fkind write fkind;
+    property Transparent: boolean read GetTransparent
+      write SetTransparent default True;
+    property FrameCount : integer read fframe write SetFrame;
+    Property Frameindex : integer read fframee write SetFframe;//fframee;
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property Action;
+    property Align;
+    property Anchors;
+    property AutoSize;
+    property BidiMode;
+    property Constraints;
+    property Enabled;
+    property ParentBidiMode;
+    property OnChangeBounds;
+    property OnClick;
+    property OnContextPopup;
+    property OnDragDrop;
+    property OnDragOver;
+    property OnEndDrag;
+    property OnMouseDown;
+    property OnMouseEnter;
+    property OnMouseLeave;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnMouseWheel;
+    property OnMouseWheelDown;
+    property OnMouseWheelUp;
+    property OnResize;
+    property ParentShowHint;
+    property ParentColor;
+    property PopupMenu;
+    property ShowHint;
+    property Visible;
+  end;
+  { ToImgswich }
+
+  ToImgswich = class(TGraphicControl)
+   private
+    fkind          : Tokindstate;
+    fres           : TPortableNetworkGraphic;//TPicture;
+    FOnChange      : TNotifyEvent;
+    fframe,fframee : integer;
+    fclickable     : Boolean;
+    Function Getitemat(Pos: Tpoint): Integer;
+    function GetTransparent: boolean;
+    procedure setbitmap(const AValue: TPortableNetworkGraphic);// TPicture);
+    Procedure Setclickable(Avalue: Boolean);
+    Procedure Setfframe(Const Avalue: Integer);
+    Procedure Setframe(Const Avalue: Integer);
+    procedure SetTransparent(const AValue: boolean);
+    procedure ImageSet(Sender: TObject);
+  protected
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
+      X: integer; Y: integer); override;
+ //   procedure DoOnChange; virtual;
+  public
+    constructor Create(Aowner: TComponent); override;
+    destructor Destroy; override;
+    procedure paint; override;
+
+  published
+    property Picture     : TPortableNetworkGraphic{TPicture} read fres       write Setbitmap;
+    property PictureKind : Tokindstate                       read fkind      write fkind;
+    property Transparent : boolean                           read GetTransparent
+      write SetTransparent;// default True;
+    property FrameCount  : integer                           read fframe     write SetFrame;
+    property Frameindex  : integer                           read fframee    write SetFframe;// fframee;
+    property Clickable   : Boolean                           read fclickable write fclickable;//SetClickable;//  Default False;
+    property OnChange    : TNotifyEvent                      read FOnChange  write FOnChange;
+    property Action;
+    property Align;
+    property Anchors;
+    property AutoSize;
+    property BidiMode;
+    property Constraints;
+    property Enabled;
+    property ParentBidiMode;
+    property OnChangeBounds;
+    property OnClick;
+    property OnContextPopup;
+    property OnDragDrop;
+    property OnDragOver;
+    property OnEndDrag;
+    property OnMouseDown;
+    property OnMouseEnter;
+    property OnMouseLeave;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnMouseWheel;
+    property OnMouseWheelDown;
+    property OnMouseWheelUp;
+    property OnResize;
+    property ParentShowHint;
+    property ParentColor;
+    property PopupMenu;
+    property ShowHint;
+    property Visible;
+  end;
 
   { Tocheckbox }
 
@@ -502,6 +786,7 @@ type
       X: integer; Y: integer); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
       X: integer; Y: integer); override;
+    procedure DoOnChange; virtual;
   public
     constructor Create(Aowner: TComponent); override;
     destructor Destroy; override;
@@ -556,18 +841,56 @@ type
     property Visible;
   end;
 
-  ToRadiobutton = class(Tocheckbox)
+  { ToRadiobutton }
+
+  ToRadiobutton = class(ToGraphicControl)
+    private
+    obenter, obleave, obdown, obdisabled, obcheckenters, obcheckleaves: ToColor;
+    fstate: Tobutonstate;
+    fcheckwidth: integer;
+    fchecked: boolean;
+    fcaptiondirection: Tcapdirection;
+    FOnChange: TNotifyEvent;
+    function GetChecWidth: integer;
+    procedure SetChecWidth(AValue: integer);
+    procedure SetCaptionmod(const val: Tcapdirection);
+    procedure SetChecked(const Value: boolean);
+    function GetChecked: boolean;
+    procedure SetState(const Value: Tobutonstate);
+    function GetState: Tobutonstate;
+    function GetCaptionmod: Tcapdirection;
+    procedure deaktifdigerleri;
+  protected
+    procedure CMonmouseenter(var Messages: Tmessage); message CM_MOUSEENTER;
+    procedure CMonmouseleave(var Messages: Tmessage); message CM_MOUSELEAVE;
+    procedure WMEraseBkgnd(var Message: TWMEraseBkgnd); message WM_ERASEBKGND;
+    procedure CreateParams(var Params: TCreateParams);
+    procedure CMHittest(var msg: TCMHIttest);
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
+      X: integer; Y: integer); override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
+      X: integer; Y: integer); override;
+    procedure DoOnChange; virtual;
+  public
+    constructor Create(Aowner: TComponent); override;
+    destructor Destroy; override;
+    procedure paint; override;
   published
-    property ColorEnter;
-    property ColorLeave;
-    property ColorDown;
-    property ColorCheckEnter;
-    property ColorCheckLeave;
+    property ColorEnter: Tocolor read obenter write obenter;
+    property ColorLeave: Tocolor read obleave write obleave;
+    property ColorDown: Tocolor read obdown write obdown;
+    property ColorCheckEnter: Tocolor read obcheckenters write obcheckenters;
+    property ColorCheckLeave: Tocolor read obcheckleaves write obcheckleaves;
+    property ColorDisable: Tocolor read obdisabled write obdisabled;
     property Caption;
-    property CaptionDirection;
-    property State;
-    property Checked;
+    property State: Tobutonstate read GetState write SetState;
+    property Checked: boolean read GetChecked write SetChecked;
+    property ChecWidth: integer read GetChecWidth write SetChecWidth;
+    property CaptionDirection: Tcapdirection read GetCaptionmod write SetCaptionmod;
     property Transparent;
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+
+
     property Action;
     property Align;
     property Anchors;
@@ -580,7 +903,7 @@ type
     property Enabled;
     property Font;
     property ParentBidiMode;
-    property OnChange;
+
     property OnChangeBounds;
     property OnClick;
     property OnContextPopup;
@@ -1318,7 +1641,7 @@ type
     property Action;
     property Align;
     property Anchors;
-    property AutoSize;
+//    property AutoSize;
     property BidiMode;
     property Constraints;
     property DragCursor;
@@ -1362,7 +1685,11 @@ type
    ffdisabled     : ToColor;
    Fliste         : TStrings;
    Fedit          : Toedit;
-   Fonchange      : TNotifyEvent;
+   FOnChange      : TNotifyEvent;
+   FOnCloseUp     : TNotifyEvent;
+   FOnDropDown    : TNotifyEvent;
+   FOnGetItems    : TNotifyEvent;
+   FOnSelect      : TNotifyEvent;
    fReadOnly      : Boolean;
    Fitemindex     : integer;
    fbutonarea     : Trect;
@@ -1372,6 +1699,7 @@ type
    Fselectedcolor : Tcolor;
    fdropdown      : boolean;
    Fbutton        : Tobuton;
+   fpopupopen     : boolean;
    procedure kclick(Sender: TObject);
    function Gettext: string;
    function GetItemIndex: integer;
@@ -1380,14 +1708,32 @@ type
    procedure MoveEnd;
    procedure MoveHome;
    procedure MoveUp;
+
+   procedure setitemheight(avalue: integer);
    procedure SetItemIndex(Avalue: integer);
-   procedure SetStrings(AValue: TStrings);
    procedure SetText(AValue: string);
+   procedure SetButtonenter(val:Tocolor);
+   procedure SetButtonLeave(val:Tocolor);
+   procedure SetButtonDown(val:Tocolor);
+   procedure SetButtonDisable(val:Tocolor);
+
    procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
       X: integer; Y: integer); override;
-   procedure KeyDown(var Key: word; Shift: TShiftState);
+
    procedure LstPopupReturndata(Sender: TObject; const Str:string; const indx:integer);
    procedure LstPopupShowHide(Sender: TObject);
+  protected
+    procedure Change; virtual;
+    procedure Select; virtual;
+    procedure DropDown; virtual;
+    procedure GetItems; virtual;
+    procedure CloseUp; virtual;
+    procedure SetStrings(AValue: TStrings); virtual;
+    procedure KeyDown(var Key: word; Shift: TShiftState);  virtual;
+    property OnCloseUp: TNotifyEvent read FOnCloseUp write FOnCloseUp;
+    property OnDropDown: TNotifyEvent read FOnDropDown write FOnDropDown;
+    property OnGetItems: TNotifyEvent read FOnGetItems write FOnGetItems;
+    property OnSelect: TNotifyEvent read FOnSelect write FOnSelect;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy;override;
@@ -1402,10 +1748,11 @@ type
     property ReadOnly      : boolean      read freadonly      write freadonly;
     property Itemindex     : integer      read Getitemindex   write Setitemindex;
     property Selectedcolor : Tcolor       read Fselectedcolor write Fselectedcolor;
-    property ButtonEnter   : Tocolor      read fobenter       write fobenter;
-    property ButtonLeave   : Tocolor      read fobleave       write fobleave;
-    property ButtonDown    : Tocolor      read fobdown        write fobdown;
-    property ButtonDisable : Tocolor      read ffdisabled     write ffdisabled;
+    property ButtonEnter   : Tocolor      read fobenter       write SetButtonenter;
+    property ButtonLeave   : Tocolor      read fobleave       write SetButtonLeave;
+    property ButtonDown    : Tocolor      read fobdown        write SetButtonDown;
+    property ButtonDisable : Tocolor      read ffdisabled     write SetButtonDisable;
+    property ItemHeight    : integer      read FitemHeight    write SetItemHeight;
   //  property Background;
     property Action;
     property Align;
@@ -1444,6 +1791,10 @@ type
     property Visible;
   end;
 
+
+
+
+
   { Tpopupformcombobox }
   type
   TReturnStintEvent = procedure (Sender: TObject; const ftext: string; const itemind:integer) of object;
@@ -1468,20 +1819,562 @@ type
     procedure Paint; override;
   end;
 
+ Type
+  TBalloonType     = (blnInfo, blnError, blnWarning);
+  TBalloonHoriz    = (blnLeft, blnMiddle, blnRight);
+  TBalloonVert     = (blnTop, blnCenter, blnBottom);
+  TBalloonPosition = (blnArrowTopLeft, blnArrowTopRight, blnArrowBottomLeft, blnArrowBottomRight);
+
+Type
+	ToBalloonControl = Class(TComponent)
+	private
+		FTitle: String;
+    FText: TStringList;
+		FDuration, FPixelCoordinateX, FPixelCoordinateY: Integer;
+		FHorizontal: TBalloonHoriz;
+		FVertical: TBalloonVert;
+		FPosition: TBalloonPosition;
+		FControl: TWinControl;
+		FBalloonType: TBalloonType;
+
+    procedure SetText(Value: TStringList);
+	public
+         Constructor Create(AOwner: TComponent); override;
+    Destructor Destroy; override;
+		procedure ShowControlBalloon;
+		procedure ShowPixelBalloon;
+	published
+		property Text: TStringList read FText write SetText;
+		property Title: String read FTitle write FTitle;
+		property Duration: Integer read FDuration write FDuration;
+		property Horizontal: TBalloonHoriz read FHorizontal write FHorizontal;
+		property Vertical: TBalloonVert read FVertical write FVertical;
+		property Position: TBalloonPosition read FPosition write FPosition;
+		property Control: TWinControl read FControl write FControl;
+		property PixelCoordinateX: Integer read FPixelCoordinateX write FPixelCoordinateX;
+		property PixelCoordinateY: Integer read FPixelCoordinateY write FPixelCoordinateY;
+		property BalloonType: TBalloonType read FBalloonType write FBalloonType;
+
+
+	End;
+
+Type
+  TBalloon = Class(TCustomForm)
+  private
+    lblTitle: TLabel;
+    lblText: TLabel;
+    pnlAlign: TPanel;
+    iconBitmap: TImage;
+    tmrExit: TTimer;
+    Procedure FormPaint(Sender: TObject);
+  protected
+    Procedure CreateParams(Var Params: TCreateParams); override;
+    Procedure OnMouseClick(Sender: TObject);
+    Procedure OnExitTimer(Sender: TObject);
+    Procedure OnChange(Sender: TObject);
+    Procedure WndProc(Var Message: TMessage); override;
+  public
+    Constructor CreateNew(AOwner: TComponent; Dummy: Integer = 0); override;
+    Procedure ShowBalloon(blnLeft, blnTop: Integer; blnTitle, blnText: String; blnType: TBalloonType; blnDuration: Integer; blnPosition: TBalloonPosition);
+    Procedure ShowControlBalloon(blnControl: TWinControl; blnHoriz: TBalloonHoriz; blnVert: TBalloonVert; blnTitle, blnText: String; blnType: TBalloonType; blnDuration: Integer);
+  End;
+
+  TOlist = class;
+  { TOlistItem }
+
+
+  TOlistItem = class(TCollectionItem)
+  private
+    FCaption    : String;
+    flist       : TStrings;
+    fvisible    : Boolean;
+    FCurrent    : Boolean;
+    FSelected   : Boolean;
+    fwidth      : integer;
+    ffont       : TFont;
+
+  public
+    constructor Create(Collectioni: TCollection); override;
+    destructor Destroy; override;
+    procedure Assign(Source: TPersistent); override;
+    property Selected : Boolean read FSelected write FSelected;
+    property Current  : Boolean read FCurrent  write FCurrent;
+    property Index;
+    procedure delete(Indexi: integer);
+  protected
+     procedure SetString(AValue: TStrings); virtual;
+     procedure listchange(Sender: TObject);
+  published
+    property Caption   : String      read FCaption   write FCaption;
+    property Visible   : Boolean     read fvisible   write fvisible default true;
+    property Items     : TStrings    read Flist      write SetString;
+    property Width     : integer     read fwidth     write fwidth;
+    property Font      : TFont       read ffont      write ffont;
+
+  end;
+
+  { TOlistItems }
+
+  TOlistItems = class(TOwnedCollection)
+  private
+
+    function GetItem(Indexi: Integer): TOlistItem;
+    procedure SetItem(Indexi: Integer; const Value: TOlistItem);
+  protected
+    procedure Update(Item: TCollectionItem); override;
+  public
+    constructor Create(AOwner: TPersistent; ItemClassi: TCollectionItemClass);
+    function Add: TOlistItem;
+    procedure Clear;
+    procedure Delete(Indexi: Integer);
+    function Insert(Indexi: Integer): TOlistItem;
+    function IndexOf(Value: TOlistItem): Integer;
+    property Items[Indexi: Integer]: TOlistItem read GetItem write SetItem; default;
+
+  end;
+
+ {  TOListColumns = class(TOwnedCollection)
+  private
+
+    function GetItem(Index: Integer): TOlistItem;
+    procedure SetItem(Index: Integer; const Value: TOlistItem);
+  protected
+    procedure Update(Item: TCollectionItem); override;
+  public
+    constructor Create(AOwner: TPersistent; ItemClassi: TCollectionItemClass);
+    function Add: TOlistItem;
+    procedure Clear;
+    procedure Delete(Index: Integer);
+    function Insert(Index: Integer): TOlistItem;
+    function IndexOf(Value: TOlistItem): Integer;
+    property Items[Index: Integer]: TOlistItem read GetItem write SetItem; default;
+
+  end;
+  }
+  TOnDeleteItem = procedure(Sender: TObject) of object;
+  TOnCellClick = procedure(Sender: TObject;Column:TOlistItem) of object;
+  ToStatelist = (fnormal,fwarning,fconfirmation);
+  TOlist = class(TOCustomControl)
+  private
+    fheaderfont            : Tfont;
+    Fstatelist             : ToStatelist;
+    FListItems             : TOlistItems;
+    fItemscount            : integer;
+//    Fcolunmsitems          : TOlistItems;
+    FItemOffset            : Integer;
+    FItemhOffset           : integer;
+    vscroll                : ToScrollBar;
+    FItemsShown            : SmallInt;
+    FFocusedItem           : Integer;
+    FItemHeight            : integer;
+    FheaderHeight          : integer;
+    fgridwidth             : integer;
+    fgridlines             : Boolean;
+    FAutoHideScrollBar     : Boolean;
+    fheadervisible         : Boolean;
+    fmodusewhelll          : Boolean;
+    fcolumindex            : integer;
+    Fobdown                : Tocolor;
+    Fobenter               : Tocolor;
+    Fobleave               : Tocolor;
+    Ffdisabled             : Tocolor;
+    fselectcolor           : TColor;
+    fgridcolor             : Tcolor;
+    fheadercolor           : Tcolor;
+    fitemcolor             : Tcolor;
+    fbackgroundvisible     : Boolean;
+    ScrollBar              : TOScrollBar;
+    FItemDblClick          : TNotifyEvent;
+    FItemEnterKey          : TNotifyEvent;
+    FOnDeleteItem          : TOnDeleteItem;
+    FOnCellclick           : TOnCellClick;
+
+    procedure CMEnabledChanged(var Message: TMessage); message CM_ENABLEDCHANGED;
+    Function Getcells(Acol, Arow: Integer): String;
+    function Getgridview: Boolean;
+    Procedure Setbuttondisable(Avalue: Tocolor);
+    Procedure Setbuttondown(Avalue: Tocolor);
+    Procedure Setbuttonenter(Avalue: Tocolor);
+    Procedure Setbuttonleave(Avalue: Tocolor);
+    Procedure Setcells(Acol, Arow: Integer; Avalue: String);
+    procedure SetGridview(AValue: Boolean);
+    procedure SetItems(Value: TOlistItems);
+    function ItemRect(Item: Integer): TRect;
+    Function GetItemAt(Pos: TPoint): Integer;
+    procedure ScrollBarChange(Sender: TObject);
+    procedure CNKeyDown(var Message: TWMKeyDown); message CN_KEYDOWN;
+    procedure HScrollBarChange(Sender: TObject);
+  protected
+    procedure Paint; override;
+    function DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): Boolean; override;
+    function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): Boolean; override;
+  public
+    constructor Create(Aowner: TComponent); override;
+    destructor Destroy; override;
+    procedure MouseDown(Button : TMouseButton; Shift : TShiftState; X,Y : Integer); override;
+    procedure MouseUp(Button : TMouseButton; Shift : TShiftState; X,Y : Integer); override;
+    procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
+//    procedure ClearSelection(RepaintAll: Boolean = False);
+//    procedure SelectAll;
+    procedure Clear;
+    procedure MoveUp;
+    procedure MoveDown;
+    procedure MoveHome;
+    procedure MoveEnd;
+//    procedure FindItem(Texti: String);
+    procedure Delete(indexi: integer);
+    property  Cells[ACol, ARow: Integer]: string read GetCells write SetCells;
+
+  published
+    property OnCellClick           : TOnCellClick   read FOnCellclick          write FOnCellclick;
+    property Columns               : TOlistItems    read FListItems            write SetItems;
+    property ItemIndex             : Integer        read FFocusedItem          write FFocusedItem;
+    property Itemscount            : Integer        read FItemscount;//           write FFocusedItem;
+    property Backgroundvisible     : Boolean        read fbackgroundvisible    write fbackgroundvisible;
+    property Columindex            : Integer        read fcolumindex           write fcolumindex;
+    property ItemHeight            : Integer        read FItemHeight           write FItemHeight;
+    property Itemcolor             : Tcolor         read fitemcolor            write fitemcolor;
+    property Itemstate             : ToStatelist    read Fstatelist            write Fstatelist;
+    property HeaderHeight          : Integer        read FheaderHeight         write FheaderHeight;
+    property Gridwidth             : Integer        read fgridwidth            write fgridwidth;
+    property Gridbordercolor       : TColor         read fgridcolor            write fgridcolor;
+    property Gridview              : Boolean        read Getgridview           write SetGridview;
+    property Selectedcolor         : Tcolor         read fselectcolor          write fselectcolor;
+    property Headercolor           : Tcolor         read fheadercolor          write fheadercolor;
+    property Headervisible         : Boolean        read fheadervisible        write fheadervisible;
+    property Headerfont            : TFont          read fheaderfont           write fheaderfont;
+    property AutoHideScrollBar     : Boolean        read FAutoHideScrollBar    write FAutoHideScrollBar;
+    property OnItemDblClick        : TNotifyEvent   read FItemDblClick         write FItemDblClick;
+    property OnItemEnterKey        : TNotifyEvent   read FItemEnterKey         write FItemEnterKey;
+    property OnDeleteItem          : TOnDeleteItem  read FOnDeleteItem         write FOnDeleteItem;
+    property VertialScroll         : ToScrollBar    read ScrollBar             write ScrollBar;
+    property HorizontalScroll      : ToScrollBar    read vscroll               write vscroll;
+
+    property ButtonEnter           : Tocolor        read fobenter              write SetButtonenter;
+    property ButtonLeave           : Tocolor        read fobleave              write SetButtonLeave;
+    property ButtonDown            : Tocolor        read fobdown               write SetButtonDown;
+    property ButtonDisable         : Tocolor        read ffdisabled            write SetButtonDisable;
+    property Anchors;
+    property Font;
+    property OnDblClick;
+    property TabOrder;
+    property TabStop;
+    property Visible;
+  end;
+
+  { TOnurStrings }
+
+  TOnurStrings = class
+  private
+    fparent :Tcontrol;
+    FCells: array of string;
+    FSize: integer;
+    function GetCell(X: integer): string;
+    function GetRowCount: integer;
+    procedure SetCell(X: integer; AValue: string);
+    procedure SetRowCount(AValue: integer);
+  public
+    constructor Create;
+    procedure Insert(index:integer;Avalue:string);
+    procedure Add(s: string);
+    procedure Savetofile(s: string);
+    procedure Loadfromfile(s: string);
+    procedure Clear;
+    function arrayofstring(aranan: string): integer;
+    property Cells[Row: integer]: string read GetCell write SetCell;
+    property Count: integer read GetRowCount write SetRowCount;
+  end;
+
+   { Totransprentlistbox }
+
+   Totransprentlistbox= class(TGraphicControl)
+   private
+    FBackground: Tocolor;
+    ffdisabled: Tocolor;
+    fobdown: Tocolor;
+    fobenter: Tocolor;
+    fobleave: Tocolor;
+
+    FCells: TOnurStrings;//array of array of string;
+    FItemHeight:integer;
+    FItemhOffset:Integer;
+    FItemOffset:Integer;
+    fcolwidth:integer;
+    fcolvisible:integer;
+    fscroll:ToScrollBar;
+    yscroll:ToScrollBar;
+    procedure SetBackground(AValue: Tocolor);
+    procedure SetButtonDisable(AValue: Tocolor);
+    procedure SetButtonDown(AValue: Tocolor);
+    procedure SetButtonenter(AValue: Tocolor);
+    procedure SetButtonLeave(AValue: Tocolor);
+    procedure VscrollBarChange(Sender: Tobject);
+    procedure HScrollBarChange(Sender: TObject);
+  public
+    constructor Create(Aowner: TComponent); override;
+    destructor Destroy; override;
+    procedure paint; override;
+    property Items: TOnurStrings read Fcells write FCells;
+    function DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): boolean; override;
+    function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): boolean; override;
+  published
+    property ItemHeight            : integer       read FItemHeight     write FItemHeight;
+    Property Scrollbar             : ToScrollBar   read fscroll         write fscroll;
+    Property HScrollbar            : ToScrollBar   read yscroll         write yscroll;
+    property ButtonEnter           : Tocolor       read fobenter        write SetButtonenter;
+    property ButtonLeave           : Tocolor       read fobleave        write SetButtonLeave;
+    property ButtonDown            : Tocolor       read fobdown         write SetButtonDown;
+    property ButtonDisable         : Tocolor       read ffdisabled      write SetButtonDisable;
+    property Background            : Tocolor       read FBackground     write SetBackground;
+    property Action;
+    property Align;
+    property Anchors;
+    property AutoSize;
+    property BidiMode;
+    property Constraints;
+    property Enabled;
+    property Font;
+    property ParentBidiMode;
+    property OnChangeBounds;
+    property OnClick;
+    property OnContextPopup;
+    property OnDragDrop;
+    property OnDragOver;
+    property OnEndDrag;
+    property OnMouseDown;
+    property OnMouseEnter;
+    property OnMouseLeave;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnMouseWheel;
+    property OnMouseWheelDown;
+    property OnMouseWheelUp;
+    property OnResize;
+    property OnStartDrag;
+    property ParentFont;
+    property ParentShowHint;
+    property ParentColor;
+    property PopupMenu;
+    property ShowHint;
+    property Visible;
+  end;
+
+
+
+
+  { Totransprentlist }
+
+  Totransprentlist= class(TGraphicControl)
+    private
+      FCells: array of array of string;
+      FSize: TPoint;
+      FItemHeight:integer;
+      FItemhOffset:Integer;
+      FItemOffset:Integer;
+      fcolwidth:integer;
+      fcolvisible:integer;
+      fscroll:ToScrollBar;
+      yscroll:ToScrollBar;
+      Procedure Change(Sender: Tobject);
+
+      function GetCell(X, Y: Integer): string;
+      function GetColCount: Integer;
+
+      function GetRowCount: Integer;
+      procedure SetCell(X, Y: Integer; AValue: string);
+      procedure SetColCount(AValue: Integer);
+      Procedure Setcolwidth(Const Avalue: Integer);
+      procedure SetRowCount(AValue: Integer);
+      procedure SetSize(AValue: TPoint);
+      procedure HScrollBarChange(Sender: TObject);
+
+  public
+    constructor Create(Aowner: TComponent); override;
+    destructor Destroy; override;
+    procedure paint; override;
+    property Cells[Col,Row : Integer]: string read GetCell write SetCell;
+    property Size: TPoint read FSize write SetSize;
+    function DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): boolean; override;
+    function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): boolean; override;
+  published
+    property ItemHeight :integer read FItemHeight write FItemHeight;
+    property ColCount: Integer read GetColCount write SetColCount;
+    property RowCount: Integer read GetRowCount write SetRowCount;
+    property Colwidth:Integer read fcolwidth  write SetColwidth;
+    Property Scrollbar :ToScrollBar read fscroll write fscroll;
+    Property HScrollbar :ToScrollBar read yscroll write yscroll;
+    property NoVisiblecol:integer  read fcolvisible  write fcolvisible;
+    property Action;
+    property Align;
+    property Anchors;
+    property AutoSize;
+    property BidiMode;
+    property Constraints;
+    property Enabled;
+    property Font;
+    property ParentBidiMode;
+    property OnChangeBounds;
+    property OnClick;
+    property OnContextPopup;
+    property OnDragDrop;
+    property OnDragOver;
+    property OnEndDrag;
+    property OnMouseDown;
+    property OnMouseEnter;
+    property OnMouseLeave;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnMouseWheel;
+    property OnMouseWheelDown;
+    property OnMouseWheelUp;
+    property OnResize;
+    property OnStartDrag;
+    property ParentFont;
+    property ParentShowHint;
+    property ParentColor;
+    property PopupMenu;
+    property ShowHint;
+    property Visible;
+  end;
+
+type
+
+  { TOlabel }
+
+  TOlabel = class(TGraphicControl)
+  private
+    { Private declarations }
+    FBitmap     : TPortableNetworkGraphic;//TBitmap;
+    Flist       : Tstrings;
+    FPicture    : TPortableNetworkGraphic;
+    FTimer      : TTimer;
+    FInterval   : Cardinal;
+    FActive     : Boolean;
+    FStretch    : Boolean;
+    FScrollBy   : Integer;
+    FCurPos     : Integer;
+    FWait       : Integer;
+    FWaiting    : Boolean;
+ //   Fmousemm    : Boolean;
+    FCaption    : TCaption;
+    FScale      : Real;
+    fCharWidth,fCharHeight:integer;
+    ftransparent:Boolean;
+
+    Procedure Getbmp;
+    Function  GetScrollBy:Integer;
+    procedure SetActive(Value : Boolean);
+    Procedure Setcaption(Value: TTranslateString);
+    procedure SetStretch(Value : Boolean);
+    procedure SetInterval(Value : Cardinal);
+    procedure SetPicture(Value : TPortableNetworkGraphic);//Picture);
+    procedure Activate;
+    procedure Deactivate;
+    procedure UpdatePos;
+    procedure DoOnTimer(Sender : TObject);
+    procedure SetCharWidth(value:integer);
+    procedure SetCharHeight(value:integer);
+    procedure SetTransparent(const value:boolean);
+     procedure SetString(AValue: TStrings); virtual;
+     procedure listchange(Sender: TObject);
+  public
+    { Public declarations }
+    constructor create(AOwner: TComponent);override;
+    destructor destroy; override;
+    procedure paint; override;
+
+
+
+  published
+    { Published declarations }
+    property Strings    : TStrings    read Flist      write SetString;
+    property Active     : Boolean read FActive write SetActive;
+    property Stretch    : Boolean read FStretch write SetStretch;
+    property ScrollBy   : Integer read GetScrollBy write FScrollBy;
+    property Interval   : Cardinal read FInterval write SetInterval;
+    property CharHeight  : integer read fCharHeight write SetCharHeight default 75;
+    property CharWidth   : integer read fCharWidth write SetCharWidth default 44;
+    property WaitOnEnd  : Integer read FWait write FWait;
+    property SkinBitmap : TPortableNetworkGraphic read FPicture write SetPicture;// TPicture read FPicture write SetPicture;
+    property Align;
+    property Transparent : boolean    read fTransparent     write SetTransparent default True;
+    property Caption   : TCaption      read FCaption   write SetCaption;
+//    property Caption;
+    property ParentColor;
+    property Visible;
+    property OnClick;
+    property OnDblClick;
+    property OnMouseDown;
+    property OnMouseMove;
+    property OnMouseUp;
+
+  end;
+
+
+
+ { TOKnob }
+
+ TOKnob = class(TOGraphicControl)//Customcontrol)
+  private
+    FClick: Boolean;
+    FPos: Integer;
+    FValue: Integer;
+    FInit: Integer;
+    FMaxValue: Integer;
+    FMinValue: Integer;
+    FStep: Integer;
+    FScroolStep: Integer;
+    fstate: Tobutonstate;
+    FOnChange: TNotifyEvent;
+    obenter, obleave, obdown, obdisabled: ToColor;
+    procedure SetMaxValue(const aValue: Integer);
+    procedure SetMinValue(const aValue: Integer);
+  protected
+    procedure cmonmouseleave(var messages: tmessage);
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X,
+      Y: Integer); override;
+    procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X,
+      Y: Integer); override;
+    function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer;
+      MousePos: TPoint): Boolean; override;
+    procedure SetValue(const aValue: Integer);
+    procedure DoOnChange; virtual;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy;override;
+    procedure Paint;override;
+
+  published
+    property MaxValue: Integer read FMaxValue write SetMaxValue;
+    property MinValue: Integer read FMinValue write SetMinValue;
+    property Step: Integer read FStep write FStep;
+    property ScroolStep: Integer read FScroolStep write FScroolStep;
+    property CurrentValue: Integer read FValue write SetValue;
+    property ColorEnter: Tocolor read obenter write obenter;
+    property ColorLeave: Tocolor read obleave write obleave;
+    property ColorDown: Tocolor read obdown write obdown;
+    property ColorDisable: Tocolor read obdisabled write obdisabled;
+    property Transparent;
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+  end;
 
 
 procedure Register;
-
+ {$R Balloon.res}
 implementation
+uses strutils,LazUnicode,Math;//,utf8scanner;
 {$IFDEF UNIX}uses math;{$ENDIF}
 
 procedure Register;
 begin
+  RegisterComponents('Standard', [TOlabel]);
   RegisterComponents('Standard', [Tobuton]);
   RegisterComponents('Standard', [Topanel]);
   RegisterComponents('Standard', [TOGraphicPanel]);
   RegisterComponents('Standard', [TCollapExpandpanel]);
   RegisterComponents('Standard', [Toedit]);
+  RegisterComponents('Standard', [TOled]);
   RegisterComponents('Standard', [ToSpinEdit]);
   RegisterComponents('Standard', [Tomemo]);
   RegisterComponents('Standard', [Tocombobox]);
@@ -1492,13 +2385,30 @@ begin
   RegisterComponents('Standard', [ToScrollBar]);
   RegisterComponents('Standard', [ToListBox]);
   RegisterComponents('Standard', [ToChecklistbox]);
+  RegisterComponents('Standard', [ToBalloonControl]);
+  RegisterComponents('Standard', [TOlist]);
+  RegisterComponents('Standard', [Toswich]);
+  RegisterComponents('Standard', [ToImgswich]);
+  RegisterComponents('Standard', [ToImgradio]);
+  RegisterComponents('Standard', [Totransprentlist]);
+  RegisterComponents('Standard', [Totransprentlistbox]);
+  RegisterComponents('Standard', [TOKnob]);
 
 
 end;
 
 
-
-
+Procedure Ocolortoocolor(Too, From: Tocolor);
+begin
+ if Assigned(from) and Assigned(too) then
+ begin
+ too.Border      := from.Border;
+ too.Bordercolor := from.Bordercolor;
+ too.Fontcolor   := from.Fontcolor;
+ too.Startcolor  := from.Startcolor;
+ too.Stopcolor   := from.Stopcolor;
+ End;
+End;
 
 function ValueRange(const Value, Min, Max: integer): integer;
 begin
@@ -1539,10 +2449,15 @@ procedure ShowCombolistPopup(const APosition: TPoint;
   ACaller: Tocombobox);
 var
   PopupForm: Tpopupformcombobox;
+  a,b:integer;
 begin
-
+  b:=ACaller.Height;
+ // for a:=0 to ACaller.Items.Count-1 do
+ // begin
+   b:=b+(ACaller.ItemHeight*ACaller.Items.Count);
+ // End;
   PopupForm := Tpopupformcombobox.Create(Application);
-  PopupForm.SetBounds(APosition.x,APosition.y,150,250);
+  PopupForm.SetBounds(APosition.x,APosition.y,ACaller.Width,b);//150,250);
   PopupForm.BorderStyle:=bsNone;
 //  PopupForm.Name:='xyzzyx';
 {  PopupForm.Width:=150;
@@ -1553,8 +2468,3277 @@ begin
   PopupForm.OnHide := OnShowHide;
   PopupForm.Show;
   PopupForm.KeepInView(APosition);   // must be after Show for PopupForm.AutoSize to be in effect.
+
+
+
 end;
 
+{ TOKnob }
+
+procedure TOKnob.SetMaxValue(const aValue: Integer);
+begin
+  FMaxValue:=ValueRange(aValue,FMinValue,FMaxValue);
+  Invalidate;
+end;
+
+procedure TOKnob.SetMinValue(const aValue: Integer);
+begin
+  FMinValue:=ValueRange(aValue,FMinValue,FMaxValue);
+  Invalidate;
+end;
+
+procedure TOKnob.SetValue(const aValue: Integer);
+begin
+ fvalue:=ValueRange(aValue,FMinValue,FMaxValue);
+ Invalidate;
+end;
+
+procedure TOKnob.DoOnChange;
+begin
+ if Assigned(FOnChange) then FOnChange(Self);
+end;
+
+procedure TOKnob.cmonmouseleave(var messages: tmessage);
+begin
+
+  fstate := obleaves;
+  FClick:= False;
+  Invalidate;
+end;
+
+procedure TOKnob.MouseDown(Button: TMouseButton; Shift: TShiftState; X,
+  Y: Integer);
+begin
+  inherited MouseDown(Button, Shift, X, Y);
+  FPos:= Y;
+  FClick:= True;
+  FInit:= FValue;
+  fState := obdowns;
+end;
+
+procedure TOKnob.MouseMove(Shift: TShiftState; X, Y: Integer);
+begin
+  inherited MouseMove(Shift, X, Y);
+  if FClick then
+  begin
+  SetValue (FInit - (Y - FPos) * FStep);
+  DoOnChange;
+  end;
+end;
+
+procedure TOKnob.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer
+  );
+begin
+  inherited MouseUp(Button, Shift, X, Y);
+   FClick:= False;
+   fstate := obenters;
+end;
+
+function TOKnob.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer;
+  MousePos: TPoint): Boolean;
+begin
+ if WheelDelta > 0 then
+    SetValue (FValue + FScroolStep)
+  else if WheelDelta < 0 then
+    SetValue (FValue - FScroolStep);
+  Result:=inherited DoMouseWheel(Shift, WheelDelta, MousePos);
+end;
+
+
+
+constructor TOKnob.Create(Aowner: TComponent);
+begin
+  inherited Create(Aowner);
+//  parent := TWinControl(Aowner);
+  ControlStyle := ControlStyle + [csParentBackground, csClickEvents,
+    csCaptureMouse, csDoubleClicks, csSetCaption];
+  backgroundcolored := False;
+  self.Width := 50;
+  self.Height := 50;
+  Caption:= IntToStr(FValue);
+  FMaxValue:= +100;
+  FMinValue:= -100;
+  FStep:= 2;
+  FScroolStep:= 5;
+
+
+  obenter := Tocolor.Create(self);
+  with obenter do
+  begin
+    //Aownerr:=self;
+    border := 1;
+    bordercolor := clblack;
+    startcolor := $00CDCDCD;
+    stopcolor := clmenu;
+    Fontcolor := clBlue;
+  end;
+
+
+
+  obleave := Tocolor.Create(self);
+  with obleave do
+  begin
+ //   Aownerr:=self;
+    border := 1;
+    bordercolor := $006E6E6E;
+    startcolor := clActiveBorder;
+    stopcolor := clmenu;
+    Fontcolor := clblack;
+  end;
+
+  obdown := Tocolor.Create(self);
+  with obdown do
+  begin
+ //   Aownerr:=self;
+     border := 1;
+    bordercolor := clblack;
+    startcolor := clmenu;
+    stopcolor := $00A0A0A0;
+    Fontcolor := clRed;
+  end;
+
+  obdisabled := Tocolor.Create(self);
+  with obdisabled do
+  begin
+    // Aownerr:=self;
+     border := 1;
+    bordercolor := clblack;
+    startcolor := clmenu;
+    stopcolor := $005D5D5D;
+    Fontcolor := $002C2C2C;
+  end;
+
+
+end;
+destructor TOKnob.destroy;
+begin
+  FreeAndNil(obenter);
+  FreeAndNil(obleave);
+  FreeAndNil(obdown);
+  FreeAndNil(obdisabled);
+  inherited Destroy;
+end;
+
+
+
+procedure TOKnob.Paint;
+var
+  x, y: Integer;
+  w, h: Integer;
+  dialH, dialW: Integer;
+  zValue: Integer;
+  fborderWidth:integer;
+   obstart, obend, checkendstart, checkedend, oborder: Tcolor;
+
+
+
+const
+  dialRadius = 4;
+  offset = 5;
+begin
+  if csLoading in ComponentState then exit;
+  inherited paint;
+
+  if Enabled = False then
+  begin
+    obstart           := obdisabled.Startcolor;
+    obend             := obdisabled.Stopcolor;
+    oborder           := obdisabled.Bordercolor;
+    fborderWidth      := obdisabled.Border;
+    canvas.Font.Color := obdisabled.Fontcolor;
+  end
+  else
+  begin
+      case fstate of
+        obenters:
+        begin
+          obstart           := obenter.Startcolor;
+          obend             := obenter.Stopcolor;
+          oborder           := obenter.Bordercolor;
+          fborderWidth      := obenter.Border;
+          canvas.Font.Color := obenter.Fontcolor;
+        end;
+        obleaves:
+        begin
+          obstart           := obleave.Startcolor;
+          obend             := obleave.Stopcolor;
+          oborder           := obleave.Bordercolor;
+          fborderWidth      := obleave.Border;
+          canvas.Font.Color := obleave.Fontcolor;
+        end;
+        obdowns:
+        begin
+          obstart           := obdown.Startcolor;
+          obend             := obdown.Stopcolor;
+          fborderWidth      := obdown.Border;
+          oborder           := obdown.Bordercolor;
+          canvas.Font.Color := obdown.Fontcolor;
+        end;
+      end;
+  end;
+
+  w:= Canvas.TextWidth(Caption);
+  h:= Canvas.TextHeight(Caption);
+
+
+
+  Canvas.Brush.Color:= Background.Startcolor;
+  Canvas.Brush.Style:= bsSolid;
+  Canvas.Ellipse(ClientRect);
+
+  dialW:= ClientWidth div 2 - offset;
+  dialH:= ClientHeight div 2 - offset;
+
+
+  Canvas.Pen.Color:= Background.Bordercolor;// clBlack;
+  Canvas.Pen.Width:= Background.Border;
+  Canvas.Ellipse(ClientRect);
+
+
+  Canvas.Brush.Style:=  bsSolid;
+  Canvas.Brush.Color:= obstart;//clRed;
+
+
+
+  zValue:= Round (270 / (MaxValue - MinValue) * (FValue - MinValue)) + 45;
+
+  x:= Round (sin(degToRad(-zValue)) * dialW + dialW) + offset;
+  y:= Round (cos(degToRad(-zValue)) * dialW + dialW) + offset;
+
+  Canvas.Ellipse(x - dialRadius, y - dialRadius,
+    x + dialRadius, y + dialRadius);
+
+  Caption:= IntToStr(FValue);
+  Canvas.Brush.Style:= bsClear;
+  Canvas.TextOut((ClientWidth - w)div 2, (ClientHeight - h)div 2,  Caption);
+
+end;
+{ Totransprentlistbox }
+
+
+function Totransprentlistbox.DoMouseWheelDown(Shift: TShiftState;
+  MousePos: TPoint): boolean;
+begin
+inherited;
+ if not fscroll.Visible then exit;
+ if FItemOffset =fscroll.max then exit;
+
+ fscroll.Position := fscroll.Position + Mouse.WheelScrollLines;
+ FItemOffset := fscroll.Position;
+ Result := True;
+ Invalidate;
+//  fmodusewhelll := False;
+end;
+
+function Totransprentlistbox.DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint
+  ): boolean;
+begin
+ inherited;
+// fmodusewhelll := True;
+ if not fscroll.Visible then exit;
+ if FItemOffset =0 then exit;
+ fscroll.Position := fscroll.Position - Mouse.WheelScrollLines;
+ FItemOffset := fscroll.Position;
+ Result := True;
+ Invalidate;
+// fmodusewhelll := False;
+end;
+
+
+
+constructor Totransprentlistbox.Create(Aowner: TComponent);
+Begin
+ Inherited Create(Aowner);
+  parent := TWinControl(Aowner);
+ ControlStyle := ControlStyle + [csParentBackground, csClickEvents,
+   csCaptureMouse, csDoubleClicks];
+ FCells:=TOnurStrings.Create;
+ FBackground:=ToColor.Create(self);
+// FBackground.// Aownerr:=self;
+ fobenter:=ToColor.Create(self);
+// fobenter.// Aownerr:=self;
+ fobleave:=ToColor.Create(self);
+// fobleave.// Aownerr:=self;
+ fobdown:=ToColor.Create(self);
+// fobdown.// Aownerr:=self;
+ ffdisabled:=ToColor.Create(self);
+//ffdisabled.// Aownerr:=self;
+
+
+
+ FCells.fparent:=self;
+ FItemHeight:=15;
+ Width:=150;
+ Height:=250;
+ fcolwidth:=80;
+ FItemOffset:=0;
+ fcolvisible:=-1;
+ FItemhOffset:=0;
+ fscroll:=ToScrollBar.Create(nil);
+ fscroll.Parent:=Parent;
+ fscroll.Kind:=oVertical;
+ fscroll.Left:=self.Left+self.Width;
+ fscroll.top:=self.top;
+ fscroll.Width:=20;
+ fscroll.Height:=self.Height;
+ fscroll.OnChange:=@VScrollBarChange;
+ fscroll.Visible:=false;
+
+
+ yscroll:=ToScrollBar.Create(nil);
+ yscroll.Parent:=Parent;
+ yscroll.Kind:=oHorizontal;
+ yscroll.Left:=self.Left;
+ yscroll.top:=self.top+self.Height;
+ yscroll.Width:=self.Width;
+ yscroll.Height:=20;
+ yscroll.OnChange:=@HScrollBarChange;
+ yscroll.Visible:=false;
+End;
+
+destructor Totransprentlistbox.Destroy;
+Begin
+ FCells.free;
+ if Assigned(fscroll) then FreeAndNil(fscroll);
+ if Assigned(yscroll) then FreeAndNil(yscroll);
+ freeandnil(fbackground);
+ freeandnil(fobenter);
+ freeandnil(fobleave);
+ freeandnil(fobdown);
+ freeandnil(ffdisabled);
+ Inherited Destroy;
+End;
+
+
+procedure Totransprentlistbox.VscrollBarChange(Sender: Tobject);
+begin
+FItemOffset:=fscroll.Position;
+Invalidate;
+End;
+
+procedure Totransprentlistbox.SetBackground(AValue: Tocolor);
+begin
+  if FBackground=AValue then Exit;
+  FBackground.border:=AValue.Border;
+  FBackground.Startcolor:=AValue.Startcolor;
+  FBackground.Stopcolor:=AValue.Stopcolor;
+  FBackground.Fontcolor:=AValue.Fontcolor;
+
+end;
+
+procedure Totransprentlistbox.SetButtonDisable(AValue: Tocolor);
+begin
+  if ffdisabled=AValue then Exit;
+  ffdisabled:=AValue;
+end;
+
+procedure Totransprentlistbox.SetButtonDown(AValue: Tocolor);
+begin
+  if fobdown=AValue then Exit;
+  fobdown:=AValue;
+end;
+
+procedure Totransprentlistbox.SetButtonenter(AValue: Tocolor);
+begin
+  if fobenter=AValue then Exit;
+  fobenter:=AValue;
+end;
+
+procedure Totransprentlistbox.SetButtonLeave(AValue: Tocolor);
+begin
+  if fobleave=AValue then Exit;
+  fobleave:=AValue;
+end;
+
+procedure Totransprentlistbox.HScrollBarChange(Sender: TObject);
+begin
+FItemhOffset := yscroll.Position;
+Invalidate;
+end;
+
+
+
+
+procedure Totransprentlistbox.paint;
+var
+i,a,b,FItemsShown,fark:integer;
+begin
+ if Visible=false then exit;
+ inherited paint;
+
+ if fcells.GetRowCount > 0 then
+ begin
+    try
+
+      FItemsShown := self.Height div FItemHeight;
+
+      if fcells.GetRowCount * FItemHeight > self.Height then
+       fscroll.Visible := True
+      else
+       fscroll.Visible := False;
+
+    //  writeln(FItemsShown,'  ',fcells.GetRowCount,'  ',fcells.GetRowCount * FItemHeight,'  ', self.Height);
+
+      if fcells.GetRowCount-FItemsShown+1 > 0 then
+      begin
+         with fscroll do
+         begin
+           Width := 25;
+           left := self.Left+Self.ClientWidth-25;
+           Top := self.top;
+           Height := Self.Height;
+           Max:= fcells.GetRowCount-FItemsShown;
+           Ocolortoocolor(Background,self.Background);
+           Ocolortoocolor(ButtonDown,self.ButtonDown);
+           Ocolortoocolor(ButtonLeave,self.ButtonLeave);
+           Ocolortoocolor(ButtonEnter,self.ButtonEnter);
+           Ocolortoocolor(ButtonDisabled,self.ButtonDisable);
+         end;
+      end;
+
+
+  {
+        fark:=0;
+        fark:=(fcells.FSize.X-2)*fcolwidth;
+
+        if (fark>0) and (fark>self.ClientWidth) then
+         yscroll.Max :=(fcells.FSize.X-2)-1;
+
+        if fark> self.ClientWidth then
+        begin
+          yscroll.Visible := True;
+          yscroll.Left:=self.Left;
+          yscroll.top:=self.top+self.Height;
+          yscroll.Width:=self.Width;
+        end else
+          yscroll.Visible := False;
+ }
+       a := 15;
+       canvas.Brush.Style := bsClear;
+       b:=a;
+       for i := FItemOffset to (FItemOffset + (Height) div FItemHeight) - 1 do
+       begin
+           if (i < Fcells.GetRowCount) and (i>-1) then
+           begin
+               Canvas.TextOut(a, b, Fcells.GetCell(i));
+               b := b + FitemHeight;
+             if (b >= Height) then Break;
+           end;
+       end;
+
+   finally
+
+   end;
+ end;
+end;
+
+
+
+
+
+{ TOnurStrings }
+
+{ TOnurStrings }
+
+function TOnurStrings.GetCell(X: integer): string;
+begin
+  Result := FCells[x];
+end;
+
+function TOnurStrings.GetRowCount: integer;
+begin
+  Result := Length(FCells);//FSize;
+  // SetLength(FCells,1);
+end;
+
+procedure TOnurStrings.SetCell(X: integer; AValue: string);
+begin
+  if Length(FCells) <= x then
+    SetLength(FCells, X);
+
+  if x > 0 then
+    FCells[x - 1] := AValue
+  else
+    FCells[x] := AValue;
+
+  FSize := Length(FCells);
+
+  if Assigned(fparent) then
+  fparent.Invalidate;
+end;
+
+procedure TOnurStrings.SetRowCount(AValue: integer);
+begin
+  if (Length(FCells) >= AValue) then Exit;
+  SetLength(FCells, AValue);
+  FSize := AValue;
+end;
+
+constructor TOnurStrings.Create;
+begin
+  FSize := 0;
+  SetLength(FCells, 0);
+end;
+
+procedure TOnurStrings.Insert(index: integer; Avalue: string);
+var
+  Temp : string;
+  CurIndex,NewIndex:integer;
+begin
+  SetCell(FSize + 1, Avalue);
+  CurIndex:=Length(FCells)-1;
+  NewIndex:=index;
+
+  Temp := FCells[CurIndex];
+
+//   ShowMessage('ok '+temp);
+
+  if NewIndex > CurIndex then
+    System.Move(FCells[CurIndex+1], FCells[CurIndex], (NewIndex - CurIndex) * SizeOf(Pointer))
+  else
+    System.Move(FCells[NewIndex], FCells[NewIndex+1], (CurIndex - NewIndex) * SizeOf(Pointer));
+
+  FCells[NewIndex] := Temp;
+
+
+
+  if Assigned(fparent) then
+  fparent.Invalidate;
+end;
+
+
+procedure TOnurStrings.Add(s: string);
+begin
+  SetCell(FSize + 1, s);
+end;
+
+procedure TOnurStrings.Savetofile(s: string);
+var
+  i: integer;
+  s1: TStringList;
+begin
+  s1 := TStringList.Create;
+  for i := 0 to Count - 1 do
+    s1.Add(FCells[i]);
+  s1.SaveToFile(s);
+  FreeAndNil(s1);
+
+end;
+
+
+procedure TOnurStrings.Loadfromfile(s: string);
+var
+  i: integer;
+  s1: TStringList;
+begin
+  s1 := TStringList.Create;
+  s1.LoadFromFile(s);
+  for i := 0 to s1.Count - 1 do
+    add(s1[i]);
+
+  FreeAndNil(s1);
+end;
+
+procedure TOnurStrings.Clear;
+begin
+  FSize := 0;
+  SetLength(FCells, 0);
+end;
+
+function TOnurStrings.arrayofstring(aranan: string): integer;
+var
+  i: integer;
+begin
+  Result := -1;
+  for i := 0 to Length(FCells) - 1 do
+  begin
+    if FCells[i] = aranan then
+    begin
+      Result := i;
+      break;
+    end;
+  end;
+end;
+
+
+{ TOlabel }
+
+Function Tolabel.Getscrollby: Integer;
+Begin
+  Result:=ABS(FScrollBy);
+End;
+
+Procedure Tolabel.Setactive(Value: Boolean);
+Begin
+  IF Value <> FActive then
+  Begin
+    FActive:=Value;
+    IF FActive then
+     Begin
+       Activate;
+     end
+    else Deactivate;
+    FWaiting:=False;
+  end;
+End;
+
+Procedure Tolabel.Setcaption(Value: Ttranslatestring);
+Begin
+  If fcaption=value Then Exit;
+  fcaption:=value;
+  Getbmp;
+  Invalidate;
+End;
+
+Procedure Tolabel.Setstretch(Value: Boolean);
+Var
+ Rec : TRect;
+begin
+ IF Value <> FStretch then
+  Begin
+    FStretch:=Value;
+     Rec.Top:=0; Rec.Left:=0; Rec.Bottom:=Height; Rec.Right:=Width;
+     Canvas.Brush.Color:=Color;
+     Canvas.Brush.Style:=bsSolid;
+     Canvas.FillRect(Rec);
+     Paint;
+  end;
+  IF Not FStretch then FScale:=1;
+
+End;
+
+Procedure Tolabel.Setinterval(Value: Cardinal);
+Begin
+  IF Value <> FInterval then
+  Begin
+    FInterval:=Value;
+    FTimer.Interval:=Value;
+  end;
+End;
+
+Procedure Tolabel.Setpicture(Value: Tportablenetworkgraphic);
+Begin
+  FPicture.Assign(Value);
+ // IF (FPicture.Bitmap.Width<>155) or (FPicture.Bitmap.Height<>18) then
+ //  ShowMessage('Dimensions not valid. Not valid Winamp Skin Text!');
+ // FCaption:='';
+ Getbmp;
+ Invalidate;
+End;
+
+
+Procedure Tolabel.Activate;
+Begin
+ FActive:=True;
+ FTimer.Enabled:=True;
+ FTimer.Interval:=FInterval;
+ FWaiting:=False;
+
+ FCurPos:=0;
+ FScrollBy:=ABS(FScrollBy);
+// FillBitMap;
+ Getbmp;
+End;
+
+Procedure Tolabel.Deactivate;
+Begin
+  FTimer.Enabled:=False;
+  FActive:=False;
+  Invalidate;
+End;
+
+Procedure Tolabel.Updatepos;
+begin
+If (Length(Caption)*CharWidth)*FScale > Self.Width then
+   Begin
+     FCurPos:=FCurPos+FScrollBy;
+     IF FCurPos <= 0 then
+      Begin
+        FScrollBy:=Abs(FScrollBy);
+        IF FWait<>0 then
+         Begin
+           FWaiting:=True;
+           FTimer.Interval:=FWait;
+         end;
+      end;
+
+     IF (Length(Caption)*CharWidth{(FBitMap.Width)}-(FCurPos)) <= (Self.Width/FScale) then
+      Begin
+       FScrollBy:=Abs(FScrollBy)*-1;
+       IF FWait<>0 then
+         Begin
+           FWaiting:=True;
+           FTimer.Interval:=FWait;
+         end;
+      end;
+   end Else FCurPos:=0;
+
+
+End;
+
+Procedure Tolabel.Doontimer(Sender: Tobject);
+Begin
+  IF FWaiting then
+   Begin
+    FTimer.Interval:=FInterval;
+    FWaiting:=False;
+   end;
+
+  UpDatePos;
+  Invalidate;
+End;
+
+Procedure Tolabel.Setcharwidth(Value: Integer);
+Begin
+  if Value=CharWidth then exit;
+ fCharWidth:=Value;
+ Getbmp;
+ Invalidate;
+End;
+
+Procedure Tolabel.Setcharheight(Value: Integer);
+Begin
+  if Value=CharHeight then exit;
+ fCharHeight:=Value;
+ Getbmp;
+ Invalidate;
+End;
+
+Procedure Tolabel.Settransparent(Const Value: Boolean);
+Begin
+   if ftransparent = Value then
+    exit;
+  if Value then
+    Color := clNone
+  else
+  if Color = clNone then
+    Color := clBackground;
+End;
+
+Procedure Tolabel.Setstring(Avalue: Tstrings);
+Begin
+ if Flist=AValue then Exit;
+  flist.BeginUpdate;
+  Flist.Assign(AValue);
+  flist.EndUpdate;
+End;
+
+Procedure Tolabel.Listchange(Sender: Tobject);
+Begin
+ Getbmp;
+End;
+
+Constructor Tolabel.Create(Aowner: Tcomponent);
+Begin
+ inherited Create(AOwner);
+
+//  AutoSize:=False;
+  FInterval:=100;
+ // AutoSize:=false;
+  FPicture:=TPortableNetworkGraphic.create;
+  FBitmap:=TPortableNetworkGraphic.Create;
+  FPicture.PixelFormat:=pf32bit;
+  fbitmap.PixelFormat:=pf32bit;
+  fbitmap.TransparentColor:=clBlack;
+  fbitmap.Transparent:=true;
+  fbitmap.TransparentMode:=tmAuto;
+
+  //FCaption:='';
+  fCharWidth:= 44;
+  fCharHeight:= 75;
+  Width:=100;
+  Height:=fCharHeight*2;
+  FScale:=1;
+
+  FStretch:=True;
+  FScrollBy:=2;
+  FWait:=1000;
+  Color:=clNone;
+
+  Flist:=TStringList.Create;
+
+  FTimer:=TTimer.Create(nil);
+  With FTimer do
+   Begin
+    Enabled:=False;
+    Interval:=FInterval;
+    OnTimer:=@DoOnTimer;
+   end;
+  FActive:=False;
+  Activate;
+End;
+
+Destructor Tolabel.Destroy;
+Begin
+ Deactivate;
+ FBitmap.Free;
+ FPicture.Free;
+ FTimer.Free;
+ Flist.free;
+ inherited Destroy;
+End;
+
+
+
+
+
+
+Procedure Tolabel.Getbmp;//:Trect;
+var
+i,w,h,a,n:integer;
+place:word;
+tmpText: {$IFDEF FPC}AnsiString{$ELSE}String{$ENDIF};
+s, ch: String;
+cpIter: TCodePointEnumerator;
+ucIter: TUnicodeCharacterEnumerator;
+
+{  const
+  Row1 :AnsiString = 'ABCDEFGHIJKLMNOPRSTUVYZ';// String[29] = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ';
+  Row2 :AnsiString = '0123456789.:<> '; //String[29] = '0123456789.:<> ';
+  Row3 :AnsiString = 'ÇĞİÖŞÜ';// String[29] = '';
+}
+
+begin
+
+  FBitmap.Clear;
+ if self.Caption='' then exit;
+
+{ If Caption<>'' then
+   FBitMap.Width:=(Length(self.Caption)*CharWidth)
+   else FBitMap.Width:=Self.Width;
+
+   FBitmap.Height:=CharHeight;
+}
+//   IF FBitMap.Width < Self.Width then
+//     FBitmap.Width:=Self.Width;
+
+
+   tmpText:=self.Caption;
+   s:=ansiuppercase(tmpText);
+
+//    FBitmap.SetSize(Length(s)*CharWidth,CharHeight);
+
+   i:=0;
+  for ch in s do
+  begin
+    w:=0;
+    h:=0;
+    a:=0;
+    for n:=0 to Flist.Count-1 do
+    begin
+      ucIter := TUnicodeCharacterEnumerator.Create(Flist[n]);
+      while ucIter.MoveNext do
+      begin
+        if ch=ucIter.Current then
+        begin
+          w:=a*CharWidth;
+          h:=n*CharHeight;
+        End;
+        Inc(a);
+      End;
+    ucIter.Free;
+    a:=0;
+    End;
+    FBitmap.SetSize((i*CharWidth)+CharWidth,CharHeight);
+    FBitmap.Canvas.CopyRect(Rect((i*CharWidth),0,(i*CharWidth)+CharWidth,CharHeight),FPicture.Canvas,Rect(w,h,w+CharWidth,h+CharHeight));
+    inc(i);
+  end;
+End;
+
+Procedure Tolabel.Paint;
+ begin
+  if color<> clnone then
+  begin
+   Canvas.Brush.Color:=self.color;
+   canvas.FillRect(ClientRect);
+  end;
+
+  IF not FStretch then
+   Begin
+    IF FActive then
+      canvas.Draw(-FCurPos,0,FBitmap)
+    //  BitBlt(Canvas.Handle,0,0,Width,CharHeight,FBitmap.Canvas.Handle,FCurPos,0,SrcCopy)
+    else
+     Begin
+   //  BitBlt(Canvas.Handle,0,0,Width,CharHeight,FBitmap.Canvas.Handle,0,0,SRCPAINT);
+      canvas.Draw(0,0,FBitmap);
+     end;
+   end
+  Else
+  Begin
+    FScale:=Height/CharHeight;
+     IF FActive then
+
+     // canvas.CopyRect(rect(0,0,Width,Height),fbitmap.canvas,Rect(FCurPos,0,FCurPos+Width,CharHeight))
+       StretchBlt(Canvas.Handle,0,0,Width,Height,FBitmap.Canvas.Handle,FCurPos,0,Round(Width/FScale),CharHeight,SrcCopy)
+     else
+   //  canvas.StretchDraw(rect(0,0,Width,Height){Rect(0,0,Round(Width/FScale),CharHeight)},fbitmap);//
+     canvas.CopyRect(Rect(0,0,self.Width,self.Height),FBitmap.Canvas,Rect(0,0,FBitmap.Width,FBitmap.Height));//Round(Width/FScale),CharHeight))
+    //  StretchBlt(Canvas.Handle,0,0,Width,Height,FBitmap.Canvas.Handle,0,0,Round(Width/FScale),CharHeight,SrcCopy);
+  end;
+End;
+
+
+{ Totransprentlist }
+ 
+function Totransprentlist.GetCell(X, Y: Integer): string;
+Begin
+   Result := FCells[Y, X];
+End;
+
+function Totransprentlist.GetColCount: Integer;
+Begin
+  Result := FSize.X;
+End;
+
+{
+Function Totransprentlist.Getcolwidth: Integer;
+Begin
+ Result:=fcolwidth;
+End;
+}
+
+function Totransprentlist.GetRowCount: Integer;
+Begin
+  Result := FSize.Y;
+End;
+
+procedure Totransprentlist.SetCell(X, Y: Integer; AValue: string);
+Var
+  i,p, z, fark, FItemsShown:integer;
+Begin
+  i:=FSize.X;
+  p:=FSize.y;
+  if x>=i then
+  Inc(i);
+  if y>=p then
+  inc(p);
+  SetSize(point(i,p));
+
+
+  FCells[Y, X] := AValue;
+
+
+  FItemsShown := self.Height div FItemHeight;
+
+  if fsize.y * FItemHeight > self.Height then
+   fscroll.Visible := True
+  else
+   fscroll.Visible := False;
+
+
+
+  if fsize.y-FItemsShown+1 > 0 then
+  begin
+     with fscroll do
+     begin
+       Width := 25;
+       left := self.Left+Self.ClientWidth;
+       Top := self.top;
+       Height := Self.Height;
+       Max:= fsize.y-FItemsShown;
+     end;
+  end;
+
+
+
+  fark:=0;
+  fark:=(FSize.X-2)*fcolwidth;
+
+  if (fark>0) and (fark>self.ClientWidth) then
+   yscroll.Max :=(FSize.X-2)-1;//({( FSize.X) div }(fark div self.ClientWidth))+1;
+
+        if fark> self.ClientWidth then
+        begin
+          yscroll.Visible := True;
+          yscroll.Left:=self.Left;
+          yscroll.top:=self.top+self.Height;
+          yscroll.Width:=self.Width;
+        end else
+          yscroll.Visible := False;
+
+
+
+  Invalidate;
+
+
+End;
+
+procedure Totransprentlist.SetColCount(AValue: Integer);
+Begin
+   Size := Point(AValue, FSize.Y);// RowCount);
+End;
+
+procedure Totransprentlist.Setcolwidth(const Avalue: Integer);
+Begin
+ if Avalue=fcolwidth then exit;
+ fcolwidth:=Avalue;
+ Invalidate;
+
+End;
+
+procedure Totransprentlist.SetRowCount(AValue: Integer);
+Begin          //ColCount;
+ Size := Point(FSize.X, AValue);
+End;
+
+procedure Totransprentlist.SetSize(AValue: TPoint);
+Begin
+   if (FSize.X = AValue.X) and (FSize.Y = AValue.Y) then Exit;
+  FSize := AValue;
+  SetLength(FCells, FSize.Y, FSize.X);
+
+End;
+
+
+
+
+function Totransprentlist.DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint
+  ): boolean;
+begin
+//  fmodusewhelll := True;
+  inherited;
+  if not fscroll.Visible then exit;
+  if FItemOffset =fscroll.max then exit;
+
+  fscroll.Position := fscroll.Position + Mouse.WheelScrollLines;
+  FItemOffset := fscroll.Position;
+  Result := True;
+  Invalidate;
+//  fmodusewhelll := False;
+end;
+
+function Totransprentlist.DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint
+  ): boolean;
+begin
+  inherited;
+ // fmodusewhelll := True;
+  if not fscroll.Visible then exit;
+  if FItemOffset =0 then exit;
+  fscroll.Position := fscroll.Position - Mouse.WheelScrollLines;
+  FItemOffset := fscroll.Position;
+  Result := True;
+  Invalidate;
+ // fmodusewhelll := False;
+end;
+
+constructor Totransprentlist.Create(Aowner: TComponent);
+Begin
+  Inherited Create(Aowner);
+   parent := TWinControl(Aowner);
+  ControlStyle := ControlStyle + [csParentBackground, csClickEvents,
+    csCaptureMouse, csDoubleClicks];
+  FItemHeight:=15;
+  Width:=150;
+  Height:=250;
+  fcolwidth:=80;
+  FItemOffset:=0;
+  fcolvisible:=-1;
+  FItemhOffset:=0;
+  fscroll:=ToScrollBar.Create(nil);
+  fscroll.Parent:=Parent;
+  fscroll.Kind:=oVertical;
+  fscroll.Left:=self.Left+self.Width;
+  fscroll.top:=self.top;
+  fscroll.Width:=20;
+  fscroll.Height:=self.Height;
+  fscroll.OnChange:=@change;
+  fscroll.Visible:=false;
+
+
+  yscroll:=ToScrollBar.Create(nil);
+  yscroll.Parent:=Parent;
+  yscroll.Kind:=oHorizontal;
+  yscroll.Left:=self.Left;
+  yscroll.top:=self.top+self.Height;
+  yscroll.Width:=self.Width;
+  yscroll.Height:=20;
+  yscroll.OnChange:=@HScrollBarChange;
+  yscroll.Visible:=false;
+End;
+
+destructor Totransprentlist.Destroy;
+Begin
+  if Assigned(fscroll) then FreeAndNil(fscroll);
+  Inherited Destroy;
+End;
+
+
+procedure Totransprentlist.Change(Sender: Tobject);
+begin
+ FItemOffset:=fscroll.Position;
+ Invalidate;
+End;
+procedure Totransprentlist.HScrollBarChange(Sender: TObject);
+begin
+ FItemhOffset := yscroll.Position;
+ Invalidate;
+end;
+
+Procedure Totransprentlist.Paint;
+var
+ i,z,x4 ,a,b,FItemsShown,fark:integer;
+begin
+  if Visible=false then exit;
+  inherited paint;
+
+
+  if fsize.x-1 > 0 then
+  begin
+     try
+
+
+      a := 1;
+      x4:=0;
+
+      canvas.Brush.Style := bsClear;
+        for z:=0+FItemhOffset to fsize.x -1 do  // columns
+        begin
+
+         b:=a;
+          if z<>fcolvisible then
+          begin
+            for i := FItemOffset to (FItemOffset + (Height) div FItemHeight) - 1 do
+            begin
+                if (i < GetRowCount) and (i>-1) then
+                begin
+                    Canvas.TextOut(a+x4, b, GetCell(z,i));
+                    b := b + FitemHeight;
+                  if (b >= Height) then Break;
+                end;
+             //   b := a+FItemHeight;
+            end;
+
+            x4:=x4+fcolwidth;
+          end;
+        end;
+    finally
+
+    end;
+
+  end;
+End;
+
+
+
+
+
+
+Procedure Toimgswich.Setbitmap(Const Avalue: Tportablenetworkgraphic);// Tpicture);
+begin
+  if fres=AValue then exit;
+  fres.Assign(AValue);
+  fres.Transparent:=true;
+end;
+
+Procedure Toimgswich.Setclickable(Avalue: Boolean);
+Begin
+  If Fclickable=Avalue Then Exit;
+  fclickable:=Avalue;
+End;
+
+Procedure Toimgswich.Setfframe(Const Avalue: Integer);
+Begin
+  If (Fframee=Avalue) and (Avalue>fframe) Then Exit;
+  Fframee:=Avalue;
+  Invalidate;
+End;
+
+Procedure Toimgswich.Setframe(Const Avalue: Integer);
+Begin
+  if fframe=Avalue then exit;
+  fframe:=Avalue;
+  fframee:=Avalue-1;
+  Invalidate;
+End;
+
+
+Function Toimgswich.Gettransparent: Boolean;
+begin
+ Result := Color = clNone;
+end;
+
+
+
+
+Procedure Toimgswich.Settransparent(Const Avalue: Boolean);
+begin
+  if transparent = AValue then
+    exit;
+  if AValue then
+    Color := clNone
+  else
+  if Color = clNone then
+    Color := clBackground;
+end;
+
+
+
+
+
+Constructor Toimgswich.Create(Aowner: Tcomponent);
+begin
+  inherited Create(Aowner);
+   parent := TWinControl(Aowner);
+  ControlStyle := ControlStyle + [csParentBackground, csClickEvents,
+    csCaptureMouse, csDoubleClicks];
+  Width            := 100;
+  Height           := 20;
+  fframe           := 2;
+  fframee          := fframe-1;
+  fkind            := oVertical;
+//  fclickable       := false;
+  fres             := TPortableNetworkGraphic.Create;// TPicture.Create;
+  fres.OnChange    := @imageset;
+  fres.transparent := true;
+//  fres.Graphic.Transparent:=true;
+end;
+
+Destructor Toimgswich.Destroy;
+begin
+  fres.OnChange := nil;
+//  fres.Graphic  := nil;
+  fres.Free;
+  inherited Destroy;
+end;
+
+Procedure Toimgswich.Imageset(Sender: Tobject);
+begin
+  Invalidate;
+end;
+
+Procedure Toimgswich.Paint;
+  procedure DrawFrame;
+  begin
+    with Canvas do
+    begin
+      Pen.Color := clBlack;
+      Pen.Style := psDash;
+      MoveTo(0, 0);
+      LineTo(Self.Width-1, 0);
+      LineTo(Self.Width-1, Self.Height-1);
+      LineTo(0, Self.Height-1);
+      LineTo(0, 0);
+    end;
+  end;
+var
+//  fbitmap:Tbitmap;
+  SrcRect, DstRect: TRect;
+  framewi:integer;
+begin
+  if csDesigning in ComponentState  then
+  DrawFrame;
+
+  inherited paint;
+//  if not Assigned(fres.Graphic)then exit;// fres.Bitmap.Empty then exit;
+//  if fres.Graphic.Empty then exit;
+//  if fres.Graphic= nil then exit;
+
+
+  if fkind=oVertical then
+  begin
+   framewi:=fres.Height div fframe;
+   DstRect := Rect(0, framewi*fframee, fres.Width,framewi*(fframee+1))
+  End
+  else
+  begin
+   framewi:=fres.Width div fframe;
+   DstRect := Rect(framewi*fframee, 0, framewi*(fframee+1), fres.Height);
+  end;
+  SrcRect := Rect(0, 0,self.Width,self.Height);
+
+  Canvas.CopyRect(SrcRect,fres.Canvas,DstRect);
+
+//  fbitmap:=TBitmap.Create;
+//  fbitmap.SetSize(SrcRect.Right,SrcRect.Bottom);// .Width,self.Height);
+//  fbitmap.Canvas.CopyRect(SrcRect,fres.bitmap.Canvas,DstRect);
+
+  // fbitmap.Canvas.StretchDraw(SrcRect,fres.Graphic);
+//  Canvas.StretchDraw(SrcRect,fbitmap);//
+//   FreeAndNil(fbitmap);
+
+//  inherited paint;
+end;
+Procedure Toimgswich.Mousedown(Button: Tmousebutton; Shift: Tshiftstate;
+  X: Integer; Y: Integer);
+begin
+  inherited MouseDown(Button, Shift, X, Y);
+  if fclickable then
+  begin
+    Inc(fframee);
+    if fframee>=fframe then
+    fframee:=0;
+    if Assigned(FOnChange) then FOnChange(self);
+    Invalidate;
+  End;
+end;
+
+Function Toimgswich.Getitemat(Pos: Tpoint): Integer;
+begin
+
+  Result := -1;
+  if fkind=oVertical then
+  begin
+
+    if Pos.Y >= 0 then
+    begin
+      Result := ({fframe + }Pos.Y div (Height div fframe));
+    end;
+  End else
+  begin
+
+    if Pos.X >= 0 then
+    begin
+      Result := ({fframe + }Pos.X div (Width div fframe));
+    end;
+  End;
+end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{ ToImgradio }
+
+
+
+Procedure Toimgradio.Setbitmap(Const Avalue: Tportablenetworkgraphic);//Tpicture);
+begin
+  if fres=AValue then exit;
+  fres.Assign(AValue);
+  fres.Transparent:=true;
+end;
+
+Procedure Toimgradio.Setfframe(Avalue: Integer);
+Begin
+  If (Fframee=Avalue) and (Avalue>fframe) Then Exit;
+  Fframee:=Avalue;
+  Invalidate;
+End;
+
+Procedure Toimgradio.Setframe(Const Avalue: Integer);
+Begin
+  if fframe=Avalue then exit;
+  fframe:=Avalue;
+  fframee:=Avalue-1;
+  Invalidate;
+End;
+
+
+Function Toimgradio.Gettransparent: Boolean;
+begin
+ Result := Color = clNone;
+end;
+
+
+
+
+Procedure Toimgradio.Settransparent(Const Avalue: Boolean);
+begin
+  if transparent = AValue then
+    exit;
+  if AValue then
+    Color := clNone
+  else
+  if Color = clNone then
+    Color := clBackground;
+end;
+
+
+
+
+
+Constructor Toimgradio.Create(Aowner: Tcomponent);
+begin
+  inherited Create(Aowner);
+   parent := TWinControl(Aowner);
+  ControlStyle := ControlStyle + [csClickEvents,
+    csCaptureMouse, csDoubleClicks];
+  Width       := 100;
+  Height      := 20;
+  fframe       := 2;
+  fframee      := fframe-1;
+  fkind       := oVertical;
+//  Color       := clRed;
+  fres        := TPortableNetworkGraphic.Create;
+  //fres.Clear;
+ // fres.Mask(clBlack);
+ // fres.Masked:=true;
+  FOnChange:=nil;
+  fres.OnChange:=@imageset;
+  fres.Transparent:=true;
+end;
+
+Destructor Toimgradio.Destroy;
+begin
+  fres.OnChange := nil;
+ // fres.Graphic  := nil;
+  fres.Free;
+  inherited Destroy;
+end;
+
+Procedure Toimgradio.Imageset(Sender: Tobject);
+begin
+  Invalidate;
+end;
+
+Procedure Toimgradio.Paint;
+  procedure DrawFrame;
+  begin
+    with Canvas do
+    begin
+      Pen.Color := clBlack;
+      Pen.Style := psDash;
+      MoveTo(0, 0);
+      LineTo(Self.Width-1, 0);
+      LineTo(Self.Width-1, Self.Height-1);
+      LineTo(0, Self.Height-1);
+      LineTo(0, 0);
+    end;
+  end;
+var
+//  fbitmap:TPortableNetworkGraphic;
+  SrcRect, DstRect: TRect;
+  framewi:integer;
+begin
+  if csDesigning in ComponentState  then
+  DrawFrame;
+
+  inherited paint;
+//  if not Assigned(fres.Graphic)then exit;// fres.Bitmap.Empty then exit;
+ // if fres.Graphic.Empty then exit;
+//  if fres.Graphic= nil then exit;
+
+
+  if fkind=oVertical then
+  begin
+   framewi:=fres.Height div fframe;
+   DstRect := Rect(0, framewi*fframee, fres.Width,framewi*(fframee+1))
+  End
+  else
+  begin
+   framewi:=fres.Width div fframe;
+   DstRect := Rect(framewi*fframee, 0, framewi*(fframee+1), fres.Height);
+  end;
+  SrcRect := Rect(0, 0,self.Width,self.Height);
+  Canvas.CopyRect(SrcRect,fres.Canvas,DstRect);
+
+
+ { fbitmap:=TPortableNetworkGraphic.Create;// TBitmap.Create;
+  fbitmap.SetSize(SrcRect.Right,SrcRect.Bottom);// .Width,self.Height);
+  fbitmap.Canvas.CopyRect(SrcRect,fres.Canvas,DstRect);
+  fBitmap.TransparentColor := fres.Canvas.Pixels[1,1];
+  fBitmap.Transparent:=true;      }
+  // fbitmap.Canvas.StretchDraw(SrcRect,fres.Graphic);
+  //Canvas.StretchDraw(SrcRect,fbitmap);//
+
+//  Tform(Parent).Canvas.CopyRect(SrcRect,fres.Canvas,DstRect);//
+//   FreeAndNil(fbitmap);
+
+//  inherited paint;
+end;
+Procedure Toimgradio.Mousedown(Button: Tmousebutton; Shift: Tshiftstate;
+  X: Integer; Y: Integer);
+var
+  oldf:integer;
+begin
+  inherited MouseDown(Button, Shift, X, Y);
+  oldf:=fframee;
+  fframee:= getitemat(point(X, Y));
+
+  If oldf=fframee then exit;
+  Invalidate;
+  Change;
+
+end;
+
+Procedure Toimgradio.change;
+Begin
+  if Assigned(FOnChange) then FOnChange(Self);
+
+
+
+
+
+End;
+
+Function Toimgradio.Getitemat(Pos: Tpoint): Integer;
+begin
+
+  Result := -1;
+  if fkind=oVertical then
+  begin
+
+    if Pos.Y >= 0 then
+    begin
+      Result := ({fframe + }Pos.Y div (Height div fframe));
+    end;
+  End else
+  begin
+
+    if Pos.X >= 0 then
+    begin
+      Result := ({fframe + }Pos.X div (Width div fframe));
+    end;
+  End;
+end;
+
+{ TOlist }
+
+constructor TOlist.Create(Aowner: TComponent);
+
+begin
+  inherited Create(AOwner);
+
+  ControlStyle            := ControlStyle + [csOpaque];
+  Width                   := 150;
+  Height                  := 150;
+  Parent                  := TWinControl(AOwner); // Remover!?
+
+  FListItems              := TOlistItems.Create(Self, TOlistItem);
+  fselectcolor            := Clblue;
+  FItemOffset             := 0;
+  FItemhOffset            := 0;
+  fItemscount             := 0;
+  FItemHeight             := 24;
+  FheaderHeight           := 24;
+  FFocusedItem            := -1;
+  FAutoHideScrollBar      := true;
+  Font.Name               := 'Calibri';
+  Font.Size               := 9;
+  Font.Style              := [];
+//  fcolumwidth             := 80;
+  TabStop                 := True;
+  fbackgroundvisible      := True;
+  fheadervisible          := True;
+  FItemsShown             := 0;
+  fcolumindex             := 0;
+  Fheaderfont             := Tfont.Create;
+  Fheaderfont.Name        := 'Calibri';
+  Fheaderfont.Size        := 10;
+  Fheaderfont.Style       := [];
+  fitemcolor              := clBtnFace;
+  fgridlines              := true;
+  fgridwidth              := 1;
+  fgridcolor              := clBlack;
+  fheadercolor            := clBtnFace;
+ // Backgroundcolored       := true;
+
+   fobenter := Tocolor.Create(self);
+  with fobenter do
+  begin
+   // Aownerr:=self;
+     border := 1;
+    bordercolor := clblack;
+    startcolor := $00CDCDCD;
+    stopcolor := clmenu;
+    Fontcolor := clBlue;
+  end;
+
+  fobleave := Tocolor.Create(self);
+  with fobleave do
+  begin
+    // Aownerr:=self;
+     border := 1;
+    bordercolor := $006E6E6E;
+    startcolor := clActiveBorder;
+    stopcolor := clmenu;
+    Fontcolor := clblack;
+  end;
+
+  fobdown := Tocolor.Create(self);
+  with fobdown do
+  begin
+    // Aownerr:=self;
+     border := 1;
+    bordercolor := clblack;
+    startcolor := clmenu;
+    stopcolor := $00A0A0A0;
+    Fontcolor := clRed;
+  end;
+
+  ffdisabled := Tocolor.Create(self);
+  with ffdisabled do
+  begin
+    // Aownerr:=self;
+    border := 1;
+    bordercolor := clblack;
+    startcolor := clmenu;
+    stopcolor := $005D5D5D;
+    Fontcolor := $002C2C2C;
+  end;
+
+
+  ScrollBar := ToScrollBar.Create(self);
+  with ScrollBar do
+  begin
+    Parent := self;
+    Kind := oVertical;
+    Width := 25;
+    left := Self.Width - (25 + Background.Border);
+    Top := Background.Border;
+    Height := Self.Height - (Background.Border * 2);
+    Max := 100;//Flist.Count;
+    Min := 0;
+    OnChange := @Scrollbarchange;
+    Position := 0;
+    Visible  := false;
+
+
+  end;
+
+
+  vscroll := ToScrollBar.Create(self);
+  with vscroll do
+  begin
+    Parent := self;
+    Kind := oHorizontal;
+    Width := self.Width- (Background.Border * 2);
+    left := Background.Border;
+    Top := Self.Height - (25 + Background.Border);
+    Height := 25+ Background.Border;
+    Max := 100;//Flist.Count;
+    Min := 0;
+    OnChange := @HScrollBarChange;
+    Position := 0;
+    Visible  := false;
+
+  end;
+end;
+
+destructor TOlist.Destroy;
+begin
+   FListItems.Free; FListItems := NIL;
+   ScrollBar.Free;  ScrollBar  := NIL;
+   vscroll.free; vscroll:=nil;
+   if Assigned(headerfont) then
+   FreeAndNil(Fheaderfont);
+
+   if Assigned(fobdown) then
+   FreeAndNil(fobdown);
+
+   if Assigned(fobenter) then
+   FreeAndNil(fobenter);
+
+   if Assigned(fobleave) then
+   FreeAndNil(fobleave);
+
+   if Assigned(ffdisabled) then
+   FreeAndNil(ffdisabled);
+
+  inherited Destroy;
+end;
+
+procedure TOlist.Paint;
+var
+  i, z   : Integer;
+  x1, x2,x3,x4 : SmallInt;
+  a,b, fark,farki:integer;
+  itmclr:Tcolor;
+  FItemshShown:integer;
+  gt:integer;
+begin
+  if Visible=false then exit;
+  inherited paint;
+  if Columns.Count > 0 then
+  begin
+     try
+
+      FItemsShown := self.Height div FItemHeight;
+
+      fark:=0;
+
+      for z := 0 to Columns.Count - 1 do
+      begin
+        if Columns[z].Visible=true then
+        fark+=Columns[z].Width; //:= fark+Fcolumns[z].Width;
+      end;
+
+   //   inc(fItemscount);
+   //   writeln(FItemhOffset,'  ',fItemscount);
+
+     // FItemshShown:=0;
+      farki:=0;
+      //if FItemshShown<=0 then
+      for z := 0 to Columns.Count - 1 do
+      begin
+        farki+=Columns[z].Width;
+        if farki>=self.ClientWidth then
+        begin
+          FItemshShown:=z;
+          Break;
+        end;
+      end;
+
+
+
+      if FAutoHideScrollBar then
+      begin
+        if Columns[0].Items.Count * FItemHeight > Height then
+          ScrollBar.Visible := True
+        else
+          ScrollBar.Visible := False;
+
+       if fark>self.ClientWidth then
+         vscroll.Visible := True
+        else
+         vscroll.Visible := False;
+      end;
+    //  else
+    //    ScrollBar.Visible := True;
+
+
+
+
+
+
+
+        if Columns[0].Items.Count-FItemsShown+1 > 0 then
+        begin
+           with ScrollBar do
+           begin
+             Width := 25;
+             left := Self.Width - (ScrollBar.Width);// + Background.Border);
+             Top := Background.Border;
+             Height := Self.Height - (Background.Border * 2);
+             Max:=((Columns[0].Items.Count+1)-FItemsShown)+1;
+             Ocolortoocolor(Background,self.Background);
+             Ocolortoocolor(ButtonDown,self.ButtonDown);
+             Ocolortoocolor(ButtonLeave,self.ButtonLeave);
+             Ocolortoocolor(ButtonEnter,self.ButtonEnter);
+             Ocolortoocolor(ButtonDisabled,self.ButtonDisable);
+           end;
+        end;
+
+        if fark>self.ClientWidth then
+        with vscroll do
+        begin
+          if ScrollBar.Visible then
+           Width := self.Width- ((Background.Border * 2)+ScrollBar.Width)
+          else
+           Width := self.Width- (Background.Border * 2);
+
+          left := Background.Border;
+          Top := Self.Height - (25 + Background.Border);
+          Height := 25+ Background.Border;
+
+          if (fark>0) and (fark>self.ClientWidth) then
+            Max :=(Columns.Count-FItemshShown)-1;// div (fark div self.ClientWidth))+1;
+
+     //     writeln(fark,'  ',self.ClientWidth);
+         // ShowMessage(inttostr((Columns.Count div (fark div self.ClientWidth))+1));
+
+          if fark> self.Width then
+            Visible := True
+          else
+            Visible := False;
+
+          Ocolortoocolor(Background,self.Background);
+          Ocolortoocolor(ButtonDown,self.ButtonDown);
+          Ocolortoocolor(ButtonLeave,self.ButtonLeave);
+          Ocolortoocolor(ButtonEnter,self.ButtonEnter);
+          Ocolortoocolor(ButtonDisabled,self.ButtonDisable);
+        end;
+
+
+     // z:=0;
+      a := Background.Border;
+      b := a+FItemHeight;
+      x1:=0;
+      x2:=0;
+      x3:=0;
+      x4:=0;
+
+      canvas.Brush.Style := bsClear;
+        for z:=0+FItemhOffset to Columns.Count-1 do  // columns
+        begin
+
+           if Columns[z].Visible=true then
+           begin
+
+              a := Background.Border;
+              if fheadervisible = True then
+               b := a+FItemHeight
+              else
+               b:=a;
+
+
+
+
+              if z>0 then
+              x1:=x3
+              else
+              x1:=a;
+
+              x2:=a;
+              x3:=x1+(Columns[z].width);
+              x4:=a+ FheaderHeight;
+
+
+              if fheadervisible = True then
+              begin
+                canvas.Brush.Color := fgridcolor;// Background.Bordercolor;  // başlık border
+                canvas.Brush.Style := bsSolid;
+                canvas.FillRect(x1, x2, x3,x4);
+
+
+              //  Canvas.Pen.Color:=clLime;// Background.Bordercolor;
+              //  canvas.Pen.Width:=fgridwidth;//Background.Border;
+
+                canvas.Brush.Color := fheadercolor;          // başlık rengi
+                canvas.FillRect(x1+fgridwidth, x2+fgridwidth, x3-fgridwidth,x4-fgridwidth);
+
+                canvas.Font.Assign(Fheaderfont);
+                canvas.TextOut(x1+fgridwidth+5, x2+fgridwidth, Columns[z].Caption);   // başlık yazısı
+               end;
+
+
+
+
+
+              canvas.Font.Assign(Columns[z].font);
+
+              if vscroll.Visible then
+              gt:=(FItemOffset + ((self.Height-vscroll.Height) div FItemHeight))
+              else
+              gt:=(FItemOffset + ((self.Height) div FItemHeight));
+
+
+              for i := FItemOffset to gt  do
+              begin
+                  if (i < Columns[z].Flist.Count) and (i>-1) then
+                  begin
+                      if fbackgroundvisible= True then
+                      begin
+                       // item border
+                          if fgridlines then
+                          begin
+                            canvas.Brush.Color := fgridcolor;
+                            canvas.Brush.Style := bsSolid;
+                            canvas.FillRect(x1, b, x3,b + FitemHeight);
+                          End;
+
+
+                          if Columns.Count>=2 then
+                          begin
+                             if Columns[1].Flist[i]='2uy' then
+                              itmclr:=clred
+                              else if Columns[1].flist[i]='1bil' then
+                              itmclr:=clGreen
+                              else if Columns[1].flist[i]='0nor' then
+                              itmclr:=fitemcolor
+                              else
+                              itmclr:=fitemcolor
+                          End else
+                          begin
+                            itmclr:=fitemcolor;
+                          end;
+
+                          //tüm itemler boyancak
+
+                          //item color
+                          canvas.Brush.Color := itmclr;//fitemcolor;
+                          canvas.Brush.Style := bsSolid;
+
+                          canvas.FillRect(x1+fgridwidth, b+fgridwidth, x3-fgridwidth,(b + FitemHeight)-fgridwidth);
+
+                         // DrawFocusRect(self.canvas.Handle,rect(x1+fgridwidth, b+fgridwidth, x3-fgridwidth,(b + FitemHeight)-fgridwidth));
+
+                        //  Fstatelist:=fnormal;
+
+
+                          if i = FFocusedItem then     // item seçili ise
+                          begin
+                              canvas.Brush.Color := fselectcolor;
+                              canvas.Brush.Style := bsSolid;
+
+                              if z=Columns.Count-1 then    // son item scrollbarı geçmesin
+                              begin
+                                if ScrollBar.Visible then
+                                 canvas.FillRect(x1+fgridwidth, b+fgridwidth, x3-(fgridwidth+ScrollBar.Width),(b + FitemHeight)-fgridwidth)
+                                else
+                                 canvas.FillRect(x1+fgridwidth, b+fgridwidth, x3-fgridwidth,(b + FitemHeight)-fgridwidth);
+                              end else
+                              begin
+                               canvas.FillRect(x1+fgridwidth, b+fgridwidth, x3-fgridwidth,(b + FitemHeight)-fgridwidth);
+                              end;
+                          end;
+
+                          canvas.Brush.Style := bsClear;
+                          Canvas.TextOut(x1+5, x2+b, Columns[z].Flist[i]);
+
+                      end else
+                      begin
+
+                        if i = FFocusedItem then     // item seçili ise
+                        begin
+                          canvas.Brush.Color := fselectcolor;
+                          canvas.Brush.Style := bsSolid;
+
+                          if fheadervisible = True then
+                           canvas.FillRect(x1+fgridwidth, b+fgridwidth, x3-fgridwidth,b -fgridwidth)
+                          else
+                           canvas.FillRect(x1+fgridwidth, b+fgridwidth, x3-fgridwidth,(b + FitemHeight)-fgridwidth);
+
+                        end;
+
+                        canvas.Brush.Style := bsClear;
+                        canvas.TextOut(x1+5, x2+b, Columns[z].Flist[i]);
+
+                      end;
+                    b := b + FitemHeight;
+                    if (b >= Height) then Break;
+                  end;
+              end;
+
+           end;
+        end;
+     finally
+
+     end;
+  end;
+end;
+
+
+
+procedure TOlist.SetItems(Value: TOlistItems);
+begin
+   FListItems.Assign(Value);
+  Invalidate;
+end;
+
+function TOlist.ItemRect(Item: Integer): TRect;
+var
+  r :TRect;
+begin
+  r := Rect(0, 0, 0, 0);
+
+  if (Item >= FItemOffset - 1) and ((Item - FItemOffset) * FItemHeight < Height) then
+  begin
+    r.Top    := (Item - FItemOffset) * FItemHeight; // + 2; // 2 = TOP MARGIN!!
+    r.Bottom := r.Top + FItemHeight;
+    r.Left   := 0;
+
+    if ScrollBar.Visible then
+      r.Right := ScrollBar.Left
+    else
+      r.Right := Width;
+  end;
+
+  Result := r;
+
+end;
+
+
+function TOlist.GetItemAt(Pos: TPoint): Integer;
+var
+  i,m,w: Integer;
+begin
+   Result := -1;
+
+//  Dec(Pos.Y, 2); // TOP MARGIN!
+
+  if fheadervisible = True then
+  w:=FheaderHeight
+  else
+  w:=0;
+
+  if Pos.Y >= w then// FheaderHeight then
+  begin
+    Result := FItemOffset + (Pos.Y div FItemHeight);
+    if fheadervisible = True then
+    Result := Result -1;
+   end;
+
+
+
+
+  m:=0;
+  fcolumindex:=-1;
+  w:=0;
+  if (pos.X>=0) then
+  for i:=0 to Columns.Count-1 do
+  begin
+  {  if i=Columns.Count-1 then
+     w:=width
+    else }
+     w:=w+Columns[i].Width;
+
+    if (m<=Pos.x) and (w>=pos.x)then
+    begin
+     fcolumindex:=i;
+     break;
+    end;
+
+    m:=w;
+  end;
+end;
+
+{
+procedure TOlist.ClearSelection(RepaintAll: Boolean);
+var
+  i: Integer;
+begin
+  if Columns.Count > 0 then
+  begin
+    for i := 0 to Columns.Count-1 do
+      Columns[i].FSelected := False;
+
+    if RepaintAll then Paint;
+  end;
+end;
+  }
+
+
+procedure TOlist.CMEnabledChanged(var Message: TMessage);
+begin
+ inherited;
+   Invalidate;
+end;
+
+
+
+procedure TOlist.Setbuttondisable(Avalue: Tocolor);
+Begin
+  If Ffdisabled=Avalue Then Exit;
+  Ffdisabled:=Avalue;
+End;
+
+procedure TOlist.Setbuttondown(Avalue: Tocolor);
+Begin
+  If Fobdown=Avalue Then Exit;
+  Fobdown:=Avalue;
+End;
+
+procedure TOlist.Setbuttonenter(Avalue: Tocolor);
+Begin
+  If Fobenter=Avalue Then Exit;
+  Fobenter:=Avalue;
+End;
+
+procedure TOlist.Setbuttonleave(Avalue: Tocolor);
+Begin
+  If Fobleave=Avalue Then Exit;
+  Fobleave:=Avalue;
+End;
+
+function TOlist.Getcells(Acol, Arow: Integer): String;
+Begin
+  if (Columns.Count>-1) and (Columns.Count<=Acol) then
+  Result:=''
+  else
+  begin
+   if (Columns[Acol].Items.Count>-1) and (Columns[Acol].Items.Count<=Arow) then
+   Result:=''
+   else
+    Result:=Columns[Acol].Items[Arow];
+  end;
+End;
+
+function TOlist.Getgridview: Boolean;
+begin
+  Result:=fgridlines;
+end;
+
+procedure TOlist.Setcells(Acol, Arow: Integer; Avalue: String);
+var
+  i:integer;
+Begin
+   if (Columns.Count>-1) and (Columns.Count<=Acol) then
+   begin
+     Columns.Add;
+   end;
+   if (Columns[Acol].Items.Count>-1) and (Columns[Acol].Items.Count<=Arow) then
+   begin
+     Columns[Acol].Items.BeginUpdate;
+    for i:=Columns[Acol].Items.Count+1 to arow do
+    Columns[Acol].Items.Add('');
+
+    Columns[Acol].Items.Insert(Arow,Avalue);
+    Columns[Acol].Items.EndUpdate;
+   end else
+   begin
+     Columns[Acol].Items.BeginUpdate;
+     Columns[Acol].Items[Arow]:=Avalue;
+     Columns[Acol].Items.EndUpdate;
+   end;
+
+   fItemscount :=Columns[acol].flist.Count;
+   Invalidate;
+End;
+
+procedure TOlist.SetGridview(AValue: Boolean);
+begin
+   if fgridlines=AValue then exit;
+   fgridlines:=AValue;
+end;
+
+
+procedure TOlist.CNKeyDown(var Message: TWMKeyDown);
+var
+  x: Integer;
+begin
+
+  case Message.CharCode of
+    VK_RETURN : if (Columns.Count > 0) and (FFocusedItem > -1) then
+                begin
+                  Invalidate;
+                  if Assigned(FItemEnterKey) then FItemEnterKey(Self);
+                end;
+    VK_UP     : begin
+                  MoveUp;
+                  Invalidate;
+                end;
+    VK_DOWN   : begin
+                  MoveDown;
+                  Invalidate;
+                end;
+    VK_HOME   : begin
+                  MoveHome;
+                  Invalidate;
+                end;
+    VK_END    : begin
+                  MoveEnd;
+                  Invalidate;
+                end;
+    VK_PRIOR  : if Columns[0].items.Count > 0 then
+                begin
+                  x := FItemOffset-FItemsShown;
+                  if x < 0 then x := 0;
+                  FItemOffset  := x;
+                  FFocusedItem := x;
+                  Invalidate;
+
+                end;
+    VK_NEXT   : if Columns[0].items.Count > 0 then
+                begin
+                  x := FItemOffset+FItemsShown;
+                  if x >= Columns[0].items.Count then x := Columns[0].items.Count-1;
+                  if Columns[0].items.Count <= FItemsShown then
+                    FItemOffset  := 0
+                  else if x > (Columns[0].items.Count - FItemsShown) then
+                    FItemOffset  := Columns[0].items.Count - FItemsShown
+                  else
+                    FItemOffset  := x;
+                  FFocusedItem := x;
+                  Invalidate;
+                end;
+  else
+    inherited;
+  end;
+
+end;
+
+procedure TOlist.HScrollBarChange(Sender: TObject);
+begin
+ if fmodusewhelll=false then
+ begin
+   FItemhOffset := vscroll.Position;
+   Invalidate;
+ end;
+end;
+
+procedure TOlist.ScrollBarChange(Sender: TObject);
+begin
+ if fmodusewhelll=false then
+ begin
+   FItemOffset := ScrollBar.Position;
+   Invalidate;
+ end;
+end;
+
+
+
+
+function TOlist.DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): Boolean;
+begin
+ //  ScrollBar.Position := ScrollBar.Position+Mouse.WheelScrollLines;
+//   FItemOffset := ScrollBar.Position+Mouse.WheelScrollLines;
+//   Result := True;
+  fmodusewhelll:=True;
+  inherited;
+  if not ScrollBar.visible then exit;
+  ScrollBar.Position := ScrollBar.Position+Mouse.WheelScrollLines;
+  FItemOffset := ScrollBar.Position;
+  Result := True;
+  Invalidate;
+  fmodusewhelll:=false;
+end;
+
+function TOlist.DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): Boolean;
+begin
+// ScrollBar.Position := ScrollBar.Position-Mouse.WheelScrollLines;
+// FItemOffset := ScrollBar.Position-Mouse.WheelScrollLines;
+//   Result := True;
+
+   inherited;
+   fmodusewhelll:=True;
+   if not ScrollBar.visible then exit;
+   ScrollBar.Position := ScrollBar.Position-Mouse.WheelScrollLines;
+   FItemOffset := ScrollBar.Position;
+   Result := True;
+   Invalidate;
+   fmodusewhelll:=false;
+end;
+
+
+procedure TOlist.MouseDown(Button: TMouseButton; Shift: TShiftState; X,
+  Y: Integer);
+Var
+  Clickeditem: Integer;
+begin
+  FFocusedItem:= -1;
+  Clickeditem := -1;
+  if Columns.Count>0 then
+  begin
+    //if Items.Items.Count>0 then
+ //   if button = mbLeft then
+    begin
+
+      ClickedItem := GetItemAt(Point(X, Y));
+
+      if (ClickedItem>-1) and (fcolumindex>-1) then
+      begin
+       if (Clickeditem<=Columns[fcolumindex].Items.Count-1) then FFocusedItem:=ClickedItem;
+
+       if Assigned(FOnCellclick) then  FOnCellclick(self,Columns[fcolumindex]);
+       Invalidate;
+
+      end;
+      SetFocus;
+ //   end else
+   // begin
+     // FFocusedItem:=-1;
+     // Invalidate;
+    End;
+  end;
+  inherited MouseDown(Button,Shift,X,Y);
+end;
+
+procedure TOlist.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer
+  );
+begin
+ if (Button = mbLeft) then
+   inherited MouseUp(Button, Shift, X, Y)
+ else if (Button = mbRight) and Assigned(PopupMenu) and (not PopupMenu.AutoPopup) then
+   PopupMenu.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
+
+end;
+
+procedure TOlist.MouseMove(Shift: TShiftState; X, Y: Integer);
+begin
+ inherited MouseMove(Shift, X, Y);
+
+end;
+
+
+{
+procedure TOlist.SelectAll;
+ var
+  i: Integer;
+begin
+  if Columns.Count > 0 then
+  begin
+    Columns.BeginUpdate;
+    try
+      for i := 0 to Columns.Count-1 do
+        Columns[i].FSelected := True;
+    finally
+      Columns.EndUpdate;
+    end;
+  end;
+end;
+}
+procedure TOlist.Clear;
+var
+ i:integeR;
+begin
+   for i:=0 to Columns.Count-1 do
+   begin
+     Columns[i].Items.Clear;
+   end;
+end;
+
+
+procedure TOlist.MoveUp;
+ begin
+   if Columns.Count > 0 then
+   begin
+
+
+     if (FFocusedItem > (FItemOffset+FItemsShown)) or (FFocusedItem < (FItemOffset)) then
+     begin
+       FFocusedItem := FItemOffset;
+     end
+     else if (FFocusedItem > 0) and (FFocusedItem < Columns[0].items.Count) then
+     begin
+      dec(FFocusedItem);
+
+       if ((FFocusedItem-FItemOffset) = 0) and (FItemOffset > 0) then
+         dec(FItemOffset);
+
+
+     end;
+   end;
+
+end;
+
+procedure TOlist.MoveDown;
+ begin
+   if Columns.Count > 0 then
+   begin
+      if (FFocusedItem > (FItemOffset+FItemsShown)) or (FFocusedItem < (FItemOffset)) then
+     begin
+       FFocusedItem := FItemOffset;
+     end
+     else if (FFocusedItem >= 0) and (FFocusedItem < Columns[0].items.Count-1) then
+     begin
+       Inc(FFocusedItem);
+       // eğer scrollbar kaydırılması gerekiyorssa
+       if (FFocusedItem-FItemOffset) > FItemsShown-1 then
+       begin
+         inc(FItemOffset);
+       end;
+     end;
+   end;
+ end;
+
+procedure TOlist.MoveHome;
+ var
+   i: Integer;
+ begin
+   if Columns.Count > 0 then
+   begin
+     FFocusedItem := 0;
+     FItemOffset  := 0;
+   end;
+end;
+
+procedure TOlist.MoveEnd;
+ var
+   i: Integer;
+ begin
+   if Columns.Count > 0 then
+   begin
+
+     FFocusedItem := Columns[0].items.Count-1;
+
+     if (Columns[0].items.Count-FItemsShown) >= 0 then
+       FItemOffset := Columns[0].items.Count-FItemsShown
+     else
+       FItemOffset := 0;
+   end;
+
+
+end;
+
+{
+procedure TOlist.FindItem(Texti: String);
+begin
+
+end;
+}
+
+procedure TOlist.Delete(indexi: integer);
+ var
+   i:integer;
+ begin
+  for i:=0 to Columns.Count-1 do
+   Columns[i].items.delete(Indexi);
+end;
+
+{ TOlistItem }
+
+constructor TOlistItem.Create(Collectioni: TCollection);
+begin
+  FCaption       := '';
+  fwidth         := 80;
+  fvisible       := true;
+  flist          := TStringList.Create;
+  ffont          := TFont.Create;
+  fFont.Name     := 'Calibri';
+  fFont.Size     := 9;
+  fFont.Style    := [];
+  TStringList(Flist).OnChange := @listchange;
+  inherited Create(Collectioni);
+end;
+
+destructor TOlistItem.Destroy;
+begin
+    with TOlist(TOwnedCollection(GetOwner).Owner) do
+    if not (csDestroying in ComponentState) then
+      if Assigned(FOnDeleteItem) then
+      begin
+        FOnDeleteItem(Self);
+
+      end;
+   if Assigned(flist) then
+        FreeAndNil(flist);
+        if Assigned(ffont) then
+        FreeAndNil(ffont);
+  inherited Destroy;
+end;
+
+procedure TOlistItem.delete(Indexi: integer);
+begin
+ if (flist.Count>0) and (flist.Count>Indexi) then
+  flist.Delete(indexi);
+ end;
+
+procedure TOlistItem.Assign(Source: TPersistent);
+begin
+  if (Source is TOlistItem) then
+    with (Source as TOlistItem) do
+    begin
+      Self.FCaption  := FCaption;
+      self.flist.Assign(flist);
+    end
+  else
+  inherited Assign(Source);
+end;
+
+procedure TOlistItem.SetString(AValue: TStrings);
+begin
+  if Flist=AValue then Exit;
+  flist.BeginUpdate;
+  Flist.Assign(AValue);
+  flist.EndUpdate;
+ //  TOlist(TOwnedCollection(GetOwner).Owner).Paint;
+
+
+end;
+
+procedure TOlistItem.listchange(Sender: TObject);
+begin
+  TOlist(TOwnedCollection(GetOwner).Owner).Invalidate;// Paint;
+
+end;
+
+{ TOlistItems }
+
+Function Tolistitems.Getitem(Indexi: Integer): Tolistitem;
+begin
+  if Indexi <> -1 then
+ Result := TOlistItem(inherited GetItem(Indexi));
+end;
+
+Procedure Tolistitems.Setitem(Indexi: Integer; Const Value: Tolistitem);
+begin
+  inherited SetItem(Indexi, Value);
+  Changed;
+end;
+
+Procedure Tolistitems.Update(Item: Tcollectionitem);
+begin
+  TOlist(GetOwner).Invalidate;//Paint;
+ // inherited Update(Item);
+end;
+
+Constructor Tolistitems.Create(Aowner: Tpersistent;
+  Itemclassi: Classes.Tcollectionitemclass);
+begin
+ inherited Create(AOwner, ItemClassi);
+end;
+
+Function Tolistitems.Add: Tolistitem;
+begin
+   Result := TOlistItem(inherited Add);
+end;
+
+Procedure Tolistitems.Clear;
+begin
+ with TOlist(GetOwner) do
+ begin
+   FItemOffset  := 0;  FFocusedItem := -1;
+ end;
+
+end;
+
+Procedure Tolistitems.Delete(Indexi: Integer);
+var
+  i:integer;
+begin
+
+
+ for i:=0 to Count-1 do
+  Items[i].delete(Indexi);
+
+  Changed;
+end;
+
+Function Tolistitems.Insert(Indexi: Integer): Tolistitem;
+begin
+   Result := TOlistItem(inherited Insert(Indexi));
+end;
+
+Function Tolistitems.Indexof(Value: Tolistitem): Integer;
+var
+  i : Integer;
+begin
+  Result := -1;
+  i      := 0;
+
+  while (i < Count) and (Result = -1) do
+    if Items[i] = Value then
+      Result := i;
+
+end;
+
+{ ToRadiobutton }
+
+
+
+
+function ToRadiobutton.getchecwidth: integer;
+begin
+  Result := fcheckwidth;
+end;
+
+procedure ToRadiobutton.setchecwidth(avalue: integer);
+begin
+  if fcheckwidth = AValue then exit;
+  fcheckwidth := AValue;
+  Invalidate;
+end;
+
+
+function ToRadiobutton.getcaptionmod: tcapdirection;
+begin
+  Result := fcaptiondirection;
+end;
+
+procedure ToRadiobutton.setcaptionmod(const val: tcapdirection);
+begin
+  if fcaptiondirection = val then
+    exit;
+  fcaptiondirection := val;
+  //  paint;
+  Invalidate;
+end;
+
+
+procedure ToRadiobutton.cmonmouseenter(var messages: tmessage);
+begin
+  fstate := obenters;
+  Invalidate;
+end;
+
+procedure ToRadiobutton.cmonmouseleave(var messages: tmessage);
+begin
+  fstate := obleaves;
+  Invalidate;
+end;
+
+procedure ToRadiobutton.mousedown(button: tmousebutton; shift: tshiftstate;
+  x: integer; y: integer);
+begin
+  inherited MouseDown(Button, Shift, X, Y);
+  if fchecked=true then exit;
+
+  if Button = mbLeft then
+  begin
+   // fchecked := not fchecked;
+
+    fState := obdowns;
+
+    //if Assigned(FOnChange) then FOnChange(Self);
+
+    SetChecked(true);
+   // deaktifdigerleri;
+   //  Invalidate;
+
+  end;
+end;
+
+procedure ToRadiobutton.mouseup(button: tmousebutton; shift: tshiftstate;
+  x: integer; y: integer);
+begin
+  inherited MouseUp(Button, Shift, X, Y);
+  state := obenters;
+  Invalidate;
+end;
+
+procedure ToRadiobutton.doonchange;
+begin
+  EditingDone;
+  if Assigned(OnChange) then OnChange(Self);
+end;
+
+procedure ToRadiobutton.setchecked(const value: boolean);
+begin
+  if FChecked <> Value then
+  begin
+    FChecked := Value;
+
+    deaktifdigerleri;
+     doonchange;
+    //   paint;
+    Invalidate;
+  end;
+end;
+
+function ToRadiobutton.getchecked: boolean;
+begin
+  Result := fchecked;
+end;
+
+{
+procedure ToCustomcheckbox.SetCaption(const Value: string);
+begin
+  if Ftext <> Value then
+  begin
+    Ftext := Value;
+ //   paint;
+    Invalidate;
+  end;
+end;
+
+function ToCustomcheckbox.GetCaption: string;
+begin
+  Result := Ftext;
+end;
+}
+procedure ToRadiobutton.setstate(const value: tobutonstate);
+begin
+  if fstate <> Value then
+  begin
+    fstate := Value;
+
+    //if (self is Toradiobutton) then
+    //  deaktifdigerleri;
+
+    //  paint;
+    //  Invalidate;
+  end;
+end;
+
+function ToRadiobutton.getstate: tobutonstate;
+begin
+  Result := fstate;
+end;
+
+procedure ToRadiobutton.deaktifdigerleri;
+var
+  i: integer;
+  Sibling: TControl;
+begin
+
+  if self.Parent = nil then exit;
+
+    with self.Parent do
+    begin
+      for i := 0 to ControlCount - 1 do
+      begin
+        Sibling := Controls[i];
+        if (Controls[i] is ToRadiobutton) and (Sibling <> Self) then
+        begin
+          ToRadiobutton(Sibling).fchecked:=false;//SetChecked(False);// Checked := False;
+          ToRadiobutton(Sibling).fstate := obleaves;// Checked := False;
+          Invalidate;
+        end;
+
+      end;
+
+
+    {
+
+      for i := 0 to ControlCount - 1 do
+        if (Controls[i] <> Self) and (Controls[i] is ToRadiobutton) and
+          ((Controls[i] as ToRadiobutton).FGroupIndex =
+          (Self as ToRadiobutton).FGroupIndex) then
+          ToRadiobutton(Controls[i]).SetChecked(False);
+      }
+    end;
+
+//  fchecked := true;
+
+end;
+
+procedure ToRadiobutton.cmhittest(var msg: tcmhittest);
+begin
+  inherited;
+  //  if csDesigning in ComponentState then
+  //    Exit;
+  if PtInRegion(CreateRectRgn(0, 0, self.Width, self.Height), msg.XPos, msg.YPos) then
+    msg.Result := HTCLIENT
+  else
+    msg.Result := HTNOWHERE;
+
+end;
+
+constructor ToRadiobutton.create(aowner: tcomponent);
+begin
+  inherited Create(Aowner);
+  parent := TWinControl(Aowner);
+  ControlStyle := ControlStyle + [csParentBackground, csClickEvents,
+    csCaptureMouse, csDoubleClicks, csSetCaption];
+  Width := 100;
+  Height := 20;
+  fcheckwidth := 20;
+  fchecked := False;
+  //fCaptionDirection:=cleft;
+  obenter := Tocolor.Create(self);
+  with obenter do
+  begin
+    // Aownerr:=self;
+    border := 1;
+    bordercolor := clblack;
+    startcolor := $00CDCDCD;
+    stopcolor := clmenu;
+    Fontcolor := clBlue;
+  end;
+
+  obleave := Tocolor.Create(self);
+  with obleave do
+  begin
+    // Aownerr:=self;
+    border := 1;
+    bordercolor := $006E6E6E;
+    startcolor := clActiveBorder;
+    stopcolor := clmenu;
+    Fontcolor := clblack;
+  end;
+
+  obdown := Tocolor.Create(self);
+  with obdown do
+  begin
+    // Aownerr:=self;
+    border := 1;
+    bordercolor := clblack;
+    startcolor := clmenu;
+    stopcolor := $00A0A0A0;
+    Fontcolor := clRed;
+  end;
+
+  obcheckenters := Tocolor.Create(self);
+  with obcheckenters do
+  begin
+    // Aownerr:=self;
+    border := 1;
+    bordercolor := clblack;
+    startcolor := clBlack;
+    stopcolor := clBlack;
+    Fontcolor := clBlue;
+  end;
+
+  obcheckleaves := Tocolor.Create(self);
+  with obcheckleaves do
+  begin
+    // Aownerr:=self;
+    border := 1;
+    bordercolor := clblack;
+    startcolor := clBlack;
+    stopcolor := clBlack;
+    Fontcolor := clblack;
+  end;
+
+  obdisabled := Tocolor.Create(self);
+  with obdisabled do
+  begin
+    // Aownerr:=self;
+    border := 1;
+    bordercolor := clblack;
+    startcolor := clmenu;
+    stopcolor := $005D5D5D;
+    Fontcolor := $002C2C2C;
+  end;
+
+{  if (self is Toradiobutton) then
+    Ftext := 'Radiobutton'
+  else
+    Ftext := 'Checkbox';
+ }
+
+  fstate := obleaves;
+  fcaptiondirection := ocright; //cleft;
+  backgroundcolored := False;
+  // Transparent := True;
+end;
+
+destructor ToRadiobutton.destroy;
+begin
+  FreeAndNil(obenter);
+  FreeAndNil(obleave);
+  FreeAndNil(obdown);
+  FreeAndNil(obcheckenters);
+  FreeAndNil(obcheckleaves);
+
+  inherited Destroy;
+end;
+{
+procedure DrawEllipticRegion(wnd: HWND; rect: TRect);
+var
+  rgn: HRGN;
+begin
+  rgn := CreateEllipticRgn(rect.left, rect.top, rect.right, rect.bottom);
+  SetWindowRgn(wnd, rgn, True);
+end;
+ }
+procedure ToRadiobutton.wmerasebkgnd(var message: twmerasebkgnd);
+begin
+  SetBkMode(Message.dc, 1);
+  Message.Result := 1;
+end;
+
+procedure ToRadiobutton.createparams(var params: tcreateparams);
+begin
+  inherited;// CreateParams(Params);
+  params.exstyle := params.exstyle or WS_EX_TRANSPARENT or
+   {$IFNDEF UNIX}WS_EX_LAYERED or{$ENDIF}
+    WS_CLIPCHILDREN;
+  //  SetWindowLong(Handle, GWL_EXSTYLE, GetWindowLong(Handle, GWL_EXSTYLE) or WS_EX_LAYERED)
+end;
+
+procedure ToRadiobutton.paint;
+var
+  gradienrect1, gradienrect2, checkrect, Radiorect, Textrectt, borderect: Types.Trect;
+  textx, Texty, fborderWidth, fborderWidthT: integer;
+  obstart, obend, checkendstart, checkedend, oborder: Tcolor;
+  //Com:TComponent;
+  //Brush: ibrus IGradientBrush;
+  fbuttoncenter,x,y: integer;
+  Tc:Tocolor;
+begin
+  inherited paint;
+
+  // com:=self;
+
+  if Enabled = False then
+  begin
+    obstart := obdisabled.Startcolor;
+    obend := obdisabled.Stopcolor;
+    oborder := obdisabled.Bordercolor;
+    fborderWidth := obdisabled.Border;
+    canvas.Font.Color := obdisabled.Fontcolor;
+    if Checked = True then
+    begin
+      checkendstart := obcheckenters.Startcolor;
+      checkedend := obcheckenters.Stopcolor;
+    end;
+  end
+  else
+  begin
+    if Checked = True then
+    begin
+
+      case fstate of
+        obenters:
+        begin
+          obstart := obenter.Startcolor;
+          obend := obenter.Stopcolor;
+          checkendstart := obcheckenters.Startcolor;
+          checkedend := obcheckenters.Stopcolor;
+          oborder := obenter.Bordercolor;
+          fborderWidth := obenter.Border;
+          canvas.Font.Color := obcheckenters.Fontcolor;
+        end;
+        obleaves:
+        begin
+          obstart := obleave.Startcolor;
+          obend := obleave.Stopcolor;
+          checkendstart := obcheckleaves.Startcolor;
+          checkedend := obcheckleaves.Stopcolor;
+          oborder := obcheckleaves.Bordercolor;
+          fborderWidth := obleave.Border;
+          canvas.Font.Color := obcheckleaves.Fontcolor;
+        end;
+        obdowns:
+        begin
+          obstart := obdown.Startcolor;
+          obend := obdown.Stopcolor;
+          fborderWidth := obdown.Border;
+          oborder := obdown.Bordercolor;
+          canvas.Font.Color := obdown.Fontcolor;
+        end;
+      end;
+    end
+    else
+    begin
+      case fstate of
+        obenters:
+        begin
+          obstart := obenter.Startcolor;
+          obend := obenter.Stopcolor;
+          oborder := obenter.Bordercolor;
+          fborderWidth := obenter.Border;
+          canvas.Font.Color := obenter.Fontcolor;
+        end;
+        obleaves:
+        begin
+          obstart := obleave.Startcolor;
+          obend := obleave.Stopcolor;
+          oborder := obleave.Bordercolor;
+          fborderWidth := obleave.Border;
+          canvas.Font.Color := obleave.Fontcolor;
+        end;
+        obdowns:
+        begin
+          obstart := obdown.Startcolor;
+          obend := obdown.Stopcolor;
+          oborder := obdown.Bordercolor;
+          fborderWidth := obdown.Border;
+          canvas.Font.Color := obdown.Fontcolor;
+        end;
+      end;
+
+    end;
+  end;
+{
+  if Enabled = False then
+  begin
+    tc:=obdisabled;
+  end
+  else
+  begin
+    if Checked = True then
+    begin
+     case fstate of
+         obenters:tc:=obcheckenters;
+         obleaves:tc:=obcheckleaves;
+         obdowns:tc:=obdown;
+       end;
+    end
+    else
+    begin
+       case fstate of
+         obenters:tc:=obenter;
+         obleaves:tc:=obleave;
+         obdowns:tc:=obdown;
+       end;
+     end;
+  end;
+}
+  fborderWidthT := fborderWidth + 2;
+
+
+  case fCaptionDirection of
+    ocup:
+    begin
+      textx := (Width div 2) - (self.canvas.TextWidth(Caption) div 2);
+      Texty := fborderWidth;
+      fbuttoncenter := ((Height div 2) div 2) + (fcheckwidth div 2);
+      borderect := Rect((Width div 2) - (fcheckwidth div 2), fbuttoncenter,
+        (Width div 2) + (fcheckwidth div 2), fbuttoncenter + fcheckwidth);
+    end;
+    ocdown:
+    begin
+      textx := (Width div 2) - (self.canvas.TextWidth(Caption) div 2);
+      Texty := ((Height div 2)) + fborderWidth;
+      fbuttoncenter := ((Height div 2) div 2) - (fcheckwidth div 2);
+      borderect := Rect((Width div 2) - (fcheckwidth div 2), fbuttoncenter,
+        (Width div 2) + (fcheckwidth div 2), fbuttoncenter + fcheckwidth);
+    end;
+    ocleft:
+    begin
+      textx := Width - (fcheckwidth + self.canvas.TextWidth(Caption) + 5);
+      Texty := (Height div 2) - (self.canvas.TextHeight(Caption) div 2);
+      fbuttoncenter := (Height div 2) - (fcheckwidth div 2);
+      borderect := Rect(Width - fcheckwidth, fbuttoncenter, Width, fbuttoncenter + fcheckwidth);
+    end;
+    ocright:
+    begin
+      textx := fcheckwidth + 5;
+      Texty := (Height div 2) - (self.canvas.TextHeight(Caption) div 2);
+      fbuttoncenter := (Height div 2) - (fcheckwidth div 2);
+      borderect := Rect(0, fbuttoncenter, fcheckwidth, fbuttoncenter + fcheckwidth);
+    end;
+  end;
+
+ { gradienrect1 := Rect(borderect.left + fborderWidth, borderect.top + fborderWidth,
+    borderect.Right - fborderWidth, borderect.top + (borderect.Height div 2));
+  gradienrect2 := Rect(gradienrect1.left, gradienrect1.Bottom, gradienrect1.Right,
+    (borderect.Bottom - fborderWidth));
+
+  checkrect := Rect(gradienrect1.left + fborderWidtht, gradienrect1.top +
+    fborderWidtht, gradienrect2.Right - fborderWidtht, gradienrect2.bottom -
+    fborderWidtht); }
+
+
+
+//   Drawtorect(self.Canvas,borderect,Tc,Fkind);
+
+  with canvas do
+  begin
+   // if (self is Toradiobutton) then
+   // begin
+
+    {  Brush.Color := oborder;
+      Radiorect := Rect(gradienrect1.Left - fborderWidth, gradienrect1.top -
+        fborderWidth, gradienrect2.Right + fborderWidth, gradienrect2.Bottom +
+        fborderWidth);
+
+      Ellipse(Radiorect);
+
+      Radiorect := Rect(Radiorect.left + fborderWidth, Radiorect.top +
+        fborderWidth, Radiorect.Right - fborderWidth, Radiorect.Bottom - fborderWidth);
+      Brush.Color := obstart;
+      Ellipse(Radiorect);
+
+     }
+
+
+  //      checkrect := Rect(borderect.left + fborderWidtht, borderect.top +
+ //   fborderWidtht, borderect.Right - fborderWidtht, borderect.bottom -
+ //   fborderWidtht);
+
+      Brush.Color := obstart;
+      Pen.Width := fborderWidth;
+      Pen.Color := oborder;
+      Ellipse(borderect);
+
+
+   //   Arc(borderect.left + fborderWidth,borderect.top + fborderWidth,borderect.Right - fborderWidth,
+   //  borderect.Bottom - (borderect.Height div 2),0,0,width,Height);
+
+  // Canvas.Arc(Sol-üst x, Sol-üst y, Sağ-alt x, Sağ-alt y, Başlangıç x, Başlangıç y, Bitiş x, Bitiş y);
+
+ //      x:=trunc(midx+20*cos(50));
+ //   y:=trunc(midy+20*sin(50));
+ //   canvas.brush.color:=clyellow;
+
+ //   ellipse(x-r,y-r,x+r,y+r);
+
+      if Checked then
+      begin
+        fborderWidtht+=2;
+        checkrect := Rect(borderect.left + (fborderWidtht), borderect.top +
+        (fborderWidtht), borderect.Right - (fborderWidtht), borderect.bottom -
+        (fborderWidtht));
+
+        Brush.Color := checkendstart;
+        Pen.Width := fborderWidth;
+        Pen.Color := oborder;
+        Ellipse(checkrect);
+       { Brush.Color := checkendstart;
+        Radiorect := Rect(Radiorect.left + fborderWidthT, Radiorect.top +
+          fborderWidthT, Radiorect.Right - fborderWidthT, Radiorect.Bottom -
+          fborderWidthT);
+
+        Ellipse(Radiorect);
+
+        Brush.Color := checkedend;
+        Radiorect := Rect(Radiorect.left + fborderWidth, Radiorect.top +
+          fborderWidth, Radiorect.Right - fborderWidth, Radiorect.Bottom - fborderWidth);
+        Ellipse(Radiorect);   }
+      end;
+
+    {end
+    else
+    begin
+
+    {  Drawtorect(self.Canvas,borderect,Tc,Fkind);
+      if fchecked = True then
+      Drawtorect(self.Canvas,checkrect,Tc,Fkind);
+      }
+      Brush.Color := oborder;
+      FillRect(borderect);
+      GradientFill(gradienrect1, obstart, obend, gdVertical);
+      GradientFill(gradienrect2, obend, obstart, gdVertical);
+
+      if fchecked = True then
+      begin
+        Brush.Color := oborder;
+        FillRect(checkrect);
+   //     Brush.Style := bsClear;
+   //     TextOut(checkrect.Width div 2, checkrect.Height div 2 , '֍');
+        checkrect := Rect(checkrect.Left + fborderWidth, checkrect.top +
+          fborderWidth, checkrect.Right - fborderWidth, checkrect.Bottom - fborderWidth);
+        GradientFill(checkrect, checkendstart, checkedend, gdVertical);
+        //√
+      end;
+    end;
+    }
+    if Length(Caption) > 0 then
+    begin
+      Brush.Style := bsClear;
+      TextOut(Textx, Texty, (Caption));
+    end;
+
+  end;
+
+end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{ TOled }
+
+
+
+Procedure Toled.Setoncolor(Const Val: Tocolor);
+Begin
+  if val <> foncolor then
+  begin
+   foncolor:=val;
+   Invalidate;
+  End;
+End;
+
+
+
+Procedure Toled.Setoffcolor(Const Val: Tocolor);
+Begin
+  if val <> foffcolor then
+   begin
+    foffcolor:=val;
+    Invalidate;
+   End;
+End;
+
+Procedure Toled.Setledonoff(Val: Boolean);
+Begin
+  if val <> fcheck then
+  begin
+   fcheck:=val;
+   if Assigned(FOnChange) then FOnChange(Self);
+   Invalidate;
+  End;
+End;
+
+Constructor Toled.Create(Aowner: Tcomponent);
+Begin
+  Inherited Create(Aowner);
+   Width:=50;
+  Height:=50;
+  fcheck:=false;
+  Fkind := oHorizontal;
+  Transparent := True;
+  backgroundcolored := false;
+
+  foncolor := Tocolor.Create(self);
+ // foncolor.// Aownerr:=self;
+  foncolor.Startcolor := clLime;
+  foncolor.Stopcolor := clGreen;
+  foncolor.Border := 1;
+  foncolor.Bordercolor := clBlack;
+
+  foffcolor := Tocolor.Create(self);
+//  foffcolor.// Aownerr:=self;
+  foffcolor.Startcolor := clred;
+  foffcolor.Stopcolor := clMaroon;
+  foffcolor.Border := 1;
+  foffcolor.Bordercolor := clBlack;
+
+
+  fbackground.Startcolor := $00BF9259;
+  fbackground.Stopcolor := $00BF9259;
+  fbackground.Border := 1;
+  fbackground.Bordercolor := clBlack;
+End;
+
+Destructor Toled.Destroy;
+Begin
+  Inherited Destroy;
+  FreeAndNil(foncolor);
+  FreeAndNil(foffcolor);
+End;
+
+
+Procedure Toled.Paint;
+//const
+//  BORDERR = 3;
+var// x,y,
+  r:integer;
+  a,b,c:TColor;
+//   Bmp : TBitmap;
+  w, h: Integer;
+  x, y: Integer;
+
+
+Begin
+  Inherited Paint;
+  if fcheck then
+  begin
+   a:=foncolor.Startcolor;
+   b:=foncolor.Stopcolor;
+   c:=foncolor.Bordercolor;
+   r:=foncolor.Border;
+  End
+  else
+  begin
+   a:=foffcolor.Startcolor;
+   b:=foffcolor.Stopcolor;
+   c:=foffcolor.Bordercolor;
+   r:=foffcolor.Border;
+  End;
+
+
+    w          := Width div 2;// Bmp.Canvas.TextWidth('A');   //calculate the width of the image
+    h          := Height div 2;//.Canvas.TextHeight('A');  //calculate the height of the image
+   // Width  := Max(w, h) + BORDERr * 2;                       // get a square
+  //  Height := Max(w, h) + BORDERr * 2;                       // get a square
+    x          := (Width  - w) div 2;                       // center
+    y          := (Height - h) div 2;                       // center
+
+//    Canvas.Pen.Width:=r;                                 // border
+//    Canvas.Pen.Color   := c;//Red;
+//    Canvas.Brush.Color := Background.Startcolor;                           //set the background
+//    Canvas.FillRect(Rect(0,0, Width, Height));      //paint the background which is transparent
+                               // circle in red
+
+ //   Canvas.Pen.Width:=r+5;
+  //  Canvas.Pen.Color   := b;//Red;                            // circle in red
+  //  Canvas.Ellipse(x, y, W, H);            // draw the circle
+
+
+  //  Canvas.Pen.Width:=r+2;
+  //  Canvas.Pen.Color   := a;//Red;                            // circle in red
+  //  Canvas.Ellipse(1, 1, Width-1, Height-1);            // draw the circle
+
+ //   Canvas.Pen.Width:=r+2;                                 // border
+ //   Canvas.Pen.Color   := a;//Red;
+
+   // Canvas.Pen.Width:=r;                                 // border
+   // Canvas.Pen.Color   := c;//Red;
+   // Canvas.Ellipse(0, 0, Width, Height);
+
+    Canvas.Pen.Color   := b;
+    Canvas.Brush.Color := b;
+    Canvas.Ellipse(r, r, Width-r, Height-r);
+
+
+    Canvas.Pen.Color   := c;
+    Canvas.Brush.Color := a; // circle in red
+    Canvas.Ellipse(r*2, r*2, Width-(r*2), Height-(r*2));            // draw the circle
+End;
 
 
 
@@ -1583,7 +5767,9 @@ end;
  procedure Tpopupformcombobox.DoShow;
 begin
   inherited DoShow;
-    oblist.items:=FCaller.items;
+  Width:=FCaller.Width;
+  oblist.Font.Assign(FCaller.Font);
+  oblist.items:=FCaller.items;
 
 end;
 
@@ -1593,12 +5779,16 @@ begin
 
  FClosed := false;
  Application.AddOnDeactivateHandler(@FormDeactivate);
-  oblist :=ToListBox.Create(self);
-  oblist.Parent:=self;
-  oblist.Align:=alClient;
+
+ oblist :=ToListBox.Create(self);
+ oblist.Parent:=self;
+ oblist.Align:=alClient;
+
 //  oblist.items.Assign(FCaller.Fliste);//:=FCaller.items;// .Assign(FCaller.Items);
   oblist.OnClick:=@listboxDblClick;
+
 end;
+
 
 procedure Tpopupformcombobox.CMDeactivate(var Message: TLMessage);
 begin
@@ -1617,7 +5807,7 @@ end;
 procedure Tpopupformcombobox.KeepInView(const PopupOrigin: TPoint);
 var
   ABounds: TRect;
-  P: TPoint;
+  //P: TPoint;
 begin
   ABounds := Screen.MonitorFromPoint(PopupOrigin).WorkAreaRect; // take care of taskbar
   if PopupOrigin.X + Width > ABounds.Right then
@@ -1639,20 +5829,54 @@ begin
   if Left < ABounds.Left then Left := 0;
   if Top < ABounds.Top then Top := 0;
 
+
+  if Assigned(oblist) then
+ Ocolortoocolor(oblist.Background,FCaller.Background);
+
+ if Assigned(oblist.VertialScroll) then
+ begin
+   Ocolortoocolor(oblist.VertialScroll.Background,FCaller.Background);
+   Ocolortoocolor(oblist.VertialScroll.ButtonDown,FCaller.ButtonDown);
+   Ocolortoocolor(oblist.VertialScroll.ButtonLeave,FCaller.ButtonLeave);
+   Ocolortoocolor(oblist.VertialScroll.ButtonEnter,FCaller.ButtonEnter);
+   Ocolortoocolor(oblist.VertialScroll.ButtonDisabled,FCaller.ButtonDisable);
+ End;
+
 end;
 
 procedure Tpopupformcombobox.ReturnstringAnditemindex;
 begin
+  if oblist.itemindex>=0 then
+  begin
    if Assigned(FOnReturnDate) then
+   begin
     FOnReturnDate(Self, oblist.items[oblist.itemindex],oblist.itemindex);
+    fCaller.change;
+   end;
+  end;
   if not FClosed then
     Close;
-
 end;
 
 procedure Tpopupformcombobox.Paint;
 begin
   inherited Paint;
+
+  {  if Assigned(fCaller) then
+  begin
+   if Assigned(oblist) then
+   begin
+     oblist.Background:=fCaller.Background;
+     if Assigned(oblist.VertialScroll) then
+     begin
+        oblist.VertialScroll.Background:=fCaller.Background;
+        oblist.VertialScroll.ButtonDisabled:=fCaller.ButtonDisable;
+        oblist.VertialScroll.ButtonDown:=fCaller.ButtonDown;
+        oblist.VertialScroll.ButtonEnter:=fCaller.ButtonEnter;
+        oblist.VertialScroll.ButtonLeave:=fCaller.ButtonLeave;
+     End;
+    End;
+  End;  }
 end;
 
 
@@ -1670,16 +5894,21 @@ end;
 
 function Tocolor.paint: boolean;
 begin
-  if (self.owner is TOProgressBar) and Assigned(Self.owner) then
+  if (self.owner is TOProgressBar) and Assigned(self.owner) then
     TOProgressBar(self.owner).paint;
-  if (self.owner is Tobuton) and Assigned(Self.owner) then
+  if (self.owner is Tobuton) and Assigned(self.owner) then
     Tobuton(self.owner).paint;
-  if (self.owner is Tocheckbox) and Assigned(Self.owner) then
+  if (self.owner is Tocheckbox) and Assigned(self.owner) then
     Tocheckbox(self.owner).paint;
-  if (self.owner is ToRadiobutton) and Assigned(Self.owner) then
+  if (self.owner is ToRadiobutton) and Assigned(self.owner) then
     ToRadiobutton(self.owner).paint;
-  if (self.owner is Topanel) and Assigned(Self.owner) then
+  if (self.owner is Topanel) and Assigned(self.owner) then
     Topanel(self.owner).paint;
+
+
+//  if (aownerr is TOKnob) and Assigned(aownerr) then
+//    TOKnob(aownerr).paint;
+
 //  if (self.owner is ToCustomcontrol) and Assigned(Self.owner) then
 //    ToCustomcontrol(self.owner).paint;
 //  if (self.owner is TOGraphicControl) and Assigned(Self.owner) then
@@ -1717,6 +5946,7 @@ begin
   if Value <> fborder then
   begin
     fborder := Value;
+    if Assigned(Tcontrol(self.owner)) then
     Tcontrol(self.owner).Invalidate;
   end;
 end;
@@ -1726,6 +5956,7 @@ begin
   if Value <> fborderc then
   begin
     fborderc := Value;
+    if Assigned(Tcontrol(self.owner)) then
     Tcontrol(self.owner).Invalidate;
   end;
 end;
@@ -1735,6 +5966,7 @@ begin
   if Value <> Fstartc then
   begin
     Fstartc := Value;
+    if Assigned(Tcontrol(self.owner)) then
     Tcontrol(self.owner).Invalidate;
   end;
 end;
@@ -1744,6 +5976,7 @@ begin
   if Value <> fstopc then
   begin
     fstopc := Value;
+    if Assigned(Tcontrol(self.owner)) then
     Tcontrol(self.owner).Invalidate;
   end;
 end;
@@ -1753,9 +5986,12 @@ begin
   if Value <> ffontcolor then
   begin
     ffontcolor := Value;
+    if Assigned(Tcontrol(self.owner)) then
     Tcontrol(self.owner).Invalidate;
   end;
 end;
+
+
 
 { TOGraphicControl }
 
@@ -1832,6 +6068,7 @@ begin
   self.Width := 250;
   self.Height := 150;
   background := Tocolor.Create(self);
+ // Background.// Aownerr:=self;
   background.Startcolor := clActiveBorder;
   background.Stopcolor := clMenu;
   background.Border := 1;
@@ -1867,6 +6104,7 @@ begin
   self.Width := 250;
   self.Height := 150;
   background := Tocolor.Create(self);
+//  Background.// Aownerr:=self;
   background.Startcolor := clActiveBorder;
   background.Stopcolor := clMenu;
   background.Border := 1;
@@ -2021,6 +6259,7 @@ begin
   obleave := Tocolor.Create(self);
   with obleave do
   begin
+    // Aownerr:=self;
     Startcolor := clActiveBorder;
     Stopcolor := clMenu;
     Border := 1;
@@ -2031,6 +6270,7 @@ begin
   obenter := Tocolor.Create(self);
   with obenter do
   begin
+    // Aownerr:=self;
     Startcolor := $00CDCDCD;
     Stopcolor := clMenu;
     Border := 1;
@@ -2040,6 +6280,7 @@ begin
   obdown := Tocolor.Create(self);
   with obdown do
   begin
+    // Aownerr:=self;
     Startcolor := clMenu;
     Stopcolor := $00A0A0A0;
     Border := 1;
@@ -2050,6 +6291,7 @@ begin
   fdisabled := Tocolor.Create(self);
   with fdisabled do
   begin
+    // Aownerr:=self;
     Startcolor := clMenu;
     Stopcolor := $005D5D5D;
     Border := 1;
@@ -2375,6 +6617,7 @@ begin
   obleave := Tocolor.Create(self);
   with obleave do
   begin
+    // Aownerr:=self;
     Startcolor := clActiveBorder;
     Stopcolor := clMenu;
     Border := 1;
@@ -2385,6 +6628,7 @@ begin
   obenter := Tocolor.Create(self);
   with obenter do
   begin
+    // Aownerr:=self;
     Startcolor := $00CDCDCD;
     Stopcolor := clMenu;
     Border := 1;
@@ -2394,6 +6638,7 @@ begin
   obdown := Tocolor.Create(self);
   with obdown do
   begin
+    // Aownerr:=self;
     Startcolor := clMenu;
     Stopcolor := $00A0A0A0;
     Border := 1;
@@ -2404,6 +6649,7 @@ begin
   fdisabled := Tocolor.Create(self);
   with fdisabled do
   begin
+    // Aownerr:=self;
     Startcolor := clMenu;
     Stopcolor := $005D5D5D;
     Border := 1;
@@ -2445,7 +6691,8 @@ end;
 
 procedure ToScrollBar.paint;
 var
-  Textx, Texty: integer;
+  Textx, Texty,textw,Texth: integer;
+
 begin
   if csDesigning in ComponentState then
     Exit;
@@ -2456,42 +6703,48 @@ begin
   Drawtorect(self.canvas, frbuttonrect, Getcolors(frbutons), Kind);
   Drawtorect(self.canvas, fcenterbuttonarea, Getcolors(fcbutons), Kind);
 
-  canvas.Font.Name:='arial';
-  textx := (flbuttonrect.Width div 2) - (self.canvas.TextWidth('◄') div 2);
-  Texty := (flbuttonrect.Height div 2) - (self.canvas.TextHeight('▲') div 2);
+  canvas.Font.Name:='wingdings 3';//'webdings';// arial';
+  Canvas.Font.Color:=Getcolors(flbutons).Fontcolor;
+
+  textw:=self.canvas.TextWidth('x') div 2;//'◄') div 2;
+  texth:=self.canvas.TextHeight('x') div 2;//'▲') div 2;
+
+  textx := (flbuttonrect.Width div 2) - (textw); //(self.canvas.TextWidth('◄') div 2);
+  Texty := (flbuttonrect.Height div 2) - (texth); //(self.canvas.TextHeight('▲') div 2);
 
   self.canvas.Brush.Style := bsClear;
   if Kind = oHorizontal then
-    self.canvas.TextOut(Textx, Texty, '◄')//'3')
+    self.canvas.TextOut(Textx, Texty, 't')//'◄')//'3')
   else
-    self.canvas.TextOut(Textx, Texty, '▲');//'5');
+    self.canvas.TextOut(Textx, Texty, 'p');//'▲');//'5');
 
 
-  textx := (frbuttonrect.Right - frbuttonrect.Width div 2) -
-    (self.canvas.TextWidth('◄') div 2);
-  Texty := (frbuttonrect.bottom - frbuttonrect.Height div 2) -
-    (self.canvas.TextHeight('▼') div 2);
+
+
+  Canvas.Font.Color:=Getcolors(frbutons).Fontcolor;
+
+  textx := (frbuttonrect.Right  - frbuttonrect.Width div 2) - (textw);  //(self.canvas.TextWidth('◄') div 2);
+  Texty := (frbuttonrect.bottom  - frbuttonrect.Height div 2) - (texth); // (self.canvas.TextHeight('▼') div 2);
+
 
   self.canvas.Brush.Style := bsClear;
   if Kind = oHorizontal then
-    self.canvas.TextOut(Textx, Texty, '►')//'4')
+    self.canvas.TextOut(Textx, Texty,'u') //'►')//'4') u
   else
-    self.canvas.TextOut(Textx, Texty, '▼');//▲ ▼ ► ◄ ‡ // ALT+30 ALT+31 ALT+16 ALT+17 ALT+0135
+    self.canvas.TextOut(Textx, Texty,'q'); //'▼');//▲ ▼ ► ◄ ‡ // ALT+30 ALT+31 ALT+16 ALT+17 ALT+0135
 
 
-
-   textx := 2+ (fcenterbuttonarea.Right - fcenterbuttonarea.Width div 2) -
-    (self.canvas.TextWidth('◄') div 2);
-  Texty := (fcenterbuttonarea.bottom - fcenterbuttonarea.Height div 2) -
-    (self.canvas.TextHeight('▼') div 2);
+    Canvas.Font.Color:=Getcolors(fcbutons).Fontcolor;
+  textx := (fcenterbuttonarea.Right - fcenterbuttonarea.Width div 2) - (textw);  //    (self.canvas.TextWidth('◄') div 2);
+  Texty := (fcenterbuttonarea.bottom - fcenterbuttonarea.Height div 2) - (texth);  //    (self.canvas.TextHeight('▼') div 2);
   // self.canvas.TextOut(Textx, Texty, '‡‡');
 
 
     self.canvas.Brush.Style := bsClear;
   if Kind = oHorizontal then
-    self.canvas.TextOut(Textx, Texty, '=')//'4')
+    self.canvas.TextOut(Textx, Texty, 'I')//'4')
   else
-    self.canvas.TextOut(Textx, Texty, '||');//▲ ▼ ► ◄ ‡ // ALT+30 ALT+31 ALT+16 ALT+17 ALT+0135
+    self.canvas.TextOut(Textx, Texty, 'E');//▲ ▼ ► ◄ ‡ // ALT+30 ALT+31 ALT+16 ALT+17 ALT+0135
 
 
 end;
@@ -2614,7 +6867,6 @@ begin
   begin
     FPosition := PositionFromSlider(Value);
      FPosValue := Value - FMin;
-    // WriteLn(fposition,'   ',FPosValue);
   end
   else
   begin
@@ -2731,8 +6983,10 @@ begin
     Exit;
   if not Enabled then
     Exit;
+
   if (fcbutons = obenters) and (flbutons = obenters) and (frbutons = obenters) then
     Exit;
+
   inherited MouseEnter;
 
   GetCursorPos(Cursorpos);
@@ -2744,6 +6998,7 @@ begin
     flbutons := obenters;
     frbutons := obleaves;
     fcbutons := obleaves;
+     Invalidate;
   end
   else
   begin
@@ -2752,6 +7007,7 @@ begin
       flbutons := obleaves;
       frbutons := obenters;
       fcbutons := obleaves;
+       Invalidate;
     end
     else
     begin
@@ -2760,16 +7016,18 @@ begin
         flbutons := obleaves;
         frbutons := obleaves;
         fcbutons := obenters;
+         Invalidate;
       end
       else
       begin
         flbutons := obleaves;
         frbutons := obleaves;
         fcbutons := obleaves;
+         Invalidate;
       end;
     end;
   end;
-  Invalidate;
+
 end;
 
 
@@ -2797,24 +7055,29 @@ begin
     Exit;
   if not Enabled then
     Exit;
-
+  FIsPressed := true;
   if (Button = mbleft) and (PtInRect(flbuttonrect, point(X, Y))) then  // left button down
   begin
-    position := position-1;
     flbutons := obdowns;
+    position := position-1;
     frbutons := obleaves;
     fcbutons := obleaves;
     if Assigned(FOnChange) then FOnChange(Self);
+
+  //  flbutons := obleaves;
+   // Invalidate;
   end
   else
   begin
     if (Button = mbleft) and (PtInRect(frbuttonrect, point(X, Y))) then   // right button down
     begin
-      flbutons := obleaves;
       frbutons := obdowns;
-      fcbutons := obleaves;
       Position := Position + 1;
+      flbutons := obleaves;
+      fcbutons := obleaves;
       if Assigned(FOnChange) then FOnChange(Self);
+    //  frbutons := obleaves;
+    //  Invalidate;
     end
     else
     begin
@@ -2842,7 +7105,7 @@ begin
             FPosition :=
               CheckRange(y - (fcenterbuttonarea.Height + (fcenterbuttonarea.Height div 2)));
            if Assigned(FOnChange) then FOnChange(Self);
-             Invalidate;
+          Invalidate;
         end
         else
         begin
@@ -2877,19 +7140,21 @@ begin
   inherited MouseMove(Shift, X, Y);
   if csDesigning in ComponentState then
     Exit;
-  if (PtInRect(flbuttonrect, point(X, Y))) then
+  if (PtInRect(flbuttonrect, point(X, Y))) {and (fispressed)} then
   begin
     fcbutons := obleaves;
     flbutons := obenters;
     frbutons := obleaves;
+    Invalidate;
   end
   else
   begin
-    if (PtInRect(frbuttonrect, point(X, Y))) then
+    if (PtInRect(frbuttonrect, point(X, Y))) {and (fispressed)} then
     begin
       fcbutons := obleaves;
       flbutons := obleaves;
       frbutons := obenters;
+      Invalidate;
     end
     else
     begin
@@ -2899,38 +7164,47 @@ begin
         if fispressed then
         begin
           if Fkind = oHorizontal then
-            FPosition :=
-              CheckRange(x - (fcenterbuttonarea.Width + (fcenterbuttonarea.Width div 2)))
+            FPosition := CheckRange(x - (fcenterbuttonarea.Width + (fcenterbuttonarea.Width div 2)))
           else
-            FPosition :=
-              CheckRange(y - (fcenterbuttonarea.Height + (fcenterbuttonarea.Height div 2)));
+            FPosition := CheckRange(y - (fcenterbuttonarea.Height + (fcenterbuttonarea.Height div 2)));
 
          if Assigned(FOnChange) then FOnChange(Self);
+
+         fcbutons := obenters;
+         flbutons := obleaves;
+         frbutons := obleaves;
+         Invalidate;
         end;
 
-        fcbutons := obenters;
+        fcbutons := obleaves;
         flbutons := obleaves;
         frbutons := obleaves;
+
       end
       else
       begin
         if fispressed then
         begin
           if Fkind = oHorizontal then
-            FPosition :=
-              CheckRange(x - (fcenterbuttonarea.Width + (fcenterbuttonarea.Width div 2)))
+            FPosition := CheckRange(x - (fcenterbuttonarea.Width + (fcenterbuttonarea.Width div 2)))
           else
-            FPosition :=
-              CheckRange(y - (fcenterbuttonarea.Height + (fcenterbuttonarea.Height div 2)));
+            FPosition := CheckRange(y - (fcenterbuttonarea.Height + (fcenterbuttonarea.Height div 2)));
          if Assigned(FOnChange) then FOnChange(Self);
+
+
+      {   fcbutons := obleaves;
+         flbutons := obleaves;
+         frbutons := obleaves;
+         Invalidate;  }
         end;
-        fcbutons := obleaves;
-        flbutons := obleaves;
-        frbutons := obleaves;
+    //   fcbutons := obleaves;
+   //    flbutons := obleaves;
+   //    frbutons := obleaves;
+    //   Invalidate;
       end;
     end;
   end;
-  Invalidate;
+
 end;
 
 
@@ -3041,6 +7315,7 @@ begin
   paint;
 end;
  }
+
 function tocustomedit.getcharcase: tocharcase;
 begin
   Result := FCharCase;
@@ -4116,6 +8391,7 @@ begin
   fposition := 10;
 
   fbar := Tocolor.Create(self);
+//  fbar.// Aownerr:=self;
   fbar.Startcolor := clWhite;
   fbar.Stopcolor := $00FF9E28;
   fbar.Bordercolor := $008E4F00;
@@ -4206,25 +8482,25 @@ end;
 
 { ToCustomcheckbox }
 
-function Tocheckbox.GetChecWidth: integer;
+function tocheckbox.getchecwidth: integer;
 begin
   Result := fcheckwidth;
 end;
 
-procedure Tocheckbox.SetChecWidth(AValue: integer);
+procedure tocheckbox.setchecwidth(avalue: integer);
 begin
   if fcheckwidth = AValue then exit;
   fcheckwidth := AValue;
-  paint;
+  Invalidate;
 end;
 
 
-function Tocheckbox.GetCaptionmod: Tcapdirection;
+function tocheckbox.getcaptionmod: tcapdirection;
 begin
   Result := fcaptiondirection;
 end;
 
-procedure Tocheckbox.SetCaptionmod(const val: Tcapdirection);
+procedure tocheckbox.setcaptionmod(const val: tcapdirection);
 begin
   if fcaptiondirection = val then
     exit;
@@ -4234,44 +8510,46 @@ begin
 end;
 
 
-procedure Tocheckbox.CMonmouseenter(var Messages: Tmessage);
+procedure tocheckbox.cmonmouseenter(var messages: tmessage);
 begin
   fstate := obenters;
   Invalidate;
 end;
 
-procedure Tocheckbox.CMonmouseleave(var Messages: Tmessage);
+procedure tocheckbox.cmonmouseleave(var messages: tmessage);
 begin
   fstate := obleaves;
-
-  //  paint;
   Invalidate;
 end;
 
-procedure Tocheckbox.MouseDown(Button: TMouseButton; Shift: TShiftState;
-  X: integer; Y: integer);
+procedure tocheckbox.mousedown(button: tmousebutton; shift: tshiftstate;
+  x: integer; y: integer);
 begin
   inherited MouseDown(Button, Shift, X, Y);
   if Button = mbLeft then
   begin
     fchecked := not fchecked;
-    State := obdowns;
+    fState := obdowns;
     if Assigned(FOnChange) then FOnChange(Self);
-
     Invalidate;
   end;
 end;
 
-procedure Tocheckbox.MouseUp(Button: TMouseButton; Shift: TShiftState;
-  X: integer; Y: integer);
+procedure tocheckbox.mouseup(button: tmousebutton; shift: tshiftstate;
+  x: integer; y: integer);
 begin
   inherited MouseUp(Button, Shift, X, Y);
   state := obenters;
-
   Invalidate;
 end;
 
-procedure Tocheckbox.SetChecked(const Value: boolean);
+procedure tocheckbox.doonchange;
+begin
+  EditingDone;
+  if Assigned(OnChange) then OnChange(Self);
+end;
+
+procedure tocheckbox.setchecked(const value: boolean);
 begin
   if FChecked <> Value then
   begin
@@ -4281,7 +8559,7 @@ begin
   end;
 end;
 
-function Tocheckbox.GetChecked: boolean;
+function tocheckbox.getchecked: boolean;
 begin
   Result := fchecked;
 end;
@@ -4302,26 +8580,26 @@ begin
   Result := Ftext;
 end;
 }
-procedure Tocheckbox.SetState(const Value: Tobutonstate);
+procedure tocheckbox.setstate(const value: tobutonstate);
 begin
   if fstate <> Value then
   begin
     fstate := Value;
 
-    if (self is Toradiobutton) then
-      deaktifdigerleri;
+   // if (self is Toradiobutton) then
+  //    deaktifdigerleri;
 
     //  paint;
     //  Invalidate;
   end;
 end;
 
-function Tocheckbox.GetState: Tobutonstate;
+function tocheckbox.getstate: tobutonstate;
 begin
   Result := fstate;
 end;
 
-procedure Tocheckbox.deaktifdigerleri;
+procedure tocheckbox.deaktifdigerleri;
 var
   i: integer;
   Sibling: TControl;
@@ -4353,7 +8631,7 @@ begin
     end;
 end;
 
-procedure Tocheckbox.CMHittest(var msg: TCMHIttest);
+procedure tocheckbox.cmhittest(var msg: tcmhittest);
 begin
   inherited;
   //  if csDesigning in ComponentState then
@@ -4365,7 +8643,7 @@ begin
 
 end;
 
-constructor Tocheckbox.Create(Aowner: TComponent);
+constructor tocheckbox.create(aowner: tcomponent);
 begin
   inherited Create(Aowner);
   parent := TWinControl(Aowner);
@@ -4379,6 +8657,7 @@ begin
   obenter := Tocolor.Create(self);
   with obenter do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := $00CDCDCD;
@@ -4389,6 +8668,7 @@ begin
   obleave := Tocolor.Create(self);
   with obleave do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := $006E6E6E;
     startcolor := clActiveBorder;
@@ -4399,6 +8679,7 @@ begin
   obdown := Tocolor.Create(self);
   with obdown do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clmenu;
@@ -4409,6 +8690,7 @@ begin
   obcheckenters := Tocolor.Create(self);
   with obcheckenters do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clBlack;
@@ -4419,6 +8701,7 @@ begin
   obcheckleaves := Tocolor.Create(self);
   with obcheckleaves do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clBlack;
@@ -4429,6 +8712,7 @@ begin
   obdisabled := Tocolor.Create(self);
   with obdisabled do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clmenu;
@@ -4448,7 +8732,7 @@ begin
   // Transparent := True;
 end;
 
-destructor Tocheckbox.Destroy;
+destructor tocheckbox.destroy;
 begin
   FreeAndNil(obenter);
   FreeAndNil(obleave);
@@ -4459,21 +8743,15 @@ begin
   inherited Destroy;
 end;
 
-procedure DrawEllipticRegion(wnd: HWND; rect: TRect);
-var
-  rgn: HRGN;
-begin
-  rgn := CreateEllipticRgn(rect.left, rect.top, rect.right, rect.bottom);
-  SetWindowRgn(wnd, rgn, True);
-end;
 
-procedure Tocheckbox.WMEraseBkgnd(var Message: TWMEraseBkgnd);
+
+procedure tocheckbox.wmerasebkgnd(var message: twmerasebkgnd);
 begin
   SetBkMode(Message.dc, 1);
   Message.Result := 1;
 end;
 
-procedure Tocheckbox.CreateParams(var Params: TCreateParams);
+procedure tocheckbox.createparams(var params: tcreateparams);
 begin
   inherited;// CreateParams(Params);
   params.exstyle := params.exstyle or WS_EX_TRANSPARENT or
@@ -4482,7 +8760,7 @@ begin
   //  SetWindowLong(Handle, GWL_EXSTYLE, GetWindowLong(Handle, GWL_EXSTYLE) or WS_EX_LAYERED)
 end;
 
-procedure Tocheckbox.paint;
+procedure tocheckbox.paint;
 var
   gradienrect1, gradienrect2, checkrect, Radiorect, Textrectt, borderect: Types.Trect;
   textx, Texty, fborderWidth, fborderWidthT: integer;
@@ -4623,7 +8901,7 @@ begin
     end;
     ocleft:
     begin
-      textx := Width - (fcheckwidth + self.canvas.TextWidth(Caption) + 5);
+      textx :=0;// Width - (fcheckwidth + self.canvas.TextWidth(Caption) + 5);
       Texty := (Height div 2) - (self.canvas.TextHeight(Caption) div 2);
       fbuttoncenter := (Height div 2) - (fcheckwidth div 2);
       borderect := Rect(Width - fcheckwidth, fbuttoncenter, Width, fbuttoncenter + fcheckwidth);
@@ -4650,40 +8928,8 @@ begin
 
   with canvas do
   begin
-    if (self is Toradiobutton) then
-    begin
-
-      Brush.Color := oborder;
-      Radiorect := Rect(gradienrect1.Left - fborderWidth, gradienrect1.top -
-        fborderWidth, gradienrect2.Right + fborderWidth, gradienrect2.Bottom +
-        fborderWidth);
-
-      Ellipse(Radiorect);
-
-      Radiorect := Rect(Radiorect.left + fborderWidth, Radiorect.top +
-        fborderWidth, Radiorect.Right - fborderWidth, Radiorect.Bottom - fborderWidth);
-      Brush.Color := obstart;
-      Ellipse(Radiorect);
 
 
-      if Checked then
-      begin
-        Brush.Color := checkendstart;
-        Radiorect := Rect(Radiorect.left + fborderWidthT, Radiorect.top +
-          fborderWidthT, Radiorect.Right - fborderWidthT, Radiorect.Bottom -
-          fborderWidthT);
-
-        Ellipse(Radiorect);
-
-        Brush.Color := checkedend;
-        Radiorect := Rect(Radiorect.left + fborderWidth, Radiorect.top +
-          fborderWidth, Radiorect.Right - fborderWidth, Radiorect.Bottom - fborderWidth);
-        Ellipse(Radiorect);
-      end;
-
-    end
-    else
-    begin
 
     {  Drawtorect(self.Canvas,borderect,Tc,Fkind);
       if fchecked = True then
@@ -4705,7 +8951,8 @@ begin
         GradientFill(checkrect, checkendstart, checkedend, gdVertical);
         //√
       end;
-    end;
+
+
 
     if Length(Caption) > 0 then
     begin
@@ -4717,8 +8964,43 @@ begin
 
 end;
 
+Procedure Tobuton.Setenterc(Val: Tocolor);
+Begin
+  if val<>fenter then
+  begin
+    fenter:=val;
+    Invalidate;
+  End;
+End;
 
-procedure Tobuton.CMonmouseenter(var Messages: Tmessage);
+Procedure Tobuton.Setleavec(Val: Tocolor);
+Begin
+  if val<>fleave then
+  begin
+    fleave:=val;
+    Invalidate;
+  End;
+End;
+
+Procedure Tobuton.Setdownc(Val: Tocolor);
+Begin
+   if val<>fdown then
+  begin
+    fdown:=val;
+    Invalidate;
+  End;
+End;
+
+Procedure Tobuton.Setdisablec(Val: Tocolor);
+Begin
+   if val<>fdisabled then
+  begin
+    fdisabled:=val;
+    Invalidate;
+  End;
+End;
+
+Procedure Tobuton.Cmonmouseenter(Var Messages: Tmessage);
 begin
   inherited;
   fstate := obenters;
@@ -4726,7 +9008,7 @@ begin
   //paint;
 end;
 
-procedure Tobuton.CMonmouseleave(var Messages: Tmessage);
+Procedure Tobuton.Cmonmouseleave(Var Messages: Tmessage);
 begin
   inherited;
   fstate := obleaves;
@@ -4734,8 +9016,8 @@ begin
   //paint;
 end;
 
-procedure Tobuton.MouseDown(Button: TMouseButton; Shift: TShiftState;
-  X: integer; Y: integer);
+Procedure Tobuton.Mousedown(Button: Tmousebutton; Shift: Tshiftstate;
+  X: Integer; Y: Integer);
 begin
   inherited;
   if Button = mbLeft then
@@ -4745,15 +9027,15 @@ begin
   end;
 end;
 
-procedure Tobuton.MouseUp(Button: TMouseButton; Shift: TShiftState;
-  X: integer; Y: integer);
+Procedure Tobuton.Mouseup(Button: Tmousebutton; Shift: Tshiftstate; X: Integer;
+  Y: Integer);
 begin
   inherited;
   fstate := obenters;
   Invalidate;
 end;
 
-constructor Tobuton.Create(Aowner: TComponent);
+Constructor Tobuton.Create(Aowner: Tcomponent);
 begin
   inherited Create(Aowner);
   parent := TWinControl(Aowner);
@@ -4765,6 +9047,7 @@ begin
   fenter := Tocolor.Create(self);
   with fenter do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := $00CDCDCD;
@@ -4774,6 +9057,7 @@ begin
   fleave := Tocolor.Create(self);
   with fleave do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := $006E6E6E;
     startcolor := clActiveBorder;
@@ -4783,6 +9067,7 @@ begin
   fdown := Tocolor.Create(self);
   with fdown do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clmenu;
@@ -4792,6 +9077,7 @@ begin
   fdisabled := Tocolor.Create(self);
   with fdisabled do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clmenu;
@@ -4804,7 +9090,7 @@ begin
   // Ftext := 'Obutton';
 end;
 
-destructor Tobuton.Destroy;
+Destructor Tobuton.Destroy;
 begin
   FreeAndNil(fenter);
   FreeAndNil(fleave);
@@ -4813,7 +9099,7 @@ begin
   inherited Destroy;
 end;
 
-procedure Tobuton.paint;
+Procedure Tobuton.Paint;
 var
   textx, Texty: integer;
   fontcolor: Tcolor;
@@ -4990,6 +9276,7 @@ begin
   fbutonen := Tocolor.Create(self);
   with fbutonen do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := $00CDCDCD;
@@ -4998,6 +9285,7 @@ begin
   fbutonle := Tocolor.Create(self);
   with fbutonle do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clActiveBorder;
@@ -5006,6 +9294,7 @@ begin
   fbutondown := Tocolor.Create(self);
   with fbutondown do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := $00BD936C;
@@ -5014,6 +9303,7 @@ begin
 
   with Background do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clActiveBorder;
@@ -5130,6 +9420,7 @@ end;
 
 destructor tolistbox.destroy;
 begin
+
   if Assigned(fvert) then
     FreeAndNil(fvert);
   if Assigned(fhorz) then
@@ -5267,7 +9558,7 @@ end;
 
 procedure tolistbox.paint;
 var
-  a, b, k, i: integer;
+  a, b,i: integer;
 begin
   inherited paint;
   if Flist.Count > 0 then
@@ -5437,7 +9728,7 @@ begin
       Dec(findex);
 
     end;
-
+    Invalidate;
   end;
 end;
 
@@ -5464,7 +9755,7 @@ begin
       if (findex - FItemOffset) > FItemsShown - 1 then
         Inc(FItemOffset);
     end;
-
+    Invalidate;
   end;
 end;
 
@@ -5478,6 +9769,7 @@ begin
   begin
     findex := 0;
     FItemOffset := 0;
+    Invalidate;
   end;
 end;
 
@@ -5494,6 +9786,7 @@ begin
       FItemOffset := Flist.Count - FItemsShown
     else
       FItemOffset := 0;
+    Invalidate;
   end;
 end;
 
@@ -5515,6 +9808,7 @@ begin
   obenter := Tocolor.Create(self);
   with obenter do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := $00CDCDCD;
@@ -5525,6 +9819,7 @@ begin
   obleave := Tocolor.Create(self);
   with obleave do
   begin
+    // Aownerr:=self;
     border := 2;
     bordercolor := $006E6E6E;
     startcolor := clActiveBorder;
@@ -5535,6 +9830,7 @@ begin
   obdown := Tocolor.Create(self);
   with obdown do
   begin
+    // Aownerr:=self;
     border := 2;
     bordercolor := clSilver;
     startcolor := clmenu;
@@ -5545,6 +9841,7 @@ begin
   obcheckenters := Tocolor.Create(self);
   with obcheckenters do
   begin
+    // Aownerr:=self;
     border := 2;
     bordercolor := clSilver;
     startcolor := clmenu;
@@ -5555,6 +9852,7 @@ begin
   obcheckleaves := Tocolor.Create(self);
   with obcheckleaves do
   begin
+    // Aownerr:=self;
     border := 2;
     bordercolor := clSilver;
     startcolor := clActiveBorder;
@@ -5565,6 +9863,7 @@ begin
   obdisabled := Tocolor.Create(self);
   with obdisabled do
   begin
+    // Aownerr:=self;
     border := 2;
     bordercolor := clSilver;
     startcolor := clmenu;
@@ -6124,8 +10423,7 @@ end;
 
 
 
-
-function Tocombobox.Gettext: string;
+Function Tocombobox.Gettext: String;
 begin
  if Fitemindex>-1 then
  Result := Fliste[Fitemindex]
@@ -6136,13 +10434,13 @@ end;
 
 
 
-procedure Tocombobox.SetItemIndex(Avalue: integer);
+Procedure Tocombobox.Setitemindex(Avalue: Integer);
 var
  Shown: integer;
 begin
   if Fliste.Count = 0 then exit;
   if Fitemindex = aValue then Exit;
-  Shown := Height div FItemHeight;
+  Shown := 1;// Height div FItemHeight;
 
   if (Fliste.Count > 0) and (aValue >= -1) and (aValue <= Fliste.Count) then
   begin
@@ -6160,18 +10458,19 @@ begin
   Invalidate;
 end;
 
-procedure Tocombobox.SetStrings(AValue: TStrings);
+Procedure Tocombobox.Setstrings(Avalue: Tstrings);
 begin
   if Fliste=AValue then Exit;
   Fliste.Assign(AValue);
 end;
 
 
-procedure Tocombobox.LstPopupReturndata(Sender: TObject; const Str: string;
-  const indx: integer);
+Procedure Tocombobox.Lstpopupreturndata(Sender: Tobject; Const Str: String;
+  Const Indx: Integer);
 begin
   try
    self.Text:=str;
+   Fedit.Text:=str;
    Fitemindex:=indx;
    Invalidate;
   except
@@ -6181,7 +10480,7 @@ begin
 
 end;
 
-procedure Tocombobox.LstPopupShowHide(Sender: TObject);
+Procedure Tocombobox.Lstpopupshowhide(Sender: Tobject);
 begin
   fdropdown := (Sender as Tpopupformcombobox).Visible;
   if fdropdown=true then
@@ -6191,27 +10490,63 @@ begin
   Invalidate;
 end;
 
-
-
-procedure Tocombobox.kclick(Sender: TObject);
-var
- aa:Tpoint;
+Procedure Tocombobox.Change;
 begin
-if Fliste.Count= 0 then  exit;
-aa := ControlToScreen(Point(0, Height));
-ShowCombolistPopup(aa, @LstPopupReturndata, @LstPopupShowHide, self);
- //Invalidate;
+    inherited Changed;
+  if Assigned(FOnChange) then FOnChange(Self);
+end;
+
+Procedure Tocombobox.Select;
+begin
+ if Assigned(FOnSelect) and (ItemIndex >= 0) then
+    FOnSelect(Self);
+end;
+
+Procedure Tocombobox.Dropdown;
+begin
+  if Assigned(FOnDropDown) then FOnDropDown(Self);
+end;
+
+Procedure Tocombobox.Getitems;
+begin
+ if Assigned(FOnGetItems) then FOnGetItems(Self);
+end;
+
+Procedure Tocombobox.Closeup;
+begin
+  if [csLoading,csDestroying,csDesigning]*ComponentState<>[] then exit;
+  if Assigned(FOnCloseUp) then FOnCloseUp(Self);
 end;
 
 
-procedure Tocombobox.MouseDown(Button: TMouseButton; Shift: TShiftState;
-  X: integer; Y: integer);
+
+Procedure Tocombobox.Kclick(Sender: Tobject);
+var
+ aa:Tpoint;
+begin
+ if Fliste.Count=0 then  exit;
+  if fpopupopen=false then
+  begin
+   aa := ControlToScreen(Point(0, Height));
+   ShowCombolistPopup(aa, @LstPopupReturndata, @LstPopupShowHide, self);
+   if Assigned(FOnChange) then FOnChange(self);
+   fpopupopen:=true;
+  end else
+  begin
+    fpopupopen:=false;
+  end;
+
+end;
+
+
+Procedure Tocombobox.Mousedown(Button: Tmousebutton; Shift: Tshiftstate;
+  X: Integer; Y: Integer);
 begin
   if button = mbLeft then
   begin
    // GetOwningForm(self).ScreenToClient(Point(xx,yy));
 
-    if not (PtInRect(ClientRect,point(x, y))) then
+  //  if not (PtInRect(ClientRect,point(x, y))) then
      begin
        kclick(self);
       Invalidate;
@@ -6223,45 +10558,86 @@ end;
 
 
 
-function Tocombobox.GetItemIndex: integer;
+Function Tocombobox.Getitemindex: Integer;
 begin
  Result := Fitemindex;
 end;
 
 
 
-procedure Tocombobox.SetText(AValue: string);
+Procedure Tocombobox.Settext(Avalue: String);
 begin
 
 end;
 
+Procedure Tocombobox.Setbuttonenter(Val: Tocolor);
+Begin
+ if Val <> fobenter then
+ begin
+  fobenter:=Val;
+  Invalidate;
 
-procedure Tocombobox.BeginUpdate;
+ End;
+End;
+
+Procedure Tocombobox.Setbuttonleave(Val: Tocolor);
+Begin
+ if Val <> fobleave then
+ begin
+   fobleave:=Val;
+   Invalidate;
+ End;
+End;
+
+Procedure Tocombobox.Setbuttondown(Val: Tocolor);
+Begin
+ if Val <> fobdown then
+ begin
+   fobdown:=Val;
+   Invalidate;
+
+ End;
+End;
+
+Procedure Tocombobox.Setbuttondisable(Val: Tocolor);
+Begin
+  if Val <> ffdisabled then
+  begin
+   ffdisabled:=Val;
+   Invalidate;
+  End;
+End;
+
+
+Procedure Tocombobox.Beginupdate;
 begin
  Fliste.BeginUpdate;
 end;
-procedure Tocombobox.EndUpdate;
+Procedure Tocombobox.Endupdate;
 begin
 Fliste.EndUpdate;
 end;
-procedure Tocombobox.Clear;
+Procedure Tocombobox.Clear;
 begin
 Fliste.Clear;
 end;
 
-constructor Tocombobox.Create(AOwner: TComponent);
+Constructor Tocombobox.Create(Aowner: Tcomponent);
 begin
   inherited Create(AOwner);
   parent := TWinControl(Aowner);
  // backgroundcolored:=false; // do not paint oncustomcontrol
   Width := 150;
   Height := 30;
+
 //  TabStop := True;
   Fselectedcolor :=clblue;
   ControlStyle := ControlStyle +//- [csAcceptsControls] +
     [csAcceptsControls,csParentBackground, csClickEvents, csCaptureMouse, csDoubleClicks];
 //  fbutonarea := Rect(Width-30,0,Width,30);
   Fitemindex := -1;
+  FItemHeight :=10;
+  fpopupopen  :=false;
   Fliste := TStringList.Create;
   TStringList(Fliste).OnChange := @LinesChanged;
 
@@ -6270,6 +10646,7 @@ begin
   fobenter := Tocolor.Create(self);
   with fobenter do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := $00CDCDCD;
@@ -6280,6 +10657,7 @@ begin
   fobleave := Tocolor.Create(self);
   with fobleave do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := $006E6E6E;
     startcolor := clActiveBorder;
@@ -6290,6 +10668,7 @@ begin
   fobdown := Tocolor.Create(self);
   with fobdown do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clmenu;
@@ -6300,6 +10679,7 @@ begin
   ffdisabled := Tocolor.Create(self);
   with ffdisabled do
   begin
+    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clmenu;
@@ -6315,11 +10695,6 @@ begin
    Width  := Height;
    OnClick :=@kclick;
    Caption :='▼';         //▲ ▼ ► ◄  // ALT+30 ALT+31 ALT+16 ALT+17
- {  ColorDown:=fobdown;
-   ColorEnter:=fobenter;
-   ColorLeave:=fobleave;
-   ColorDisable:=ffdisabled;   }
-
   end;
 
   Fedit:=Toedit.Create(self);
@@ -6328,84 +10703,68 @@ begin
     Parent := Self;
     Align  := alClient;
     Enabled:= false;
-//    font:=self.Font;
-//    onMouseDown:=@self.MouseDown;
-    {Left   := 0;
-    Top    := 0;
-    Width  := 120;
-    Height := 30;}
- //   Background:= self.Background;
+    ReadOnly:=true;
   end;
-
-
-   // combobox dropdown windows
 
 
 end;
 
-destructor Tocombobox.Destroy;
+Destructor Tocombobox.Destroy;
 begin
-  if Assigned(Fliste) then FreeAndNil(Fliste);
+
+  if Assigned(Fbutton) then FreeAndNil(Fbutton);
   if Assigned(Fedit) then FreeAndNil(Fedit);
+  if Assigned(Fliste) then FreeAndNil(Fliste);
 
   if Assigned(fobdown) then FreeAndNil(fobdown);
   if Assigned(fobenter) then FreeAndNil(fobenter);
   if Assigned(fobleave) then FreeAndNil(fobleave);
   if Assigned(ffdisabled) then FreeAndNil(ffdisabled);
-  if Assigned(Fbutton) then FreeAndNil(Fbutton);
 
   inherited Destroy;
 end;
 
 
-procedure Tocombobox.Paint;
+Procedure Tocombobox.Paint;
 begin
   inherited Paint;
-  if Assigned(Fbutton) then
-  with fbutton do
+  if not (csDesigning in ComponentState) then
   begin
-   Align  := alRight;
-   Width  := Height;
-  { ColorDown:=fobdown;
-   ColorEnter:=fobenter;
-   ColorLeave:=fobleave;
-   ColorDisable:=ffdisabled; }
+    if Assigned(Fbutton) then
+    with fbutton do
+    begin
+      Ocolortoocolor(Background,self.fbackground);
+      Ocolortoocolor(ColorEnter,self.fobenter);
+      Ocolortoocolor(ColorLeave,self.fobleave);
+      Ocolortoocolor(ColorDown,self.fobdown);
+      Ocolortoocolor(ColorDisable,self.ffdisabled);
+      Width  := Height;
+    End;
+   if Assigned(Fedit) then
+   begin
+    Ocolortoocolor(Fedit.Background,self.fbackground);
+    if Fitemindex>-1 then
+    begin
+    Fedit.Text:=Fliste[Fitemindex];
+    Text:=Fliste[Fitemindex];
+    end;
+   End;
+
   end;
-  if Assigned(Fedit) then
-  with Fedit do
-  begin
-   if Fitemindex>-1 then
-   Text:=Fliste[Fitemindex];
- //   Align  := alClient;
-    {Left   := 0;
-    Top    := 0;
-    Width  := 120;
-    Height := 30;}
- //   Background:= self.Background;
-  end;
- //
 end;
 
 
 
-procedure Tocombobox.LinesChanged(Sender: TObject);
+Procedure Tocombobox.Lineschanged(Sender: Tobject);
 begin
-
-//  Fliste.BeginUpdate;
-//  Olist.BeginUpdate;
-//  Olist.items. Assign(Fliste);
- // ShowMessage('ok');
-//  Olist.EndUpdate;
-//  Fliste.EndUpdate;
-
  Invalidate;
 end;
 
-procedure Tocombobox.KeyDown(var Key: word; Shift: TShiftState);
+Procedure Tocombobox.Keydown(Var Key: Word; Shift: Tshiftstate);
 var
   x: integer;
 begin
-
+   inherited KeyDown(Key, Shift);
   case key of
     VK_RETURN: if (Fliste.Count > 0) and (Fitemindex > -1) then
       begin
@@ -6447,23 +10806,20 @@ begin
           FItemOffset := x;
 
          Fitemindex:=x;
-         Invalidate;
+        Invalidate;
       end;
     else
   end;
 
-inherited;
+//inherited;
 end;
 
 
 
-procedure Tocombobox.MoveUp;
-var
-  Shift: boolean;
+Procedure Tocombobox.Moveup;
 begin
   if fliste.Count > 0 then
   begin
-    Shift := GetKeyState(VK_SHIFT) < 0;
 
     if (Fitemindex > (FItemOffset + FItemsShown)) or (Fitemindex < (FItemOffset)) then
     begin
@@ -6475,22 +10831,25 @@ begin
       if ((Fitemindex - FItemOffset) = 0) and (FItemOffset > 0) then
         Dec(FItemOffset);
 
-      Dec(Fitemindex);
+       Dec(Fitemindex);
 
     end;
-
+  //   Invalidate;
   end;
+end;
+
+Procedure Tocombobox.Setitemheight(Avalue: Integer);
+begin
+  if fitemheight=avalue then exit;
+  fitemheight:=avalue;
 end;
 
 // -----------------------------------------------------------------------------
 
-procedure Tocombobox.MoveDown;
-var
-  Shift: boolean;
+Procedure Tocombobox.Movedown;
 begin
   if fliste.Count > 0 then
   begin
-    Shift := GetKeyState(VK_SHIFT) < 0;
 
     if (Fitemindex > (FItemOffset + FItemsShown)) or (Fitemindex < (FItemOffset)) then
     begin
@@ -6503,13 +10862,13 @@ begin
       if (Fitemindex - FItemOffset) > FItemsShown - 1 then
         Inc(FItemOffset);
     end;
-
+//   Invalidate;
   end;
 end;
 
 // -----------------------------------------------------------------------------
 
-procedure Tocombobox.MoveHome;
+Procedure Tocombobox.Movehome;
 var
   i: integer;
 begin
@@ -6517,12 +10876,13 @@ begin
   begin
     Fitemindex := 0;
     FItemOffset := 0;
+//    Invalidate;
   end;
 end;
 
 // -----------------------------------------------------------------------------
 
-procedure Tocombobox.MoveEnd;
+Procedure Tocombobox.Moveend;
 var
   i: integer;
 begin
@@ -6533,6 +10893,7 @@ begin
       FItemOffset := Fliste.Count - FItemsShown
     else
       FItemOffset := 0;
+//    Invalidate;
   end;
 end;
 
@@ -6549,7 +10910,9 @@ begin
        inc(fvalue)
   else if sender=Fdbutton then
        dec(fvalue);
- Fedit.Text:=inttostr(fvalue);
+
+  Settext(fvalue);
+// Fedit.Text:=inttostr(fvalue);
  Invalidate;
 end;
 
@@ -6565,7 +10928,7 @@ end;
 
 function tospinedit.gettext: integer;
 begin
-  Result:=strtoint(Fedit.Text);
+  Result:=strtointdef(Fedit.Text,0);
 end;
 
 procedure tospinedit.setbuttonheight(avalue: integer);
@@ -6591,7 +10954,13 @@ end;
 procedure tospinedit.settext(avalue: integer);
 begin
  fvalue:=Avalue;//ValueRange(fvalue,fmin,fmax);
- fedit.Text:=IntToStr(fvalue);
+ if fedit.Text<>'' then
+  fedit.Text:=IntToStr(fvalue)
+ else
+ fedit.Text:='0';//IntToStr(fvalue)
+
+ Changed;
+ if Assigned(FOnChange) then FOnChange(Self);
 end;
 
 procedure tospinedit.keydown(sender: tobject; var key: word; shift: tshiftstate
@@ -6611,6 +10980,7 @@ end;
 
 procedure tospinedit.resize;
 begin
+ if self.Width<20 then self.Width:=20;
  if Assigned(Fubutton) then
    fubutton.SetBounds((self.Width-(Fbuttonwidth+(self.Background.Border*2))),self.Background.Border,Fbuttonwidth,Fbuttonheight);
 
@@ -6635,6 +11005,7 @@ begin
   parent := TWinControl(Aowner);
   Width := 100;
   Height := 25;
+
   ControlStyle := ControlStyle - [csAcceptsControls] +
     [csParentBackground, csClickEvents, csCaptureMouse, csDoubleClicks];
 
@@ -6697,7 +11068,9 @@ end;
 
 procedure tospinedit.feditchange(sender: tobject);
 begin
-  fvalue:=strtoint(Fedit.Text);
+ if Fedit.Text='' then Fedit.Text:='0';
+  fvalue:=StrToIntDef(Fedit.Text,0);
+  if Assigned(Fonchange) then Fonchange(self);
 end;
 
 function tospinedit.getbuttonheight: integer;
@@ -6716,5 +11089,679 @@ begin
 end;
 
 
+
+
+Constructor ToBalloonControl.Create(AOwner: TComponent);
+Begin
+	Inherited;
+
+	FText := TStringList.Create;
+End;
+
+Destructor ToBalloonControl.Destroy;
+Begin
+	FText.Free;
+
+	Inherited;
+End;
+
+procedure ToBalloonControl.SetText(Value: TStringList);
+begin
+  FText.Assign(Value);
+end;
+
+Procedure ToBalloonControl.ShowControlBalloon();
+Var
+	Balloon: TBalloon;
+Begin
+	Balloon := TBalloon.CreateNew(Owner);
+	Balloon.ShowControlBalloon(FControl, FHorizontal, FVertical, FTitle, Trim(FText.Text), FBalloonType, FDuration);
+End;
+
+Procedure ToBalloonControl.ShowPixelBalloon();
+Var
+	Balloon: TBalloon;
+Begin
+	Balloon := TBalloon.CreateNew(nil);
+	Balloon.ShowBalloon(FPixelCoordinateX, FPixelCoordinateY, FTitle, Trim(FText.Text), FBalloonType, FDuration, FPosition);
+End;
+
+Procedure TBalloon.CreateParams(Var Params: TCreateParams);
+Begin
+  Inherited CreateParams(Params);
+
+  Params.Style     := (Params.Style and not WS_CAPTION) or WS_POPUP;
+  Params.ExStyle   := Params.ExStyle or WS_EX_TOOLWINDOW or WS_EX_NOACTIVATE or WS_EX_TOPMOST;
+  Params.WndParent := GetDesktopWindow;
+End;
+
+Procedure TBalloon.OnMouseClick(Sender: TObject);
+Begin
+  Release;
+End;
+
+Procedure TBalloon.OnExitTimer(Sender: TObject);
+Begin
+  Release;
+End;
+
+Procedure TBalloon.OnChange(Sender: TObject);
+Begin
+  SetWindowPos(Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE or SWP_NOMOVE or SWP_NOSIZE);
+End;
+
+Procedure TBalloon.WndProc(Var Message: TMessage);
+Begin
+  If (Message.Msg = WM_SIZE) and (Message.WParam = SIZE_MINIMIZED) Then
+    Show;
+
+  Inherited;
+End;
+
+Constructor TBalloon.CreateNew(AOwner: TComponent; Dummy: Integer = 0);
+Begin
+  Inherited;
+
+  OnActivate   := @OnChange;
+  OnDeactivate := @OnChange;
+  OnShow       := @OnChange;
+  BorderStyle  := bsNone;
+  FormStyle    := fsStayOnTop;
+  OnPaint      := @FormPaint;
+  Color        := $0034A831;
+  Font.Name    := 'calibri';
+
+  pnlAlign   := TPanel.Create(Self);
+  lblTitle   := TLabel.Create(Self);
+  lblText    := TLabel.Create(Self);
+  iconBitmap := TImage.Create(Self);
+  tmrExit    := TTimer.Create(Self);
+
+  OnClick          := @OnMouseClick;
+  iconBitmap.OnClick := @OnMouseClick;
+  pnlAlign.OnClick := @OnMouseClick;
+  lblTitle.OnClick := @OnMouseClick;
+  lblText.OnClick  := @OnMouseClick;
+
+  lblTitle.Parent      := Self;
+  lblTitle.ParentColor := True;
+  lblTitle.ParentFont  := True;
+  lblTitle.AutoSize    := True;
+  lblTitle.Font.Style  := [fsBold];
+  lblTitle.Left        := 34;
+  lblTitle.Top         := 12;
+
+  lblText.Parent      := Self;
+  lblText.ParentColor := True;
+  lblText.ParentFont  := True;
+  lblText.AutoSize    := True;
+  lblText.Left        := 10;
+  lblText.WordWrap    := True;
+
+  iconBitmap.Parent      := Self;
+  iconBitmap.Transparent := True;
+  iconBitmap.Left        := 10;
+  iconBitmap.Top         := 10;
+
+  tmrExit.Enabled  := False;
+  tmrExit.Interval := 0;
+  tmrExit.OnTimer  := @OnExitTimer;
+End;
+
+Procedure TBalloon.FormPaint(Sender: TObject);
+Var
+  TempRegion: HRGN;
+Begin
+  With Canvas.Brush Do
+   Begin
+    Color := clBlack;
+    Style := bsSolid;
+   End;
+
+  TempRegion := CreateRectRgn(0,0,1,1);
+  GetWindowRgn(Handle, TempRegion);
+  FrameRgn(Canvas.Handle, TempRegion, Canvas.Brush.handle, 1, 1);
+  DeleteObject(TempRegion);
+End;
+
+Procedure TBalloon.ShowControlBalloon(blnControl: TWinControl; blnHoriz: TBalloonHoriz; blnVert: TBalloonVert; blnTitle, blnText: String; blnType: TBalloonType; blnDuration: Integer);
+Var
+  Rect: TRect;
+  blnPosLeft, blnPosTop: Integer;
+  blnPosition: TBalloonPosition;
+Begin
+  GetWindowRect(blnControl.Handle, Rect);
+
+  blnPosTop  := 0;
+  blnPosLeft := 0;
+
+  If blnVert = blnTop Then
+    blnPosTop := Rect.Top;
+
+  If blnVert = blnCenter Then
+    blnPosTop := Rect.Top + Round((Rect.Bottom - Rect.Top) / 2);
+
+  If blnVert = blnBottom Then
+    blnPosTop := Rect.Bottom;
+
+  If blnHoriz = blnLeft Then
+    blnPosLeft := Rect.Left;
+
+  If blnHoriz = blnMiddle Then
+    blnPosLeft := Rect.Left + Round((Rect.Right - Rect.Left) / 2);
+
+  If blnHoriz = blnRight Then
+    blnPosLeft := Rect.Right;
+
+  blnPosition := blnArrowBottomRight;
+
+  If ((blnHoriz = blnRight) and (blnVert = blnBottom)) or ((blnHoriz = blnMiddle) and (blnVert = blnBottom)) Then
+    blnPosition := blnArrowBottomRight;
+
+  If (blnHoriz = blnLeft) and (blnVert = blnBottom) or ((blnHoriz = blnLeft) and (blnVert = blnCenter)) Then
+    blnPosition := blnArrowBottomLeft;
+
+  If (blnHoriz = blnLeft) and (blnVert = blnTop) or ((blnHoriz = blnMiddle) and (blnVert = blnTop)) Then
+    blnPosition := blnArrowTopLeft;
+
+  If (blnHoriz = blnRight) and (blnVert = blnTop) or ((blnHoriz = blnRight) and (blnVert = blnCenter)) Then
+    blnPosition := blnArrowTopRight;
+
+  ShowBalloon(blnPosLeft, blnPosTop, blnTitle, blnText, blnType, blnDuration, blnPosition);
+End;
+
+Procedure TBalloon.ShowBalloon(blnLeft, blnTop: Integer; blnTitle, blnText: String; blnType: TBalloonType; blnDuration: Integer; blnPosition: TBalloonPosition);
+Var
+  ArrowHeight, ArrowWidth: Integer;
+  FormRegion, ArrowRegion: HRGN;
+  Arrow: Array [0..2] Of TPoint;
+  ResName: String;
+Begin
+  ArrowHeight := 20;
+  ArrowWidth  := 20;
+
+  lblTitle.Caption := blnTitle;
+
+  If blnPosition = blnArrowBottomRight Then
+    lblTitle.Top := lblTitle.Top + ArrowHeight;
+
+  If blnPosition = blnArrowBottomLeft Then
+    lblTitle.Top := lblTitle.Top + ArrowHeight;
+
+  lblText.Top     := lblTitle.Top + lblTitle.Height + 8;
+  lblText.Caption := UTF8UpperCase(blnText,'tr');
+
+  If blnPosition = blnArrowBottomRight Then
+    iconBitmap.Top := iconBitmap.Top + ArrowHeight;
+
+  If blnPosition = blnArrowBottomLeft Then
+    iconBitmap.Top := iconBitmap.Top + ArrowHeight;
+
+  Case blnType Of
+    blnError:
+      ResName := 'ERROR';
+    blnInfo:
+      ResName := 'INFO';
+    blnWarning:
+      ResName := 'WARNING';
+    Else
+      ResName := 'INFO';
+   End;
+  iconBitmap.Picture.Bitmap.LoadFromResourceName(HInstance, ResName);
+
+  If blnPosition = blnArrowBottomRight Then
+    ClientHeight := lblText.Top + lblText.Height + 10;
+  If blnPosition = blnArrowBottomLeft Then
+    ClientHeight := lblText.Top + lblText.Height + 10;
+  If blnPosition = blnArrowTopLeft Then
+    ClientHeight := lblText.Top + lblText.Height + 10 + ArrowHeight;
+  If blnPosition = blnArrowTopRight Then
+    ClientHeight := lblText.Top + lblText.Height + 10 + ArrowHeight;
+
+  If (lblTitle.Left + lblTitle.Width) > (lblText.Left + lblText.Width) Then
+    Width := lblTitle.Left + lblTitle.Width + 10
+  Else
+    Width := lblText.Left + lblText.Width + 10;
+
+  If blnPosition = blnArrowTopLeft Then
+   Begin
+    Left := blnLeft - (Width - 20);
+    Top  := blnTop - (Height);
+   End;
+
+  If blnPosition = blnArrowTopRight Then
+   Begin
+    Left := blnLeft - 20;
+    Top  := blnTop - (Height);
+   End;
+
+  If blnPosition = blnArrowBottomRight Then
+   Begin
+    Left := blnLeft - 20;
+    Top  := blnTop - 2;
+   End;
+
+  If blnPosition = blnArrowBottomLeft Then
+   Begin
+    Left := blnLeft - (Width - 20);
+    Top  := blnTop - 2;
+   End;
+
+  FormRegion := 0;
+
+  If blnPosition = blnArrowTopLeft Then
+   Begin
+    FormRegion := CreateRoundRectRgn(0, 0, Width, Height - (ArrowHeight - 2), 7, 7);
+
+    Arrow[0] := Point(Width - ArrowWidth - 20, Height - ArrowHeight);
+    Arrow[1] := Point(Width - 20, Height);
+    Arrow[2] := Point(Width - 20, Height - ArrowHeight);
+   End;
+
+  If blnPosition = blnArrowTopRight Then
+   Begin
+    FormRegion := CreateRoundRectRgn(0, 0, Width, Height - (ArrowHeight - 2), 7, 7);
+
+    Arrow[0] := Point(20, Height - ArrowHeight);
+    Arrow[1] := Point(20, Height);
+    Arrow[2] := Point(20 + ArrowWidth, Height - ArrowHeight);
+   End;
+
+  If blnPosition = blnArrowBottomRight Then
+   Begin
+    FormRegion := CreateRoundRectRgn(0, ArrowHeight + 2, Width, Height, 7, 7);
+
+    Arrow[0] := Point(20, 2);
+    Arrow[1] := Point(20, ArrowHeight + 2);
+    Arrow[2] := Point(20 + ArrowWidth, ArrowHeight + 2);
+   End;
+
+  If blnPosition = blnArrowBottomLeft Then
+   Begin
+    FormRegion := CreateRoundRectRgn(0, ArrowHeight + 2, Width, Height, 7, 7);
+
+    Arrow[0] := Point(Width - 20, 2);
+    Arrow[1] := Point(Width - 20, ArrowHeight + 2);
+    Arrow[2] := Point(Width - 20 - ArrowWidth, ArrowHeight + 2);
+   End;
+
+  ArrowRegion := CreatePolygonRgn(Arrow, 3, WINDING);
+
+  CombineRgn(FormRegion, FormRegion, ArrowRegion, RGN_OR);
+  DeleteObject(ArrowRegion);
+  SetWindowRgn(Handle, FormRegion, True);
+
+  Visible := False;
+  ShowWindow(Handle, SW_SHOWNOACTIVATE);
+  Visible := True;
+
+  tmrExit.Interval := blnDuration * 1000;
+  tmrExit.Enabled  := True;
+End;
+
+
+
+
+{ Toswich }
+
+function Toswich.GetChecWidth: integer;
+begin
+  Result:=fcheckwidth;
+end;
+
+procedure Toswich.SetChecWidth(AValue: integer);
+begin
+ if fcheckwidth=avalue then exit;
+ fcheckwidth:=AValue;
+ Invalidate;
+end;
+
+procedure Toswich.SetState(const Value: Tobutonstate);
+begin
+  if fstate=value then exit;
+ fstate:=Value;
+ Invalidate;
+end;
+
+function Toswich.GetState: Tobutonstate;
+begin
+Result:=fstate;
+end;
+
+procedure Toswich.SetSwState(const Value: ToswichState);
+begin
+ if fswichstate=value then exit;
+ fswichstate:=Value;
+ Invalidate;
+end;
+
+function Toswich.GetSwState: ToswichState;
+begin
+Result:=fswichstate;
+end;
+
+
+procedure Toswich.cmonmouseenter(var messages: tmessage);
+begin
+  fstate := obenters;
+  Invalidate;
+end;
+
+procedure Toswich.cmonmouseleave(var messages: tmessage);
+begin
+  fstate := obleaves;
+
+  Invalidate;
+end;
+
+procedure Toswich.mousedown(button: tmousebutton; shift: tshiftstate;
+  x: integer; y: integer);
+begin
+  inherited MouseDown(Button, Shift, X, Y);
+  if Button = mbLeft then
+  begin
+
+    fState := obdowns;
+    if fswichstate= fon then
+   fswichstate:=foff else
+   fswichstate:=fon;
+    if Assigned(FOnChange) then FOnChange(Self);
+    Invalidate;
+  end;
+end;
+
+procedure Toswich.mouseup(button: tmousebutton; shift: tshiftstate;
+  x: integer; y: integer);
+begin
+  inherited MouseUp(Button, Shift, X, Y);
+  state := obenters;
+  Invalidate;
+end;
+
+
+procedure Toswich.WMEraseBkgnd(var Message: TWMEraseBkgnd);
+begin
+ SetBkMode(Message.dc, 1);
+ Message.Result := 1;
+end;
+
+procedure Toswich.CreateParams(var Params: TCreateParams);
+begin
+    inherited;// CreateParams(Params);
+  params.exstyle := params.exstyle or WS_EX_TRANSPARENT or
+   {$IFNDEF UNIX}WS_EX_LAYERED or{$ENDIF}
+    WS_CLIPCHILDREN;
+end;
+
+procedure Toswich.CMHittest(var msg: TCMHIttest);
+begin
+  inherited;
+  //  if csDesigning in ComponentState then
+  //    Exit;
+  if PtInRegion(CreateRectRgn(0, 0, self.Width, self.Height), msg.XPos, msg.YPos) then
+    msg.Result := HTCLIENT
+  else
+    msg.Result := HTNOWHERE;
+end;
+
+
+procedure Toswich.DoOnChange;
+begin
+ EditingDone;
+ if Assigned(OnChange) then OnChange(Self);
+end;
+
+constructor Toswich.Create(Aowner: TComponent);
+begin
+  inherited Create(Aowner);
+  parent := TWinControl(Aowner);
+  ControlStyle := ControlStyle + [csParentBackground, csClickEvents,
+    csCaptureMouse, csDoubleClicks, csSetCaption];
+  Width := 100;
+  Height := 20;
+  fcheckwidth := 20;
+  froundx:=10;
+  froundy:=10;
+
+   fswichstate:=foff;
+  //fCaptionDirection:=cleft;
+  obenter := Tocolor.Create(self);
+  with obenter do
+  begin
+    // Aownerr:=self;
+    border := 1;
+    bordercolor := clblack;
+    startcolor := $00CDCDCD;
+    stopcolor := clmenu;
+    Fontcolor := clblack;
+  end;
+
+  obleave := Tocolor.Create(self);
+  with obleave do
+  begin
+    // Aownerr:=self;
+    border := 1;
+    bordercolor := clblack;
+    startcolor := clActiveBorder;
+    stopcolor := clmenu;
+    Fontcolor := clblack;
+  end;
+
+  obdown := Tocolor.Create(self);
+  with obdown do
+  begin
+    // Aownerr:=self;
+    border := 1;
+    bordercolor := clblack;
+    startcolor := clmenu;
+    stopcolor := $00A0A0A0;
+    Fontcolor := clblack;
+  end;
+
+  obdisabled := Tocolor.Create(self);
+  with obdisabled do
+  begin
+    // Aownerr:=self;
+    border := 1;
+    bordercolor := clblack;
+    startcolor := clmenu;
+    stopcolor := $005D5D5D;
+    Fontcolor := $002C2C2C;
+  end;
+
+
+
+  fstate := obleaves;
+  backgroundcolored := False;
+  fcaptionon:='ON';
+  fcaptionoff:='OFF';
+
+  // Transparent := True;
+end;
+
+destructor Toswich.Destroy;
+begin
+  FreeAndNil(obenter);
+  FreeAndNil(obleave);
+  FreeAndNil(obdown);
+  inherited Destroy;
+end;
+
+
+
+
+
+
+
+procedure Toswich.paint;
+var
+  gradienrect1, gradienrect2, borderect,checkrect: Types.Trect;
+  textxon, textxoff, Texty, fborderWidth, fborderWidthT: integer;
+  obstart, obend,checkendstart,checkedend ,oborder: Tcolor;
+
+  fbuttoncenter: integer;
+
+begin
+  inherited paint;
+
+  // com:=self;
+
+  if Enabled = False then
+  begin
+    obstart := obdisabled.Startcolor;
+    obend := obdisabled.Stopcolor;
+    oborder := obdisabled.Bordercolor;
+    fborderWidth := obdisabled.Border;
+    canvas.Font.Color := obdisabled.Fontcolor;
+
+  end
+  else
+  begin
+  {  if fswichstate = fon then
+    begin
+
+      case fstate of
+        obenters:
+        begin
+          obstart := obenter.Startcolor;
+          obend := obenter.Stopcolor;
+          checkendstart := obcheckenters.Startcolor;
+          checkedend := obcheckenters.Stopcolor;
+          oborder := obenter.Bordercolor;
+          fborderWidth := obenter.Border;
+          canvas.Font.Color := obcheckenters.Fontcolor;
+        end;
+        obleaves:
+        begin
+          obstart := obleave.Startcolor;
+          obend := obleave.Stopcolor;
+          checkendstart := obcheckleaves.Startcolor;
+          checkedend := obcheckleaves.Stopcolor;
+          oborder := obcheckleaves.Bordercolor;
+          fborderWidth := obleave.Border;
+          canvas.Font.Color := obcheckleaves.Fontcolor;
+        end;
+        obdowns:
+        begin
+          obstart := obdown.Startcolor;
+          obend := obdown.Stopcolor;
+          fborderWidth := obdown.Border;
+          oborder := obdown.Bordercolor;
+          canvas.Font.Color := obdown.Fontcolor;
+        end;
+      end;
+    end
+    else}
+    begin
+      case fstate of
+        obenters:
+        begin
+          obstart := obenter.Startcolor;
+          obend := obenter.Stopcolor;
+          oborder := obenter.Bordercolor;
+          fborderWidth := obenter.Border;
+          canvas.Font.Color := obenter.Fontcolor;
+        end;
+        obleaves:
+        begin
+          obstart := obleave.Startcolor;
+          obend := obleave.Stopcolor;
+          oborder := obleave.Bordercolor;
+          fborderWidth := obleave.Border;
+          canvas.Font.Color := obleave.Fontcolor;
+        end;
+        obdowns:
+        begin
+          obstart := obdown.Startcolor;
+          obend := obdown.Stopcolor;
+          oborder := obdown.Bordercolor;
+          fborderWidth := obdown.Border;
+          canvas.Font.Color := obdown.Fontcolor;
+        end;
+      end;
+
+    end;
+  end;
+
+  fborderWidthT := fborderWidth + 2;
+  textxon :=fborderWidtht;// Width - (fcheckwidth + self.canvas.TextWidth(Caption) + 5);
+  textxoff:= Width - (self.canvas.TextWidth(fCaptionOff) + 5);
+  Texty := (Height div 2) - (self.canvas.TextHeight(fcaptionon) div 2);
+  //  fbuttoncenter := (Height div 2) - (fcheckwidth div 2);
+
+  borderect := Rect(0,0,Width ,Height);
+
+
+  {gradienrect1 := Rect(borderect.left + fborderWidth, borderect.top + fborderWidth,
+    borderect.Right - fborderWidth, borderect.top + (borderect.Height div 2));
+  gradienrect2 := Rect(gradienrect1.left, gradienrect1.Bottom, gradienrect1.Right,
+    (borderect.Bottom - fborderWidth));
+  }
+  if fswichstate = fon then
+   checkrect := Rect(borderect.left + fborderWidth, borderect.top +
+    fborderWidth, borderect.Right div 2, borderect.bottom -
+    fborderWidth)
+  else
+   checkrect := Rect(borderect.Right div 2 , borderect.top +
+    fborderWidth, borderect.Right - fborderWidth, borderect.bottom -
+    fborderWidth);
+//   Drawtorect(self.Canvas,borderect,Tc,Fkind);
+
+  with canvas do
+  begin
+
+
+
+    {  Drawtorect(self.Canvas,borderect,Tc,Fkind);
+      if fchecked = True then
+      Drawtorect(self.Canvas,checkrect,Tc,Fkind);
+      }
+      pen.Color := oborder;
+      Pen.Width:=fborderWidth;
+      Brush.Color:=obend;//oborder;
+     //  FillRect(borderect);
+      //GradientFill(gradienrect1, obstart, obend, gdVertical);
+      //GradientFill(gradienrect2, obend, obstart, gdVertical);
+      RoundRect(borderect,froundx,froundy);    // arkaplan
+
+      pen.Color := obstart;
+      Pen.Width:=0;
+      Brush.Color := obstart;
+     // FloodFill(0,0,obstart,fsSurface);
+      RoundRect(checkrect,froundx,froundy);
+
+      checkrect:=rect(checkrect.left-fborderWidth,checkrect.top-fborderWidth,checkrect.Right+fborderWidth,checkrect.Bottom+fborderWidth);
+      pen.Color := oborder;
+      Pen.Width:=fborderWidth;
+      RoundRect(checkrect,froundx,froundy);
+    {  if fchecked = True then
+      begin
+        Brush.Color := oborder;
+        FillRect(checkrect);
+   //     Brush.Style := bsClear;
+   //     TextOut(checkrect.Width div 2, checkrect.Height div 2 , '֍');
+        checkrect := Rect(checkrect.Left + fborderWidth, checkrect.top +
+          fborderWidth, checkrect.Right - fborderWidth, checkrect.Bottom - fborderWidth);
+        GradientFill(checkrect, checkendstart, checkedend, gdVertical);
+        //√
+      end;
+      }
+
+
+
+    if Length(fcaptionoff) > 0 then
+    begin
+      Brush.Style := bsClear;
+      TextOut(textxoff, Texty, (fCaptionoff));
+    end;
+    if Length(fcaptionon) > 0 then
+    begin
+      Brush.Style := bsClear;
+    //  canvas.Font.Color:=;
+      TextOut(textxon, Texty, (fCaptionon));
+    end;
+  end;
+
+end;
 
 end.
