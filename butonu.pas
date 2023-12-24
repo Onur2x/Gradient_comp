@@ -30,6 +30,7 @@ type
 
   Tocolor = class(TOPersistent)
   private
+  //  owner:TPersistent;
     Fstartc, fstopc, fborderc, ffontcolor: Tcolor;
     fborder: integer;
     function getborder: integer;
@@ -45,11 +46,11 @@ type
   public
     function paint: boolean;
   published
-    property Border: integer read getborder write Setborder default 1;
-    property Startcolor: TColor read getstartcolor write setstartcolor;
-    property Stopcolor: TColor read getstopcolor write setstopcolor;
-    property Bordercolor: TColor read getbordercolor write setbordercolor;
-    property Fontcolor: TColor read getfontcolor write Setfontcolor;
+    property Border      : integer read getborder      write Setborder default 1;
+    property Startcolor  : TColor  read getstartcolor  write setstartcolor;
+    property Stopcolor   : TColor  read getstopcolor   write setstopcolor;
+    property Bordercolor : TColor  read getbordercolor write setbordercolor;
+    property Fontcolor   : TColor  read getfontcolor   write Setfontcolor;
   end;
 
 
@@ -1796,7 +1797,7 @@ type
 
 
   { Tpopupformcombobox }
-  type
+
   TReturnStintEvent = procedure (Sender: TObject; const ftext: string; const itemind:integer) of object;
 
   Tpopupformcombobox= class(TcustomForm)
@@ -1819,46 +1820,43 @@ type
     procedure Paint; override;
   end;
 
- Type
+
   TBalloonType     = (blnInfo, blnError, blnWarning);
   TBalloonHoriz    = (blnLeft, blnMiddle, blnRight);
   TBalloonVert     = (blnTop, blnCenter, blnBottom);
   TBalloonPosition = (blnArrowTopLeft, blnArrowTopRight, blnArrowBottomLeft, blnArrowBottomRight);
 
-Type
-	ToBalloonControl = Class(TComponent)
-	private
-		FTitle: String;
+
+  ToBalloonControl = Class(TComponent)
+  private
+    FTitle: String;
     FText: TStringList;
-		FDuration, FPixelCoordinateX, FPixelCoordinateY: Integer;
-		FHorizontal: TBalloonHoriz;
-		FVertical: TBalloonVert;
-		FPosition: TBalloonPosition;
-		FControl: TWinControl;
-		FBalloonType: TBalloonType;
-
+    FDuration, FPixelCoordinateX, FPixelCoordinateY: Integer;
+    FHorizontal: TBalloonHoriz;
+    FVertical: TBalloonVert;
+    FPosition: TBalloonPosition;
+    FControl: TwinControl;
+    FBalloonType: TBalloonType;
     procedure SetText(Value: TStringList);
-	public
-         Constructor Create(AOwner: TComponent); override;
-    Destructor Destroy; override;
-		procedure ShowControlBalloon;
-		procedure ShowPixelBalloon;
-	published
-		property Text: TStringList read FText write SetText;
-		property Title: String read FTitle write FTitle;
-		property Duration: Integer read FDuration write FDuration;
-		property Horizontal: TBalloonHoriz read FHorizontal write FHorizontal;
-		property Vertical: TBalloonVert read FVertical write FVertical;
-		property Position: TBalloonPosition read FPosition write FPosition;
-		property Control: TWinControl read FControl write FControl;
-		property PixelCoordinateX: Integer read FPixelCoordinateX write FPixelCoordinateX;
-		property PixelCoordinateY: Integer read FPixelCoordinateY write FPixelCoordinateY;
-		property BalloonType: TBalloonType read FBalloonType write FBalloonType;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    procedure ShowControlBalloon;
+    procedure ShowPixelBalloon;
+  published
+    property Text: TStringList read FText write SetText;
+    property Title: String read FTitle write FTitle;
+    property Duration: Integer read FDuration write FDuration;
+    property Horizontal: TBalloonHoriz read FHorizontal write FHorizontal;
+    property Vertical: TBalloonVert read FVertical write FVertical;
+    property Position: TBalloonPosition read FPosition write FPosition;
+    property Control: TWinControl read FControl write FControl;
+    property PixelCoordinateX: Integer read FPixelCoordinateX write FPixelCoordinateX;
+    property PixelCoordinateY: Integer read FPixelCoordinateY write FPixelCoordinateY;
+    property BalloonType: TBalloonType read FBalloonType write FBalloonType;
+  end;
 
 
-	End;
-
-Type
   TBalloon = Class(TCustomForm)
   private
     lblTitle: TLabel;
@@ -1876,7 +1874,9 @@ Type
   public
     Constructor CreateNew(AOwner: TComponent; Dummy: Integer = 0); override;
     Procedure ShowBalloon(blnLeft, blnTop: Integer; blnTitle, blnText: String; blnType: TBalloonType; blnDuration: Integer; blnPosition: TBalloonPosition);
-    Procedure ShowControlBalloon(blnControl: TWinControl; blnHoriz: TBalloonHoriz; blnVert: TBalloonVert; blnTitle, blnText: String; blnType: TBalloonType; blnDuration: Integer);
+    procedure ShowControlBalloon(blnControl: TWinControl; blnHoriz: TBalloonHoriz;
+      blnVert: TBalloonVert; blnTitle, blnText: String; blnType: TBalloonType;
+  blnDuration: Integer);
   End;
 
   TOlist = class;
@@ -2062,7 +2062,170 @@ Type
     property Visible;
   end;
 
-  { TOnurStrings }
+
+  { TOnurCellStrings }
+
+  TOnurCellStrings = class
+  private
+    FCells: array of array of string;
+    FSize: TPoint;
+    function GetCell(X, Y: integer): string;
+    function GetColCount: integer;
+    function GetRowCount: integer;
+    procedure SetCell(X, Y: integer; AValue: string);
+    procedure SetColCount(AValue: integer);
+    procedure SetRowCount(AValue: integer);
+    procedure SetSize(AValue: TPoint);
+    procedure Savetofile(s: string);
+    procedure Loadfromfile(s: string);
+  public
+    procedure Clear;
+    function arrayofstring(col: integer; aranan: string): integer;
+    property Cells[Col, Row: integer]: string read GetCell write SetCell;
+    property ColCount: integer read GetColCount write SetColCount;
+    property RowCount: integer read GetRowCount write SetRowCount;
+    property Size: TPoint read FSize write SetSize;
+  end;
+
+
+  { Tostringgrid }
+  TOnCellClickSG = procedure(Sender: TObject;Column:integer) of object;
+
+  Tostringgrid= class(ToCustomControl)
+  private
+   // FBackground: Tocolor;
+    ffdisabled: Tocolor;
+    fobdown: Tocolor;
+    fobenter: Tocolor;
+    fobleave: Tocolor;
+    FItemHeight:integer;
+    FItemhOffset:Integer;
+    FItemvOffset:Integer;
+    fcolwidth:integer;
+    fcolvisible:integer;
+    fscroll:ToScrollBar;
+    yscroll:ToScrollBar;
+    
+    FOnCellclick           : TOnCellClickSG;
+
+    fItemscount            : integer;
+    FItemsvShown           : integer;
+    FItemsHShown           : integer;
+    FFocusedItem           : Integer;
+    FheaderHeight          : integer;
+    fgridwidth             : integer;
+    fgridlines             : Boolean;
+    FAutoHideScrollBar     : Boolean;
+    fheadervisible         : Boolean;
+    fmodusewhelll          : Boolean;
+    fcolumindex            : integer;
+    fselectcolor           : TColor;
+    fgridcolor             : Tcolor;
+    fheadercolor           : Tcolor;
+    fitemcolor             : Tcolor;
+    fbackgroundvisible     : Boolean;
+
+    FCells: array of array of string;
+    FcolwitdhA :array of integer;
+    FSize: TPoint;
+
+
+    function GetColWidths(aCol: Integer): Integer;
+    function GetItemAt(Pos: TPoint): Integer;
+    procedure SetBackground(AValue: Tocolor);
+    procedure SetButtonDisable(AValue: Tocolor);
+    procedure SetButtonDown(AValue: Tocolor);
+    procedure SetButtonenter(AValue: Tocolor);
+    procedure SetButtonLeave(AValue: Tocolor);
+    procedure SetColWidths(aCol: Integer; AValue: Integer);
+    procedure VscrollBarChange(Sender: Tobject);
+    procedure HScrollBarChange(Sender: TObject);
+
+
+    function GetCell(X, Y: integer): string;
+    function GetColCount: integer;
+    function GetRowCount: integer;
+    procedure SetCell(X, Y: integer; AValue: string);
+    procedure SetColCount(AValue: integer);
+    procedure SetRowCount(AValue: integer);
+    procedure SetSize(AValue: TPoint);
+
+
+  public
+    constructor Create(Aowner: TComponent); override;
+    destructor Destroy; override;
+
+    procedure SaveToFile(s: string);
+    procedure LoadFromFile(s: string);
+
+    procedure Clear;
+    function Searchstring(col: integer; Search: string): integer;
+    property Cells[Col, Row: integer]: string read GetCell write SetCell;
+    property ColCount: integer read GetColCount write SetColCount;
+    property RowCount: integer read GetRowCount write SetRowCount;
+    property Size: TPoint read FSize write SetSize;
+
+    procedure MouseDown(Button : TMouseButton; Shift : TShiftState; X,Y : Integer); override;
+    procedure MouseUp(Button : TMouseButton; Shift : TShiftState; X,Y : Integer); override;
+    procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
+    property ColWidths[aCol: Integer]: Integer       read GetColWidths    write SetColWidths;
+  protected
+    procedure paint; override;
+    function DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): boolean; override;
+    function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): boolean; override;
+
+
+  published
+    property ItemHeight            : integer         read FItemHeight     write FItemHeight;
+    Property VScrollbar            : ToScrollBar     read fscroll         write fscroll;
+    Property HScrollbar            : ToScrollBar     read yscroll         write yscroll;
+    property ButtonEnter           : Tocolor         read fobenter        write SetButtonenter;
+    property ButtonLeave           : Tocolor         read fobleave        write SetButtonLeave;
+    property ButtonDown            : Tocolor         read fobdown         write SetButtonDown;
+    property ButtonDisable         : Tocolor         read ffdisabled      write SetButtonDisable;
+    property Background            : Tocolor         read FBackground     write SetBackground;
+    property Gridcolor             : Tcolor          read fgridcolor      write fgridcolor;
+    property GridBordersize        : integer         read fgridwidth      write fgridwidth;
+    property GridShow              : Boolean         read fgridlines      write fgridlines;
+    property GridWidth             : integer         read fcolwidth       write fcolwidth;
+    property Itemscolor            : Tcolor          read fitemcolor      write fItemcolor;
+    property Selectedcolor         : Tcolor          read fselectcolor    write fselectcolor;
+    property OnCellClick           : TOnCellClickSG  read FOnCellclick    write FOnCellclick;
+    property Action;
+    property Align;
+    property Anchors;
+    property AutoSize;
+    property BidiMode;
+    property Constraints;
+    property Enabled;
+    property Font;
+    property ParentBidiMode;
+    property OnChangeBounds;
+    property OnClick;
+    property OnContextPopup;
+    property OnDragDrop;
+    property OnDragOver;
+    property OnEndDrag;
+    property OnMouseDown;
+    property OnMouseEnter;
+    property OnMouseLeave;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnMouseWheel;
+    property OnMouseWheelDown;
+    property OnMouseWheelUp;
+    property OnResize;
+    property OnStartDrag;
+    property ParentFont;
+    property ParentShowHint;
+    property ParentColor;
+    property PopupMenu;
+    property ShowHint;
+    property Visible;
+  end;
+
+
+   { TOnurStrings }
 
   TOnurStrings = class
   private
@@ -2168,25 +2331,33 @@ Type
     private
       FCells: array of array of string;
       FSize: TPoint;
+      fitemindex : Integer;
       FItemHeight:integer;
       FItemhOffset:Integer;
-      FItemOffset:Integer;
+      FItemsvShown : integer;
+      FItemsHShown : integer;
+      FItemvOffset:Integer;
       fcolwidth:integer;
       fcolvisible:integer;
       fscroll:ToScrollBar;
       yscroll:ToScrollBar;
-      Procedure Change(Sender: Tobject);
-
+      Fselectedcolor:Tcolor;
+      procedure VScrollBarChange(Sender: Tobject);
       function GetCell(X, Y: Integer): string;
       function GetColCount: Integer;
-
+      function GetItemAt(Pos: TPoint): integer;
+      function GetItemIndex: integer;
       function GetRowCount: Integer;
+
       procedure SetCell(X, Y: Integer; AValue: string);
       procedure SetColCount(AValue: Integer);
       Procedure Setcolwidth(Const Avalue: Integer);
+      procedure SetItemIndex(Avalue: integer);
       procedure SetRowCount(AValue: Integer);
       procedure SetSize(AValue: TPoint);
       procedure HScrollBarChange(Sender: TObject);
+      procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
+      X: integer; Y: integer); override;
 
   public
     constructor Create(Aowner: TComponent); override;
@@ -2197,13 +2368,15 @@ Type
     function DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): boolean; override;
     function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): boolean; override;
   published
-    property ItemHeight :integer read FItemHeight write FItemHeight;
-    property ColCount: Integer read GetColCount write SetColCount;
-    property RowCount: Integer read GetRowCount write SetRowCount;
-    property Colwidth:Integer read fcolwidth  write SetColwidth;
-    Property Scrollbar :ToScrollBar read fscroll write fscroll;
-    Property HScrollbar :ToScrollBar read yscroll write yscroll;
-    property NoVisiblecol:integer  read fcolvisible  write fcolvisible;
+    property ItemHeight    : integer     read FItemHeight    write FItemHeight;
+    property Itemindex     : integer     read GetItemIndex   write SetItemIndex;
+    property ColCount      : Integer     read GetColCount    write SetColCount;
+    property RowCount      : Integer     read GetRowCount    write SetRowCount;
+    property Colwidth      : Integer     read fcolwidth      write SetColwidth;
+    Property Scrollbar     : ToScrollBar read fscroll        write fscroll;
+    Property HScrollbar    : ToScrollBar read yscroll        write yscroll;
+    property NoVisiblecol  : integer     read fcolvisible    write fcolvisible;
+    property SelectedColor : Tcolor      read Fselectedcolor write Fselectedcolor;
     property Action;
     property Align;
     property Anchors;
@@ -2310,7 +2483,82 @@ type
 
   end;
 
+  { TONNormalLabel }
+  TTextDirection = (tdLeftToRight, tdRightToLeft);
+  TTextStylee = (tsPingPong, tsScroll);
 
+  TONormalLabel = class(TGraphicControl)
+  private
+    clr        : Tcolor;
+    FBuffer    : TBitmap;//TPortableNetworkGraphic;
+    FText      : string;
+    FAnimate   : boolean;
+    fbilink    : boolean;
+    fbilinki   : boolean;
+    fblinktimer: TTimer;
+    FTimer     : TTimer;
+    FDirection : TTextDirection;
+    FStyle     : TTextStylee;
+    FWait      : byte;
+    FPos       : integer;
+    FScrollBy  : integer;
+    Fwaiting   : byte;
+    fyazibuyuk : boolean;
+    fblinkinterval : integer;
+    ftimerinterval : integer;
+
+    const
+    wWaiting    : byte = 15;
+
+
+//    procedure DrawFontTextcolor(incolor, outcolor: TColor);
+    function GetScroll: integer;
+    function GetTextDefaultPos: smallint;
+    procedure SetAnimate(AValue: boolean);
+    procedure SetBilink(AValue: boolean);
+    procedure Setblinkinterval(AValue: integer);
+    procedure Setclr(AValue: Tcolor);
+    procedure SetScrollBy(AValue: integer);
+    procedure SetText(AValue: string);
+    procedure Settimerinterval(AValue: integer);
+    procedure Setwaiting(AValue: byte);
+    procedure SetYazibuyuk(AValue: boolean);
+    procedure TimerEvent(Sender: TObject);
+    procedure DrawFontText;
+    procedure FreeTimer;
+    procedure Blinktimerevent(sender:TObject);
+    procedure Loaded; override;
+  protected
+    { Protected declarations }
+    procedure Paint; override;
+  public
+    { Public declarations }
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+  published
+    { Published declarations }
+    property Color;
+    property Flash           : boolean      read fbilink        write SetBilink default False;
+    property FlashColor      : Tcolor       read clr            write clr; // for Blink color
+    property Flashinterval   : integer      read fblinkinterval write Setblinkinterval;
+    property Animate         : boolean      read FAnimate       write SetAnimate default False;
+    property Animateinterval : integer      read ftimerinterval write Settimerinterval;
+    property Animatewait     : byte         read Fwaiting       write Setwaiting;
+    //property Style         : TTextStylee  read FStyle         write FStyle;
+    property Text            : string       read FText          write SetText;
+    property Scroll          : integer      read GetScroll      write SetScrollBy;
+    property Align;
+    property Font;
+    //property Yazibuyuk : boolean read fyazibuyuk write SetYazibuyuk;
+
+    property ParentColor;
+    property Visible;
+    property OnClick;
+    property OnDblClick;
+    property OnMouseDown;
+    property OnMouseMove;
+    property OnMouseUp;
+  end;
 
  { TOKnob }
 
@@ -2363,18 +2611,18 @@ type
 procedure Register;
  {$R Balloon.res}
 implementation
-uses strutils,LazUnicode,Math;//,utf8scanner;
+uses strutils,LazUnicode,Math,IntfGraphics, FPImage, GraphType,LazCanvas;//,utf8scanner;
 {$IFDEF UNIX}uses math;{$ENDIF}
 
 procedure Register;
 begin
   RegisterComponents('Standard', [TOlabel]);
+  RegisterComponents('Standard', [TONormalLabel]);
   RegisterComponents('Standard', [Tobuton]);
   RegisterComponents('Standard', [Topanel]);
   RegisterComponents('Standard', [TOGraphicPanel]);
   RegisterComponents('Standard', [TCollapExpandpanel]);
   RegisterComponents('Standard', [Toedit]);
-  RegisterComponents('Standard', [TOled]);
   RegisterComponents('Standard', [ToSpinEdit]);
   RegisterComponents('Standard', [Tomemo]);
   RegisterComponents('Standard', [Tocombobox]);
@@ -2383,19 +2631,22 @@ begin
   RegisterComponents('Standard', [TOProgressBar]);
   RegisterComponents('Standard', [TOTrackBar]);
   RegisterComponents('Standard', [ToScrollBar]);
+  RegisterComponents('Standard', [ToBalloonControl]);
   RegisterComponents('Standard', [ToListBox]);
   RegisterComponents('Standard', [ToChecklistbox]);
-  RegisterComponents('Standard', [ToBalloonControl]);
+  RegisterComponents('Standard', [Totransprentlist]);
+  RegisterComponents('Standard', [Totransprentlistbox]);
   RegisterComponents('Standard', [TOlist]);
+  RegisterComponents('Standard', [Tostringgrid]);
+  RegisterComponents('Standard', [TOled]);
   RegisterComponents('Standard', [Toswich]);
   RegisterComponents('Standard', [ToImgswich]);
   RegisterComponents('Standard', [ToImgradio]);
-  RegisterComponents('Standard', [Totransprentlist]);
-  RegisterComponents('Standard', [Totransprentlistbox]);
   RegisterComponents('Standard', [TOKnob]);
 
 
 end;
+
 
 
 Procedure Ocolortoocolor(Too, From: Tocolor);
@@ -2753,15 +3004,15 @@ Begin
  ControlStyle := ControlStyle + [csParentBackground, csClickEvents,
    csCaptureMouse, csDoubleClicks];
  FCells:=TOnurStrings.Create;
- FBackground:=ToColor.Create(self);
+ FBackground:=Tocolor.Create(self);
 // FBackground.// Aownerr:=self;
- fobenter:=ToColor.Create(self);
+ fobenter:=Tocolor.Create(self);
 // fobenter.// Aownerr:=self;
- fobleave:=ToColor.Create(self);
+ fobleave:=Tocolor.Create(self);
 // fobleave.// Aownerr:=self;
- fobdown:=ToColor.Create(self);
+ fobdown:=Tocolor.Create(self);
 // fobdown.// Aownerr:=self;
- ffdisabled:=ToColor.Create(self);
+ ffdisabled:=Tocolor.Create(self);
 //ffdisabled.// Aownerr:=self;
 
 
@@ -3379,6 +3630,274 @@ Procedure Tolabel.Paint;
 End;
 
 
+
+{ TONNormalLabel }
+
+function TONormalLabel.GetScroll: integer;
+begin
+ Result := ABS(FScrollBy);
+end;
+
+function TONormalLabel.GetTextDefaultPos: smallint;
+begin
+ if (FBuffer.Width<self.ClientWidth) then
+   Result := (self.ClientWidth - FBuffer.Width) div 2
+   else
+   Result :=0;
+end;
+
+procedure TONormalLabel.SetAnimate(AValue: boolean);
+begin
+  if AValue = FAnimate then exit;
+
+  if AValue then
+  begin
+    FPos := GetTextDefaultPos;
+    FWait := Fwaiting;// Waiting;
+    FDirection := tdLeftToRight;
+    FAnimate := True;
+    SetText(FText);
+    FreeTimer;
+    ftimer := TTimer.Create(Self);
+    FTimer.Interval := ftimerinterval;//100;
+    FTimer.OnTimer := @TimerEvent;
+    if not (csDesigning in ComponentState) then
+    FTimer.Enabled := True;
+  end
+  else
+  begin
+    FreeTimer;
+    FAnimate := False;
+    FWait := 0;
+    FPos := GetTextDefaultPos;
+    SetText(FText);
+  end;
+end;
+
+procedure TONormalLabel.SetBilink(AValue: boolean);
+begin
+   if fbilink = AValue then Exit;
+  fbilink := AValue;
+
+  if not (csDesigning in ComponentState) then
+  fblinktimer.Enabled:=AValue;
+
+  if AValue=false then
+  begin
+    fbilink:=false;
+    Invalidate;
+  end;
+end;
+
+procedure TONormalLabel.Setblinkinterval(AValue: integer);
+begin
+ if fblinkinterval=AValue then Exit;
+  fblinkinterval:=AValue;
+  fblinktimer.Interval:=AValue;
+end;
+
+procedure TONormalLabel.Setclr(AValue: Tcolor);
+begin
+  if clr = AValue then Exit;
+  clr := AValue;
+end;
+
+procedure TONormalLabel.SetScrollBy(AValue: integer);
+begin
+ if FScrollBy = AValue then exit;
+  FScrollBy := AValue;
+end;
+
+procedure TONormalLabel.SetText(AValue: string);
+begin
+  FText := AValue;
+  DrawFontText;
+  FPos := GetTextDefaultPos;
+  FDirection := tdLeftToRight;
+  FWait := Fwaiting;// Waiting;
+  Invalidate;
+end;
+
+procedure TONormalLabel.Settimerinterval(AValue: integer);
+begin
+ if ftimerinterval=AValue then Exit;
+  ftimerinterval:=AValue;
+  if (fAnimate) and Assigned(ftimer) then
+    FTimer.Interval := ftimerinterval;//100;
+end;
+
+procedure TONormalLabel.Setwaiting(AValue: byte);
+begin
+ if Fwaiting=AValue then Exit;
+  Fwaiting:=AValue;
+end;
+
+procedure TONormalLabel.SetYazibuyuk(AValue: boolean);
+begin
+ if fyazibuyuk=AValue then Exit;
+  fyazibuyuk:=AValue;
+end;
+
+procedure TONormalLabel.TimerEvent(Sender: TObject);
+begin
+ if FWait > 0 then
+  begin
+    Dec(FWait);
+    Exit;
+  end;
+    if (FBuffer.Width < self.Width) then
+    begin
+
+      if (fpos >= 0) and (fpos <= (self.Width - FBuffer.Width)) then
+        if FDirection = tdRightToLeft then
+          fpos -= FScrollBy
+        else if FDirection = tdLeftToRight then
+          fpos += FScrollBy;
+
+      if fpos < 0 then
+      begin
+        fpos := 0;
+        FDirection := tdLeftToRight;
+        FWait := Fwaiting;//Waiting;
+      end;
+
+      if fpos > (self.Width - FBuffer.Width) then
+      begin
+        fpos := (self.Width - FBuffer.Width);
+        FDirection := tdRightToLeft;
+        FWait := Fwaiting;// Waiting;
+      end;
+    end else
+    begin
+      if (fpos >= -(FBuffer.Width - self.Width)) and (fpos <= (FBuffer.Width - self.Width)) then
+       if FDirection = tdRightToLeft then
+         fpos -=FScrollBy
+       else if FDirection = tdLeftToRight then
+          fpos += FScrollBy;
+      if fpos > 0 then
+      begin
+        fpos := 0;
+        FDirection := tdRightToLeft;
+        FWait := Fwaiting;//Waiting;
+      end
+      else
+      if fpos < -(FBuffer.Width - self.Width) then
+      begin
+        fpos := -(FBuffer.Width - self.Width);
+        FDirection := tdLeftToRight;
+        FWait := Fwaiting;//Waiting;
+      end;
+    end;
+  Invalidate;
+end;
+
+procedure TONormalLabel.DrawFontText;
+var
+b:Tcolor;
+begin
+  FBuffer.SetSize(0, 0);
+  FBuffer.canvas.Font := self.font;
+  FBuffer.SetSize(FBuffer.canvas.TextExtent(FText).cx, self.ClientHeight);
+  if self.font.Color<>clBlack then
+   b:=clBlack
+  else
+   b:=clwhite;
+
+  FBuffer.Canvas.Brush.Color:=b;
+  FBuffer.Canvas.FillRect(0,0,FBuffer.Width,FBuffer.Height);
+  FBuffer.TransparentColor := b;
+  FBuffer.Transparent := True;
+ // FBuffer.Canvas.Brush.Style := bsClear;
+  //FBuffer.Canvas.Pen.Color := clRed;
+  FBuffer.Canvas.Brush.Color:=self.font.color;
+  FBuffer.canvas.TextRect(FBuffer.Canvas.ClipRect,0,0,FText);
+
+
+  if FBuffer.Width> self.Width then
+   fyazibuyuk:=true
+  else
+   fyazibuyuk:=false;
+end;
+
+
+
+
+procedure TONormalLabel.FreeTimer;
+begin
+  if Assigned(FTimer) then
+  begin
+    FTimer.Enabled := False;
+    FTimer.Free;
+    FTimer := nil;
+  end;
+end;
+
+procedure TONormalLabel.Blinktimerevent(sender: TObject);
+begin
+   fbilink:= not fbilinki;
+  fbilinki:= not fbilinki;
+  if FAnimate=false then
+  Invalidate;
+end;
+
+procedure TONormalLabel.Loaded;
+begin
+  inherited Loaded;
+    DrawFontText;
+end;
+
+procedure TONormalLabel.Paint;
+begin
+  inherited Paint;
+    if fbilink then
+  begin
+    canvas.Brush.Color := clr;
+    canvas.FillRect(ClientRect);
+  end;
+
+    self.Canvas.Draw(fpos,0,FBuffer);
+end;
+
+constructor TONormalLabel.Create(AOwner: TComponent);
+begin
+
+  inherited Create(AOwner);
+  Width                 := 150;
+  Height                := 30;
+  FBuffer               := TBitmap.Create;//TPortableNetworkGraphic.Create;
+  FBuffer.SetSize(150,30);
+  FBuffer.Transparent := True;
+  FTimer                := nil;
+  FDirection            := tdLeftToRight;
+  FStyle                := tsPingPong;
+  FAnimate              := False;
+  FText                 := 'ONORMALLABEL';
+  FWait                 := 0;
+  FPos                  := 0;
+  FScrollBy             := 8;
+  Fwaiting              := 15;
+  fblinkinterval        := 500;
+  ftimerinterval        := 100;
+  clr                   := clRed;
+  fbilink               := false;
+  fyazibuyuk            := false;
+  fblinktimer           := TTimer.Create(nil);
+  fblinktimer.Enabled   := False;
+  fblinktimer.Interval  := fblinkinterval;
+  fblinktimer.OnTimer   := @Blinktimerevent;
+end;
+
+destructor TONormalLabel.Destroy;
+begin
+    FreeTimer;
+  if fblinktimer.Enabled then fblinktimer.Enabled:=false;
+
+  FreeAndNil(fblinktimer);
+  FreeAndNil(FBuffer);
+  inherited Destroy;
+end;
+
+
 { Totransprentlist }
  
 function Totransprentlist.GetCell(X, Y: Integer): string;
@@ -3405,7 +3924,7 @@ End;
 
 procedure Totransprentlist.SetCell(X, Y: Integer; AValue: string);
 Var
-  i,p, z, fark, FItemsShown:integer;
+  i,p:integer;
 Begin
   i:=FSize.X;
   p:=FSize.y;
@@ -3419,7 +3938,10 @@ Begin
   FCells[Y, X] := AValue;
 
 
-  FItemsShown := self.Height div FItemHeight;
+  FItemsvShown := self.ClientHeight div FItemHeight;
+  FItemsHShown := self.ClientWidth div fcolwidth;//FItemHeight;
+
+
 
   if fsize.y * FItemHeight > self.Height then
    fscroll.Visible := True
@@ -3428,7 +3950,7 @@ Begin
 
 
 
-  if fsize.y-FItemsShown+1 > 0 then
+  if fsize.y-FItemsvShown+1 > 0 then
   begin
      with fscroll do
      begin
@@ -3436,32 +3958,34 @@ Begin
        left := self.Left+Self.ClientWidth;
        Top := self.top;
        Height := Self.Height;
-       Max:= fsize.y-FItemsShown;
+       Max:= fsize.y-FItemsvShown;
      end;
   end;
 
 
 
-  fark:=0;
-  fark:=(FSize.X-2)*fcolwidth;
+ // fark:=0;
+ // fark:=(FSize.X-2)*fcolwidth;
 
-  if (fark>0) and (fark>self.ClientWidth) then
-   yscroll.Max :=(FSize.X-2)-1;//({( FSize.X) div }(fark div self.ClientWidth))+1;
+//  if (fark>0) and (fark>self.ClientWidth) then
+//   yscroll.Max :=(FSize.X-2)-1;//({( FSize.X) div }(fark div self.ClientWidth))+1;
 
-        if fark> self.ClientWidth then
-        begin
-          yscroll.Visible := True;
-          yscroll.Left:=self.Left;
-          yscroll.top:=self.top+self.Height;
-          yscroll.Width:=self.Width;
-        end else
-          yscroll.Visible := False;
-
-
-
+ // if fark> self.ClientWidth then
+  if FSize.x-FItemsHShown>0 then
+  begin
+    with yscroll do
+    begin
+      Visible := True;
+      Left:=self.Left;
+      top:=self.top+self.ClientHeight;
+      Width:=self.ClientWidth;
+      max := (FSize.x-FItemsHShown);
+    end;
+  end else
+  begin
+    yscroll.Visible := False;
+  end;
   Invalidate;
-
-
 End;
 
 procedure Totransprentlist.SetColCount(AValue: Integer);
@@ -3487,10 +4011,70 @@ Begin
    if (FSize.X = AValue.X) and (FSize.Y = AValue.Y) then Exit;
   FSize := AValue;
   SetLength(FCells, FSize.Y, FSize.X);
-
 End;
 
+function Totransprentlist.GetItemIndex: integer;
+begin
+  Result := fitemindex;
+end;
 
+procedure Totransprentlist.SetItemIndex(Avalue: integer);
+var
+  Shown: integer;
+begin
+  if FSize.Y = 0 then exit;
+  if fitemindex = aValue then Exit;
+  if fitemindex = -1 then exit;
+  Shown := Height div FItemHeight;
+
+  if (fsize.Y > 0) and (aValue >= -1) and (aValue <= FSize.Y) then
+  begin
+    fitemindex := aValue;
+
+    if (aValue < FItemvOffset) then
+      FItemvOffset := aValue
+    else if aValue > (FItemvOffset + (Shown - 1)) then
+      FItemvOffset := ValueRange(aValue - (Shown - 1), 0, FSize.Y - Shown);
+  end
+  else
+  begin
+    fitemindex := -1;
+  end;
+  Invalidate;
+end;
+
+function Totransprentlist.GetItemAt(Pos: TPoint): integer;
+var
+  w: Integer;
+begin
+  Result := -1;
+
+  w := 3;//((Height) div FItemHeight-1);//FTop.Height;
+
+  //if (Pos.Y >= 0) and (PtInRect(itempaintHeight,pos)) then
+  if Pos.Y >= 0 then                                    //(FItemOffset + (Height) div FItemHeight) - 1
+  begin
+    Result := FItemvOffset + ((Pos.Y - w) div FItemHeight);
+
+    if (Result > FSize.Y - 1) or (Result > (FItemvOffset + FItemsvShown )-1) then
+      Result := -1;
+  end;
+end;
+
+procedure Totransprentlist.MouseDown(Button: TMouseButton; Shift: TShiftState;
+  X: integer; Y: integer);
+var
+  ClickedItem: integer;
+begin
+  if button = mbLeft then
+  begin
+    ClickedItem := GetItemAt(Point(X, Y));
+    if ClickedItem > -1 then fitemindex := ClickedItem;
+  end;
+
+  Invalidate;
+  inherited MouseDown(Button, Shift, X, Y);
+end;
 
 
 function Totransprentlist.DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint
@@ -3499,10 +4083,10 @@ begin
 //  fmodusewhelll := True;
   inherited;
   if not fscroll.Visible then exit;
-  if FItemOffset =fscroll.max then exit;
+  if FItemvOffset =fscroll.max then exit;
 
   fscroll.Position := fscroll.Position + Mouse.WheelScrollLines;
-  FItemOffset := fscroll.Position;
+  FItemvOffset := fscroll.Position;
   Result := True;
   Invalidate;
 //  fmodusewhelll := False;
@@ -3514,9 +4098,9 @@ begin
   inherited;
  // fmodusewhelll := True;
   if not fscroll.Visible then exit;
-  if FItemOffset =0 then exit;
+  if FItemvOffset =0 then exit;
   fscroll.Position := fscroll.Position - Mouse.WheelScrollLines;
-  FItemOffset := fscroll.Position;
+  FItemvOffset := fscroll.Position;
   Result := True;
   Invalidate;
  // fmodusewhelll := False;
@@ -3529,12 +4113,18 @@ Begin
   ControlStyle := ControlStyle + [csParentBackground, csClickEvents,
     csCaptureMouse, csDoubleClicks];
   FItemHeight:=15;
+  fitemindex := -1;
   Width:=150;
   Height:=250;
   fcolwidth:=80;
-  FItemOffset:=0;
+  FItemvOffset:=0;
   fcolvisible:=-1;
   FItemhOffset:=0;
+
+  FItemsvShown :=10;
+  FItemsHShown :=3;
+  Fselectedcolor :=clBlue;
+
   fscroll:=ToScrollBar.Create(nil);
   fscroll.Parent:=Parent;
   fscroll.Kind:=oVertical;
@@ -3542,7 +4132,7 @@ Begin
   fscroll.top:=self.top;
   fscroll.Width:=20;
   fscroll.Height:=self.Height;
-  fscroll.OnChange:=@change;
+  fscroll.OnChange:=@VScrollBarChange;
   fscroll.Visible:=false;
 
 
@@ -3560,13 +4150,15 @@ End;
 destructor Totransprentlist.Destroy;
 Begin
   if Assigned(fscroll) then FreeAndNil(fscroll);
+  if Assigned(yscroll) then FreeAndNil(yscroll);
+
   Inherited Destroy;
 End;
 
 
-procedure Totransprentlist.Change(Sender: Tobject);
+procedure Totransprentlist.VScrollBarChange(Sender: Tobject);
 begin
- FItemOffset:=fscroll.Position;
+ FItemvOffset := fscroll.Position;
  Invalidate;
 End;
 procedure Totransprentlist.HScrollBarChange(Sender: TObject);
@@ -3577,7 +4169,7 @@ end;
 
 Procedure Totransprentlist.Paint;
 var
- i,z,x4 ,a,b,FItemsShown,fark:integer;
+ i,z,x4 ,a,b:integer;
 begin
   if Visible=false then exit;
   inherited paint;
@@ -3586,10 +4178,10 @@ begin
   if fsize.x-1 > 0 then
   begin
      try
-
-
       a := 1;
       x4:=0;
+      FItemsvShown := Height div FitemHeight;
+      FItemsHShown := (self.Width div fcolwidth)-1;
 
       canvas.Brush.Style := bsClear;
         for z:=0+FItemhOffset to fsize.x -1 do  // columns
@@ -3598,12 +4190,19 @@ begin
          b:=a;
           if z<>fcolvisible then
           begin
-            for i := FItemOffset to (FItemOffset + (Height) div FItemHeight) - 1 do
+            for i := FItemvOffset to (FItemvOffset + (Height) div FItemHeight) - 1 do
             begin
                 if (i < GetRowCount) and (i>-1) then
                 begin
-                    Canvas.TextOut(a+x4, b, GetCell(z,i));
-                    b := b + FitemHeight;
+                  if i=fitemindex then
+                  begin
+                    canvas.Brush.Color:=Fselectedcolor;
+                    canvas.FillRect(a+x4,b,a+x4+fcolwidth, b+FitemHeight);
+                  end;
+                  canvas.Brush.Style := bsClear;
+                  Canvas.TextOut(a+x4, b, GetCell(z,i));
+
+                  b := b + FitemHeight;
                   if (b >= Height) then Break;
                 end;
              //   b := a+FItemHeight;
@@ -4540,6 +5139,7 @@ End;
 
 function TOlist.Getcells(Acol, Arow: Integer): String;
 Begin
+
   if (Columns.Count>-1) and (Columns.Count<=Acol) then
   Result:=''
   else
@@ -4549,6 +5149,7 @@ Begin
    else
     Result:=Columns[Acol].Items[Arow];
   end;
+
 End;
 
 function TOlist.Getgridview: Boolean;
@@ -4574,9 +5175,9 @@ Begin
     Columns[Acol].Items.EndUpdate;
    end else
    begin
-     Columns[Acol].Items.BeginUpdate;
+   //  Columns[Acol].Items.BeginUpdate;
      Columns[Acol].Items[Arow]:=Avalue;
-     Columns[Acol].Items.EndUpdate;
+   //  Columns[Acol].Items.EndUpdate;
    end;
 
    fItemscount :=Columns[acol].flist.Count;
@@ -4703,27 +5304,33 @@ procedure TOlist.MouseDown(Button: TMouseButton; Shift: TShiftState; X,
 Var
   Clickeditem: Integer;
 begin
-  FFocusedItem:= -1;
-  Clickeditem := -1;
+
   if Columns.Count>0 then
   begin
     //if Items.Items.Count>0 then
- //   if button = mbLeft then
+    if button = mbLeft then
     begin
+     FFocusedItem:= -1;
+     Clickeditem := -1;
 
       ClickedItem := GetItemAt(Point(X, Y));
 
       if (ClickedItem>-1) and (fcolumindex>-1) then
       begin
+
+      // FFocusedItem:=ClickedItem;
+
        if (Clickeditem<=Columns[fcolumindex].Items.Count-1) then FFocusedItem:=ClickedItem;
 
        if Assigned(FOnCellclick) then  FOnCellclick(self,Columns[fcolumindex]);
        Invalidate;
 
+     //  ShowMessage(inttostr(FFocusedItem));
+
       end;
       SetFocus;
- //   end else
-   // begin
+    end else
+    begin
      // FFocusedItem:=-1;
      // Invalidate;
     End;
@@ -4861,6 +5468,875 @@ procedure TOlist.Delete(indexi: integer);
  begin
   for i:=0 to Columns.Count-1 do
    Columns[i].items.delete(Indexi);
+end;
+
+
+{ TOnurCellStrings }
+
+function TOnurCellStrings.GetCell(X, Y: integer): string;
+begin
+  Result := FCells[Y, X];
+end;
+
+function TOnurCellStrings.GetColCount: integer;
+begin
+  Result := Size.x;
+end;
+
+function TOnurCellStrings.GetRowCount: integer;
+begin
+  Result := Size.Y;
+end;
+
+procedure TOnurCellStrings.SetCell(X, Y: integer; AValue: string);
+var
+  i, p: integer;
+begin
+  i := FSize.X;
+  p := FSize.y;
+  if x >= i then
+    Inc(i);
+  if y >= p then
+    Inc(p);
+
+  SetSize(point(i, p));
+
+  FCells[Y, X] := AValue;
+
+end;
+
+procedure TOnurCellStrings.SetColCount(AValue: integer);
+begin
+  Size := Point(AValue, RowCount);
+end;
+
+procedure TOnurCellStrings.SetRowCount(AValue: integer);
+begin
+  Size := Point(ColCount, AValue);
+end;
+
+procedure TOnurCellStrings.SetSize(AValue: TPoint);
+begin
+  if (FSize.X = AValue.X) and (FSize.Y = AValue.Y) then Exit;
+  FSize := AValue;
+  SetLength(FCells, FSize.Y, FSize.X);
+end;
+
+procedure TOnurCellStrings.Savetofile(s: string);
+var
+  f: TextFile;
+  i, k: integer;
+begin
+  AssignFile(f, s);
+  Rewrite(f);
+  Writeln(f, ColCount);
+  Writeln(f, RowCount);
+  for i := 0 to ColCount - 1 do
+    for k := 0 to RowCount - 1 do
+      Writeln(F, Cells[i, k]);
+  //    end;
+  CloseFile(F);
+end;
+
+procedure TOnurCellStrings.Loadfromfile(s: string);
+var
+  f: TextFile;
+  iTmp, i, k: integer;
+  strTemp: string;
+begin
+  AssignFile(f, s);
+  Reset(f);
+
+  // Get number of columns
+  Readln(f, iTmp);
+  ColCount := iTmp;
+  // Get number of rows
+  Readln(f, iTmp);
+  RowCount := iTmp;
+  // loop through cells & fill in values
+  for i := 0 to ColCount - 1 do
+    for k := 0 to RowCount - 1 do
+    begin
+      Readln(f, strTemp);
+      Cells[i, k] := strTemp;
+    end;
+
+  CloseFile(f);
+end;
+
+
+procedure TOnurCellStrings.Clear;
+begin
+  FSize.x := 0;
+  FSize.y := 0;
+
+  SetLength(FCells, 0);
+  Finalize(fsize);
+end;
+
+function TOnurCellStrings.arrayofstring(col: integer; aranan: string): integer;
+var
+  i: integer;
+begin
+  Result := -1;
+  for i := 0 to FSize.y - 1 do
+  begin
+    if FCells[i, col] = aranan then
+    begin
+      Result := i;
+      break;
+    end;
+  end;
+end;
+
+{ Tostringgrid }
+
+procedure Tostringgrid.SetBackground(AValue: Tocolor);
+begin
+
+end;
+
+
+
+procedure Tostringgrid.SetButtonDisable(AValue: Tocolor);
+begin
+
+end;
+
+procedure Tostringgrid.SetButtonDown(AValue: Tocolor);
+begin
+
+end;
+
+procedure Tostringgrid.SetButtonenter(AValue: Tocolor);
+begin
+
+end;
+
+procedure Tostringgrid.SetButtonLeave(AValue: Tocolor);
+begin
+
+end;
+
+procedure Tostringgrid.SetColWidths(aCol: Integer; AValue: Integer);
+begin
+
+ if Length(FcolwitdhA)>0 then
+ begin
+  FcolwitdhA[acol]:=AValue;
+  Invalidate;
+ end;
+end;
+
+procedure Tostringgrid.SetCell(X, Y: integer; AValue: string);
+var
+  i, p: integer;
+begin
+
+  i := FSize.X;
+  p := FSize.y;
+  if x >= i then
+    Inc(i);
+  if y >= p then
+    Inc(p);
+
+
+  SetSize(point(i, p));
+
+  FCells[Y, X] := AValue;
+
+  SetLength(FcolwitdhA,fsize.x); // For colwidth
+  FcolwitdhA[x]:=fcolwidth;  // default colwidth
+  Invalidate;
+end;
+
+procedure Tostringgrid.SetColCount(AValue: integer);
+begin
+  SetSize(Point(AValue, RowCount));
+  //fsize.x:=AValue;
+ // SetLength(FCells,  FSize.X);
+end;
+
+procedure Tostringgrid.SetRowCount(AValue: integer);
+begin
+  SetSize(Point(ColCount, AValue));
+  //fsize.y:=AValue;
+  //SetLength(FCells, FSize.Y);
+end;
+
+procedure Tostringgrid.SetSize(AValue: TPoint);
+begin
+  if (FSize.X = AValue.X) and (FSize.Y = AValue.Y) then Exit;
+   FSize := AValue;
+   SetLength(FCells, FSize.Y, FSize.X);
+end;
+
+function Tostringgrid.GetCell(X, Y: integer): string;
+begin
+   Result := FCells[Y, X];
+end;
+
+function Tostringgrid.GetColCount: integer;
+begin
+   Result := fSize.x;
+end;
+
+function Tostringgrid.GetRowCount: integer;
+begin
+ Result := fSize.Y;
+end;
+
+procedure Tostringgrid.VscrollBarChange(Sender: Tobject);
+begin
+  if fmodusewhelll=false then
+   begin
+     FItemvOffset := vScrollBar.Position;
+     Invalidate;
+   end;
+end;
+
+procedure Tostringgrid.HScrollBarChange(Sender: TObject);
+begin
+ if fmodusewhelll=false then
+ begin
+   FItemhOffset := hScrollBar.Position;
+   Invalidate;
+ end;
+end;
+
+constructor Tostringgrid.Create(Aowner: TComponent);
+begin
+  inherited Create(Aowner);
+  ControlStyle            := ControlStyle + [csOpaque];
+  Width                   := 150;
+  Height                  := 150;
+  Parent                  := TWinControl(AOwner); // Remover!?
+  fselectcolor            := Clblue;
+  FItemvOffset            := 0;
+  FItemhOffset            := 0;
+  fItemscount             := 0;
+  FItemHeight             := 24;
+  FheaderHeight           := 24;
+  FFocusedItem            := -1;
+  FAutoHideScrollBar      := true;
+  Font.Name               := 'Calibri';
+  Font.Size               := 9;
+  Font.Style              := [];
+  fcolwidth               := 80;
+  TabStop                 := True;
+  fbackgroundvisible      := True;
+  fheadervisible          := True;
+  FItemsvShown            := 10;
+  FItemshShown            := 5;
+
+  fcolumindex             := 0;
+
+  fitemcolor              := clBtnFace;
+  fgridlines              := true;
+  fgridwidth              := 1;
+  fgridcolor              := clBlack;
+  fheadercolor            := clBtnFace;
+ // Backgroundcolored       := true;
+
+   fobenter := Tocolor.Create(self);
+  with fobenter do
+  begin
+   // Aownerr:=self;
+     border := 1;
+    bordercolor := clblack;
+    startcolor := $00CDCDCD;
+    stopcolor := clmenu;
+    Fontcolor := clBlue;
+  end;
+
+  fobleave := Tocolor.Create(self);
+  with fobleave do
+  begin
+    // Aownerr:=self;
+     border := 1;
+    bordercolor := $006E6E6E;
+    startcolor := clActiveBorder;
+    stopcolor := clmenu;
+    Fontcolor := clblack;
+  end;
+
+  fobdown := Tocolor.Create(self);
+  with fobdown do
+  begin
+    // Aownerr:=self;
+     border := 1;
+    bordercolor := clblack;
+    startcolor := clmenu;
+    stopcolor := $00A0A0A0;
+    Fontcolor := clRed;
+  end;
+
+  ffdisabled := Tocolor.Create(self);
+  with ffdisabled do
+  begin
+    // Aownerr:=self;
+    border := 1;
+    bordercolor := clblack;
+    startcolor := clmenu;
+    stopcolor := $005D5D5D;
+    Fontcolor := $002C2C2C;
+  end;
+
+
+  vScrollBar := ToScrollBar.Create(self);
+  with vScrollBar do
+  begin
+    Parent := self;
+    Kind := oVertical;
+    Width := 25;
+    left := Self.Width - (25 + Background.Border);
+    Top := Background.Border;
+    Height := Self.Height - (Background.Border * 2);
+    Max := 100;//Flist.Count;
+    Min := 0;
+    OnChange := @vScrollbarchange;
+    Position := 0;
+    Visible  := false;
+
+
+  end;
+
+
+  hScrollBar := ToScrollBar.Create(self);
+  with hScrollBar do
+  begin
+    Parent := self;
+    Kind := oHorizontal;
+    Width := self.Width- (Background.Border * 2);
+    left := Background.Border;
+    Top := Self.Height - (25 + Background.Border);
+    Height := 25+ Background.Border;
+    Max := 100;//Flist.Count;
+    Min := 0;
+    OnChange := @hScrollBarChange;
+    Position := 0;
+    Visible  := false;
+
+  end;
+
+end;
+
+destructor Tostringgrid.Destroy;
+begin
+
+ vScrollBar.Free; vScrollBar  := NIL;
+ hScrollBar.free; hScrollBar := nil;
+
+
+   if Assigned(fobdown) then
+   FreeAndNil(fobdown);
+
+   if Assigned(fobenter) then
+   FreeAndNil(fobenter);
+
+   if Assigned(fobleave) then
+   FreeAndNil(fobleave);
+
+   if Assigned(ffdisabled) then
+   FreeAndNil(ffdisabled);
+
+  inherited Destroy;
+end;
+
+procedure Tostringgrid.SaveToFile(s: string);
+var
+  f: TextFile;
+  i, k: integer;
+begin
+  AssignFile(f, s);
+  Rewrite(f);
+  Writeln(f, ColCount);
+  Writeln(f, RowCount);
+  for i := 0 to ColCount - 1 do
+    for k := 0 to RowCount - 1 do
+      Writeln(F, Cells[i, k]);
+  //    end;
+  CloseFile(F);
+end;
+
+procedure Tostringgrid.LoadFromFile(s: string);
+var
+  f: TextFile;
+  iTmp, i, k: integer;
+  strTemp: string;
+begin
+  AssignFile(f, s);
+  Reset(f);
+
+  // Get number of columns
+  Readln(f, iTmp);
+  ColCount := iTmp;
+  // Get number of rows
+  Readln(f, iTmp);
+  RowCount := iTmp;
+  // loop through cells & fill in values
+  for i := 0 to ColCount - 1 do
+    for k := 0 to RowCount - 1 do
+    begin
+      Readln(f, strTemp);
+      Cells[i, k] := strTemp;
+    end;
+
+  CloseFile(f);
+end;
+
+procedure Tostringgrid.Clear;
+begin
+ FSize.x := 0;
+ FSize.y := 0;
+
+ SetLength(FCells, 0);
+ Finalize(fsize);
+ Invalidate;
+end;
+
+function Tostringgrid.Searchstring(col: integer; Search: string): integer;
+var
+  i: integer;
+begin
+  Result := -1;
+  for i := 0 to FSize.y - 1 do
+  begin
+    if FCells[i, col] = search then
+    begin
+      Result := i;
+      break;
+    end;
+  end;
+
+end;
+
+
+
+function Tostringgrid.GetItemAt(Pos: TPoint): Integer;
+var
+  i,m,w: Integer;
+begin
+   Result := -1;
+
+//  Dec(Pos.Y, 2); // TOP MARGIN!
+
+  if fheadervisible = True then
+  w:=FheaderHeight
+  else
+  w:=0;
+
+  if Pos.Y >= w then// FheaderHeight then
+  begin
+    Result := FItemvOffset + (Pos.Y div FItemHeight);
+    if fheadervisible = True then
+    Result := Result -1;
+   end;
+
+
+
+
+  m:=0;
+  fcolumindex:=-1;
+  w:=0;
+  if (pos.X>=0) then
+  for i:=0 to ColCount-1 do
+  begin
+  {  if i=Columns.Count-1 then
+     w:=width
+    else }
+     w:=w+fcolwidth; //Columns[i].Width;
+
+    if (m<=Pos.x) and (w>=pos.x)then
+    begin
+     fcolumindex:=i;
+     break;
+    end;
+
+    m:=w;
+  end;
+end;
+
+function Tostringgrid.GetColWidths(aCol: Integer): Integer;
+begin
+  result:=FcolwitdhA[acol];
+end;
+
+procedure Tostringgrid.MouseDown(Button: TMouseButton; Shift: TShiftState; X,
+  Y: Integer);
+Var
+  Clickeditem: Integer;
+begin
+
+  if fsize.x>0 then
+  begin
+    //if Items.Items.Count>0 then
+    if button = mbLeft then
+    begin
+     FFocusedItem:= -1;
+     Clickeditem := -1;
+
+      ClickedItem := GetItemAt(Point(X, Y));
+
+      if (ClickedItem>-1) and (fcolumindex>-1) then
+      begin
+
+      // FFocusedItem:=ClickedItem;
+
+       if (Clickeditem<=RowCount-1) then FFocusedItem:=ClickedItem;
+
+       if Assigned(FOnCellclick) then  FOnCellclick(self,fcolumindex);
+       Invalidate;
+
+     //  ShowMessage(inttostr(FFocusedItem));
+
+      end;
+      SetFocus;
+    end else
+    begin
+     // FFocusedItem:=-1;
+     // Invalidate;
+    End;
+  //  ShowMessage(inttostr(Clickeditem));
+  end;
+  inherited MouseDown(Button, Shift, X, Y);
+end;
+
+procedure Tostringgrid.MouseUp(Button: TMouseButton; Shift: TShiftState; X,
+  Y: Integer);
+begin
+  inherited MouseUp(Button, Shift, X, Y);
+end;
+
+procedure Tostringgrid.MouseMove(Shift: TShiftState; X, Y: Integer);
+begin
+  inherited MouseMove(Shift, X, Y);
+end;
+
+procedure Tostringgrid.paint;
+ var
+  i, z   : Integer;
+  x1, x2,x3,x4,xx : SmallInt;
+  a,b, fark,farki:integer;
+ // itmclr:Tcolor;
+ // FItemshShown:integer;
+  gt:integer;
+begin
+  if Visible=false then exit;
+
+  inherited paint;
+
+ //          11            1501
+ // WriteLn(FSize.X,'   ',FSize.y);
+
+  if FSize.X>0 then
+  begin
+     try
+
+      FItemsvShown := self.ClientHeight div FItemHeight;
+
+      fark:=0;
+
+      for z := 0 to FSize.x - 1 do
+      fark+= FcolwitdhA[z];
+
+      farki:=0;
+      FItemsHShown:=0;
+
+      for z := 0 to fsize.x - 1 do
+      begin
+        farki+=FcolwitdhA[z];
+        if farki>=self.ClientWidth then
+        begin
+          FItemshShown:=z;
+          Break;
+        end;
+      end;
+
+      //WriteLn(fark,'  ', FSize.x*fcolwidth);
+      //fark:= fsize.x * fcolwidth;
+
+
+      if FAutoHideScrollBar then
+      begin
+        if fark > self.ClientWidth then
+          hScrollBar.Visible := True
+        else
+          hScrollBar.Visible := False;
+
+       if (FSize.y * FItemHeight)>self.ClientHeight then
+         vScrollbar.Visible := True
+        else
+         vScrollbar.Visible := False;
+      end;
+
+    //  else
+    //    ScrollBar.Visible := True;
+
+      {  if Columns[0].Items.Count-FItemsShown+1 > 0 then
+        begin }
+        if vScrollbar.Visible then
+           with vScrollBar do
+           begin
+             Width := 25;
+             left := Self.Width - (vScrollBar.Width);// + Background.Border);
+             Top := Background.Border;
+             Height := Self.clientHeight - (Background.Border * 2);
+             Max:=((fsize.y)-FItemsvShown);
+             Ocolortoocolor(Background,self.Background);
+             Ocolortoocolor(ButtonDown,self.ButtonDown);
+             Ocolortoocolor(ButtonLeave,self.ButtonLeave);
+             Ocolortoocolor(ButtonEnter,self.ButtonEnter);
+             Ocolortoocolor(ButtonDisabled,self.ButtonDisable);
+           end;
+
+        if hScrollbar.Visible then
+        with hScrollbar do
+        begin
+          if vScrollBar.Visible then
+           Width := self.ClientWidth- ((Background.Border * 2)+vScrollBar.Width)
+          else
+           Width := self.ClientWidth- (Background.Border * 2);
+
+          left := Background.Border;
+          Top := Self.ClientHeight - (25 + Background.Border);
+          Height := 25+ Background.Border;
+
+          //if (fark>0) and (fark>self.ClientWidth) then
+            Max :=(fsize.x-FItemsHShown);// div (fark div self.ClientWidth))+1;
+
+     //     writeln(fark,'  ',self.ClientWidth);
+         // ShowMessage(inttostr((Columns.Count div (fark div self.ClientWidth))+1));
+
+       //   if fark> self.Width then
+       //     Visible := True
+       //   else
+       //     Visible := False;
+
+          Ocolortoocolor(Background,self.Background);
+          Ocolortoocolor(ButtonDown,self.ButtonDown);
+          Ocolortoocolor(ButtonLeave,self.ButtonLeave);
+          Ocolortoocolor(ButtonEnter,self.ButtonEnter);
+          Ocolortoocolor(ButtonDisabled,self.ButtonDisable);
+        end;
+
+        {end;
+
+        if fark>self.ClientWidth then
+        with vscroll do
+        begin
+          if ScrollBar.Visible then
+           Width := self.Width- ((Background.Border * 2)+ScrollBar.Width)
+          else
+           Width := self.Width- (Background.Border * 2);
+
+          left := Background.Border;
+          Top := Self.Height - (25 + Background.Border);
+          Height := 25+ Background.Border;
+
+          if (fark>0) and (fark>self.ClientWidth) then
+            Max :=(Columns.Count-FItemshShown)-1;// div (fark div self.ClientWidth))+1;
+
+     //     writeln(fark,'  ',self.ClientWidth);
+         // ShowMessage(inttostr((Columns.Count div (fark div self.ClientWidth))+1));
+
+          if fark> self.Width then
+            Visible := True
+          else
+            Visible := False;
+
+          Ocolortoocolor(Background,self.Background);
+          Ocolortoocolor(ButtonDown,self.ButtonDown);
+          Ocolortoocolor(ButtonLeave,self.ButtonLeave);
+          Ocolortoocolor(ButtonEnter,self.ButtonEnter);
+          Ocolortoocolor(ButtonDisabled,self.ButtonDisable);
+        end;
+         }
+
+     // z:=0;
+
+      if hScrollbar.Visible then
+      vScrollbar.Max:=((fsize.y)-FItemsvShown)+1;
+
+
+      a := Background.Border;
+      b := a+FItemHeight;
+      x1:=0;
+      x2:=0;
+      x3:=0;
+      x4:=0;
+      xx:=0;
+      canvas.Brush.Style := bsClear;
+
+        for z:=0+FItemhOffset to Fsize.x-1 do  // columns
+        begin
+
+         //  if Columns[z].Visible=true then
+         //  begin
+
+              a := Background.Border;
+           //   if fheadervisible = True then
+           //    b := a+FItemHeight
+           //   else
+               b:=a;
+
+
+
+
+              if z>0 then
+              x1:=x3
+              else
+              x1:=a;
+
+              x2:=a;
+              x3:=x1+FcolwitdhA[z];//fcolwidth;//(Columns[z].width);
+              x4:=a+ FheaderHeight;
+
+
+            {  if fheadervisible = True then
+              begin
+                canvas.Brush.Color := fgridcolor;// Background.Bordercolor;  // başlık border
+                canvas.Brush.Style := bsSolid;
+                canvas.FillRect(x1, x2, x3,x4);
+
+
+              //  Canvas.Pen.Color:=clLime;// Background.Bordercolor;
+              //  canvas.Pen.Width:=fgridwidth;//Background.Border;
+
+                canvas.Brush.Color := fheadercolor;          // başlık rengi
+                canvas.FillRect(x1+fgridwidth, x2+fgridwidth, x3-fgridwidth,x4-fgridwidth);
+
+                canvas.Font.Assign(Fheaderfont);
+                canvas.TextOut(x1+fgridwidth+5, x2+fgridwidth, Columns[z].Caption);   // başlık yazısı
+               end;
+               }
+
+
+
+
+            //  canvas.Font.Assign(Columns[z].font);
+
+              if hScrollbar.Visible then
+              gt:=(FItemvOffset + ((self.ClientHeight-hScrollbar.Height) div FItemHeight))
+              else
+              gt:=FItemvOffset + (self.ClientHeight div FItemHeight);
+
+             // WriteLn(FItemvOffset,'  ',((self.ClientHeight-VScrollbar.Height)),'  ',FItemHeight,' ',gt);
+
+
+
+              for i := FItemvOffset to gt  do
+              begin
+                  if (i < Fsize.y) and (i>-1) then
+                  begin
+                      if fbackgroundvisible= True then
+                      begin
+                       // item border
+                          if fgridlines then
+                          begin
+                            canvas.Brush.Color := fgridcolor;
+                            canvas.Brush.Style := bsSolid;
+                            canvas.FillRect(x1, b, x3,b + FitemHeight);
+                          End;
+
+
+
+                         // itmclr:=fitemcolor;
+
+
+                          //tüm itemler boyancak
+
+                          //item color
+                          canvas.Brush.Color := fitemcolor;
+                          canvas.Brush.Style := bsSolid;
+
+                          canvas.FillRect(x1+fgridwidth, b+fgridwidth, x3-fgridwidth,(b + FitemHeight)-fgridwidth);
+
+                         // DrawFocusRect(self.canvas.Handle,rect(x1+fgridwidth, b+fgridwidth, x3-fgridwidth,(b + FitemHeight)-fgridwidth));
+
+                        //  Fstatelist:=fnormal;
+
+
+                          if i = FFocusedItem then     // item seçili ise
+                          begin
+                              canvas.Brush.Color := fselectcolor;
+                              canvas.Brush.Style := bsSolid;
+
+                              if z=fsize.x-1 then    // son item scrollbarı geçmesin
+                              begin
+                                if hScrollBar.Visible then
+                                 canvas.FillRect(x1+fgridwidth, b+fgridwidth, x3-(fgridwidth+hScrollBar.Width),(b + FitemHeight)-fgridwidth)
+                                else
+                                 canvas.FillRect(x1+fgridwidth, b+fgridwidth, x3-fgridwidth,(b + FitemHeight)-fgridwidth);
+                              end else
+                              begin
+                               canvas.FillRect(x1+fgridwidth, b+fgridwidth, x3-fgridwidth,(b + FitemHeight)-fgridwidth);
+                              end;
+                          end;
+
+                          canvas.Brush.Style := bsClear;
+                          Canvas.TextOut(x1+5, x2+b, FCells[i,z]);
+
+                      end else
+                      begin
+
+                        if i = FFocusedItem then     // item seçili ise
+                        begin
+                          canvas.Brush.Color := fselectcolor;
+                          canvas.Brush.Style := bsSolid;
+
+                          if fheadervisible = True then
+                           canvas.FillRect(x1+fgridwidth, b+fgridwidth, x3-fgridwidth,b -fgridwidth)
+                          else
+                           canvas.FillRect(x1+fgridwidth, b+fgridwidth, x3-fgridwidth,(b + FitemHeight)-fgridwidth);
+
+                        end;
+
+                        canvas.Brush.Style := bsClear;
+                        canvas.TextOut(x1+5, x2+b, FCells[i,z]);
+
+                      end;
+                    b := b + FitemHeight;
+
+                    if (b >= self.ClientHeight) then Break;
+                  end;
+              end;
+
+          // end;
+          xx:=xx+FcolwitdhA[z];
+          if xx>self.ClientWidth then break;
+        end;
+     finally
+
+     end;
+  end;
+end;
+
+function Tostringgrid.DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint
+  ): boolean;
+begin
+  Result:=inherited DoMouseWheelDown(Shift, MousePos);
+  fmodusewhelll:=True;
+  if not HscrollBar.visible then exit;
+  HscrollBar.Position := HscrollBar.Position+Mouse.WheelScrollLines;
+  FItemvOffset := HscrollBar.Position;
+  Result := True;
+  Invalidate;
+  fmodusewhelll:=false;
+end;
+
+function Tostringgrid.DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint
+  ): boolean;
+begin
+  Result:=inherited DoMouseWheelUp(Shift, MousePos);
+
+   fmodusewhelll:=True;
+   if not HscrollBar.visible then exit;
+   HscrollBar.Position := HscrollBar.Position-Mouse.WheelScrollLines;
+   FItemvOffset := HscrollBar.Position;
+   Result := True;
+   Invalidate;
+   fmodusewhelll:=false;
 end;
 
 { TOlistItem }
@@ -5473,6 +6949,7 @@ begin
 
 //   Drawtorect(self.Canvas,borderect,Tc,Fkind);
 
+
   with canvas do
   begin
    // if (self is Toradiobutton) then
@@ -5644,6 +7121,7 @@ Begin
   backgroundcolored := false;
 
   foncolor := Tocolor.Create(self);
+
  // foncolor.// Aownerr:=self;
   foncolor.Startcolor := clLime;
   foncolor.Stopcolor := clGreen;
@@ -6265,12 +7743,12 @@ begin
     Border := 1;
     Bordercolor := clBlack;
     Fontcolor := clBlack;
+
   end;
 
   obenter := Tocolor.Create(self);
   with obenter do
   begin
-    // Aownerr:=self;
     Startcolor := $00CDCDCD;
     Stopcolor := clMenu;
     Border := 1;
@@ -6280,7 +7758,6 @@ begin
   obdown := Tocolor.Create(self);
   with obdown do
   begin
-    // Aownerr:=self;
     Startcolor := clMenu;
     Stopcolor := $00A0A0A0;
     Border := 1;
@@ -6291,7 +7768,6 @@ begin
   fdisabled := Tocolor.Create(self);
   with fdisabled do
   begin
-    // Aownerr:=self;
     Startcolor := clMenu;
     Stopcolor := $005D5D5D;
     Border := 1;
@@ -6617,7 +8093,6 @@ begin
   obleave := Tocolor.Create(self);
   with obleave do
   begin
-    // Aownerr:=self;
     Startcolor := clActiveBorder;
     Stopcolor := clMenu;
     Border := 1;
@@ -6628,7 +8103,6 @@ begin
   obenter := Tocolor.Create(self);
   with obenter do
   begin
-    // Aownerr:=self;
     Startcolor := $00CDCDCD;
     Stopcolor := clMenu;
     Border := 1;
@@ -6638,7 +8112,6 @@ begin
   obdown := Tocolor.Create(self);
   with obdown do
   begin
-    // Aownerr:=self;
     Startcolor := clMenu;
     Stopcolor := $00A0A0A0;
     Border := 1;
@@ -6649,7 +8122,6 @@ begin
   fdisabled := Tocolor.Create(self);
   with fdisabled do
   begin
-    // Aownerr:=self;
     Startcolor := clMenu;
     Stopcolor := $005D5D5D;
     Border := 1;
@@ -6714,9 +8186,9 @@ begin
 
   self.canvas.Brush.Style := bsClear;
   if Kind = oHorizontal then
-    self.canvas.TextOut(Textx, Texty, 't')//'◄')//'3')
+    self.canvas.TextOut(Textx, Texty, '◄')//'◄')//'3')
   else
-    self.canvas.TextOut(Textx, Texty, 'p');//'▲');//'5');
+    self.canvas.TextOut(Textx, Texty, '▲');//'▲');//'5');
 
 
 
@@ -6728,10 +8200,10 @@ begin
 
 
   self.canvas.Brush.Style := bsClear;
-  if Kind = oHorizontal then
-    self.canvas.TextOut(Textx, Texty,'u') //'►')//'4') u
+  if Kind = oHorizontal then              //  ▼ ▲ ▼ ► ◄
+    self.canvas.TextOut(Textx, Texty,'►') //'►')//'4') u
   else
-    self.canvas.TextOut(Textx, Texty,'q'); //'▼');//▲ ▼ ► ◄ ‡ // ALT+30 ALT+31 ALT+16 ALT+17 ALT+0135
+    self.canvas.TextOut(Textx, Texty,'▼'); //'▼');//▲ ▼ ► ◄ ‡ // ALT+30 ALT+31 ALT+16 ALT+17 ALT+0135
 
 
     Canvas.Font.Color:=Getcolors(fcbutons).Fontcolor;
@@ -6742,9 +8214,9 @@ begin
 
     self.canvas.Brush.Style := bsClear;
   if Kind = oHorizontal then
-    self.canvas.TextOut(Textx, Texty, 'I')//'4')
+    self.canvas.TextOut(Textx, Texty, '||')//'4')
   else
-    self.canvas.TextOut(Textx, Texty, 'E');//▲ ▼ ► ◄ ‡ // ALT+30 ALT+31 ALT+16 ALT+17 ALT+0135
+    self.canvas.TextOut(Textx, Texty, '=');//▲ ▼ ► ◄ ‡ // ALT+30 ALT+31 ALT+16 ALT+17 ALT+0135
 
 
 end;
@@ -8391,7 +9863,6 @@ begin
   fposition := 10;
 
   fbar := Tocolor.Create(self);
-//  fbar.// Aownerr:=self;
   fbar.Startcolor := clWhite;
   fbar.Stopcolor := $00FF9E28;
   fbar.Bordercolor := $008E4F00;
@@ -8657,7 +10128,6 @@ begin
   obenter := Tocolor.Create(self);
   with obenter do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := $00CDCDCD;
@@ -8668,7 +10138,6 @@ begin
   obleave := Tocolor.Create(self);
   with obleave do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := $006E6E6E;
     startcolor := clActiveBorder;
@@ -8679,7 +10148,6 @@ begin
   obdown := Tocolor.Create(self);
   with obdown do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clmenu;
@@ -8690,7 +10158,6 @@ begin
   obcheckenters := Tocolor.Create(self);
   with obcheckenters do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clBlack;
@@ -8701,7 +10168,6 @@ begin
   obcheckleaves := Tocolor.Create(self);
   with obcheckleaves do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clBlack;
@@ -8712,7 +10178,6 @@ begin
   obdisabled := Tocolor.Create(self);
   with obdisabled do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clmenu;
@@ -9047,7 +10512,6 @@ begin
   fenter := Tocolor.Create(self);
   with fenter do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := $00CDCDCD;
@@ -9057,7 +10521,6 @@ begin
   fleave := Tocolor.Create(self);
   with fleave do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := $006E6E6E;
     startcolor := clActiveBorder;
@@ -9067,7 +10530,6 @@ begin
   fdown := Tocolor.Create(self);
   with fdown do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clmenu;
@@ -9077,7 +10539,6 @@ begin
   fdisabled := Tocolor.Create(self);
   with fdisabled do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clmenu;
@@ -9131,7 +10592,6 @@ begin
       end;
     end;
   end;
-
 
 
   textx := (self.Width div 2) - (self.canvas.TextWidth(Caption) div 2);
@@ -9276,7 +10736,6 @@ begin
   fbutonen := Tocolor.Create(self);
   with fbutonen do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := $00CDCDCD;
@@ -9285,7 +10744,6 @@ begin
   fbutonle := Tocolor.Create(self);
   with fbutonle do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clActiveBorder;
@@ -9294,7 +10752,6 @@ begin
   fbutondown := Tocolor.Create(self);
   with fbutondown do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := $00BD936C;
@@ -9303,7 +10760,6 @@ begin
 
   with Background do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clActiveBorder;
@@ -9349,6 +10805,8 @@ begin
   headerrect := Rect(0, 0, self.Width, fminheight - Background.Border);
 
   //  fborderWidth:=Background.Border;
+
+  if Height>fNormalheight then fNormalheight:=Height;
 
   if Assigned(FExpandButton) then
     with FExpandButton do
@@ -9808,7 +11266,6 @@ begin
   obenter := Tocolor.Create(self);
   with obenter do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := $00CDCDCD;
@@ -9819,7 +11276,6 @@ begin
   obleave := Tocolor.Create(self);
   with obleave do
   begin
-    // Aownerr:=self;
     border := 2;
     bordercolor := $006E6E6E;
     startcolor := clActiveBorder;
@@ -9830,7 +11286,6 @@ begin
   obdown := Tocolor.Create(self);
   with obdown do
   begin
-    // Aownerr:=self;
     border := 2;
     bordercolor := clSilver;
     startcolor := clmenu;
@@ -9841,7 +11296,6 @@ begin
   obcheckenters := Tocolor.Create(self);
   with obcheckenters do
   begin
-    // Aownerr:=self;
     border := 2;
     bordercolor := clSilver;
     startcolor := clmenu;
@@ -9852,7 +11306,6 @@ begin
   obcheckleaves := Tocolor.Create(self);
   with obcheckleaves do
   begin
-    // Aownerr:=self;
     border := 2;
     bordercolor := clSilver;
     startcolor := clActiveBorder;
@@ -9863,7 +11316,6 @@ begin
   obdisabled := Tocolor.Create(self);
   with obdisabled do
   begin
-    // Aownerr:=self;
     border := 2;
     bordercolor := clSilver;
     startcolor := clmenu;
@@ -10646,7 +12098,6 @@ begin
   fobenter := Tocolor.Create(self);
   with fobenter do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := $00CDCDCD;
@@ -10657,7 +12108,6 @@ begin
   fobleave := Tocolor.Create(self);
   with fobleave do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := $006E6E6E;
     startcolor := clActiveBorder;
@@ -10668,7 +12118,6 @@ begin
   fobdown := Tocolor.Create(self);
   with fobdown do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clmenu;
@@ -10679,7 +12128,6 @@ begin
   ffdisabled := Tocolor.Create(self);
   with ffdisabled do
   begin
-    // Aownerr:=self;
     border := 1;
     bordercolor := clblack;
     startcolor := clmenu;
@@ -11009,8 +12457,8 @@ begin
   ControlStyle := ControlStyle - [csAcceptsControls] +
     [csParentBackground, csClickEvents, csCaptureMouse, csDoubleClicks];
 
-  Fbuttonwidth  := 11;
-  Fbuttonheight := 11;
+  Fbuttonwidth  := 15;
+  Fbuttonheight := 15;
 
 
   fubutton := Tobuton.Create(self);
@@ -11230,6 +12678,7 @@ Var
   blnPosLeft, blnPosTop: Integer;
   blnPosition: TBalloonPosition;
 Begin
+
   GetWindowRect(blnControl.Handle, Rect);
 
   blnPosTop  := 0;
