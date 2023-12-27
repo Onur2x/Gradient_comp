@@ -15,12 +15,12 @@ uses
 
 type
 
-  Tobutonstate = (obenters, obleaves, obdowns);
-  ToExpandStatus = (oExpanded, oCollapsed); // collapsed panel
-  Tcapdirection = (ocup, ocdown, ocleft, ocright);
-  Tbutondirection = (obleft, obright);
-  Tokindstate = (oVertical, oHorizontal);
-  ToswichState = (fon,foff);
+  Tobutonstate    = (obEnters, obLeaves, obDowns);
+  ToExpandStatus  = (oExpanded, oCollapsed); // collapsed panel
+  Tcapdirection   = (ocUp, ocDown, ocLeft, ocRight);
+  Tbutondirection = (obLeft, obRight);
+  Tokindstate     = (oVertical, oHorizontal);
+  ToswichState    = (FOn,FOff);
 
   { TOcolors }
   TOPersistent = class(TPersistent)
@@ -30,7 +30,6 @@ type
 
   Tocolor = class(TOPersistent)
   private
-  //  owner:TPersistent;
     Fstartc, fstopc, fborderc, ffontcolor: Tcolor;
     fborder: integer;
     function getborder: integer;
@@ -59,9 +58,8 @@ type
 
   ToCustomcontrol = class(TCustomControl)
   private
-    fbackground: Tocolor;
-    Fkind: Tokindstate;
-//    fbackgroundcolored: boolean;
+    fbackground : Tocolor;
+    Fkind       : Tokindstate;
     procedure WMEraseBkgnd(var Message: TWMEraseBkgnd); message WM_ERASEBKGND;
     procedure CreateParams(var Params: TCreateParams);
     procedure Drawtorect(Cnv: Tcanvas; rc: Trect; tc: ToColor; Fkindi: Tokindstate);
@@ -75,7 +73,6 @@ type
     procedure paint; override;
     property Kind: Tokindstate read Getkind write SetKind;
     property Caption;
-
   published
     property Background: Tocolor read fbackground write fbackground;
     property Action;
@@ -121,9 +118,8 @@ type
 
   TOGraphicControl = class(TGraphicControl)
   private
-    fbackground: Tocolor;
-    Fkind: Tokindstate;
-//    fbackgroundcolored: boolean;
+    fbackground  : Tocolor;
+    Fkind        : Tokindstate;
     function Getkind: Tokindstate;
     function GetTransparent: boolean;
     procedure Setkind(Value: Tokindstate);
@@ -174,71 +170,69 @@ type
   end;
 
   { TOled }
- type
 
  // TledStyle = (fHorz, fVert, fRectangle, fDiagonal, fCircle);
   TOled = class(TOGraphicControl)
   private
-   //Fbar: Tocolor;
-   fcheck:boolean;
-   foncolor: Tocolor;
-   foffcolor: Tocolor;
-   FOnChange: TNotifyEvent;
+   fcheck    : boolean;
+   foncolor  : Tocolor;
+   foffcolor : Tocolor;
+   FOnChange : TNotifyEvent;
    procedure Setoncolor(const Val: Tocolor);
    procedure Setoffcolor(const Val: Tocolor);
    procedure Setledonoff(val:boolean);
   public
-    constructor Create(Aowner: TComponent); override;
-    destructor Destroy; override;
-    procedure paint; override;
+   constructor Create(Aowner: TComponent); override;
+   destructor Destroy; override;
+   procedure paint; override;
   published
-    property Background;
-    property Oncolor: Tocolor read foncolor write Setoncolor;
-    property Offcolor: Tocolor read foffcolor write Setoffcolor;
-    Property LedOnOff:Boolean Read fcheck write Setledonoff;
-    property Onchange: TNotifyEvent read FOnChange write FOnChange;
-    property Transparent;
-    property Action;
-    property Align;
-    property Anchors;
-    property AutoSize;
-    property BidiMode;
-    property Constraints;
-    property Enabled;
-    property ParentBidiMode;
-    property OnChangeBounds;
-    property OnClick;
-    property OnContextPopup;
-    property OnDragDrop;
-    property OnDragOver;
-    property OnEndDrag;
-    property OnMouseDown;
-    property OnMouseEnter;
-    property OnMouseLeave;
-    property OnMouseMove;
-    property OnMouseUp;
-    property OnMouseWheel;
-    property OnMouseWheelDown;
-    property OnMouseWheelUp;
-    property OnResize;
-    property OnStartDrag;
-    property ParentFont;
-    property ParentShowHint;
-    property ParentColor;
-    property PopupMenu;
-    property ShowHint;
-    property Visible;
+   property Background;
+   property Oncolor: Tocolor read foncolor write Setoncolor;
+   property Offcolor: Tocolor read foffcolor write Setoffcolor;
+   property LedOnOff:Boolean Read fcheck write Setledonoff;
+   property Onchange: TNotifyEvent read FOnChange write FOnChange;
+   property Transparent;
+   property Action;
+   property Align;
+   property Anchors;
+   property AutoSize;
+   property BidiMode;
+   property Constraints;
+   property Enabled;
+   property ParentBidiMode;
+   property OnChangeBounds;
+   property OnClick;
+   property OnContextPopup;
+   property OnDragDrop;
+   property OnDragOver;
+   property OnEndDrag;
+   property OnMouseDown;
+   property OnMouseEnter;
+   property OnMouseLeave;
+   property OnMouseMove;
+   property OnMouseUp;
+   property OnMouseWheel;
+   property OnMouseWheelDown;
+   property OnMouseWheelUp;
+   property OnResize;
+   property OnStartDrag;
+   property ParentFont;
+   property ParentShowHint;
+   property ParentColor;
+   property PopupMenu;
+   property ShowHint;
+   property Visible;
   End;
 
   { TOCustomProgressBar }
 
   TOProgressBar = class(TOGraphicControl)
   private
-    fbar: Tocolor;
-    FOnChange: TNotifyEvent;
-    fposition, fmax, fmin: Int64;
-    ftext: string;
-    FCaptonvisible: boolean;
+    fbar                  : Tocolor;
+    FOnChange             : TNotifyEvent;
+    fposition, fmax, fmin : Int64;
+    ftext                 : string;
+    FCaptonvisible        : boolean;
     procedure setposition(const Val: Int64);
     procedure setmax(const Val: Int64);
     procedure setmin(const Val: Int64);
@@ -250,13 +244,13 @@ type
     destructor Destroy; override;
     procedure paint; override;
   published
-    property Captonvisible: boolean read FCaptonvisible write FCaptonvisible;
-    property Background;
-    property Bar: Tocolor read fbar write fbar;
-    property Min: Int64 read Getmin write setmin;
-    property Max: Int64 read Getmax write setmax;
-    property Position: Int64 read Getposition write setposition;
-    property Onchange: TNotifyEvent read FOnChange write FOnChange;
+   property Background;
+    property Captonvisible : boolean      read FCaptonvisible write FCaptonvisible;
+    property Bar           : Tocolor      read fbar           write fbar;
+    property Min           : Int64        read Getmin         write setmin;
+    property Max           : Int64        read Getmax         write setmax;
+    property Position      : Int64        read Getposition    write setposition;
+    property Onchange      : TNotifyEvent read FOnChange      write FOnChange;
     property Kind;
     property Transparent;
     property Action;
@@ -296,9 +290,8 @@ type
 
   Tobuton = class(ToGraphicControl)
   private
-    fenter, fleave, fdown, fdisabled: Tocolor;
-    fstate: Tobutonstate;
-    //    fonstatechange: Tobutonstatechange;
+    fenter, fleave, fdown, fdisabled : Tocolor;
+    fstate                           : Tobutonstate;
     procedure SetenterC(val:Tocolor);
     procedure SetLeaveC(val:Tocolor);
     procedure SetDownC(val:Tocolor);
@@ -307,7 +300,6 @@ type
   protected
     procedure CMonmouseenter(var Messages: Tmessage); message CM_MOUSEENTER;
     procedure CMonmouseleave(var Messages: Tmessage); message CM_MOUSELEAVE;
-
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
       X: integer; Y: integer); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
@@ -317,11 +309,11 @@ type
     destructor Destroy; override;
     procedure paint; override;
   published
-    property ColorEnter: Tocolor read fenter write SetenterC;
-    property ColorLeave: Tocolor read fleave write SetLeaveC;
-    property ColorDown: Tocolor read fdown write SetDownC;
-    property ColorDisable: Tocolor read fdisabled write SetDisableC;
-    property State: Tobutonstate read fstate write fstate;
+    property ColorEnter   : Tocolor      read fenter    write SetenterC;
+    property ColorLeave   : Tocolor      read fleave    write SetLeaveC;
+    property ColorDown    : Tocolor      read fdown     write SetDownC;
+    property ColorDisable : Tocolor      read fdisabled write SetDisableC;
+    property State        : Tobutonstate read fstate    write fstate;
     property Caption;
     property Transparent;
     property Action;
@@ -457,14 +449,13 @@ type
 
   TCollapExpandpanel = class(ToCustomcontrol)
   private
-    FStatus: ToExpandStatus;
-    FOnCollapse: TNotifyEvent;
-    FOnExpand: TNotifyEvent;
-    FExpandButton: Tobuton;
-    FAutoCollapse: boolean;
-    fminheight: integer;
-    fnormalheight: integer;
-    //    fheight         : integer;
+    FStatus         : ToExpandStatus;
+    FOnCollapse     : TNotifyEvent;
+    FOnExpand       : TNotifyEvent;
+    FExpandButton   : Tobuton;
+    FAutoCollapse   : boolean;
+    fminheight      : integer;
+    fnormalheight   : integer;
     fbutonen, fbutonle, fbutondown: Tocolor;
     fbutondirection: Tbutondirection;
     procedure SetStatus(const AValue: ToExpandStatus);
@@ -484,23 +475,19 @@ type
     destructor Destroy; override;
     procedure paint; override;
   published
-    property OnExpand: TNotifyEvent read FOnExpand write SetOnExpand;
-    property OnCollapse: TNotifyEvent
-      read FOnCollapse write SetOnCollapse;
-    property AutoCollapse: boolean
-      read FAutoCollapse write SetAutoCollapse;
-    property Status: ToExpandStatus read FStatus write SetStatus;
-    property Minheight: integer read GetMinheight write Setminheight;
-    property Normalheight: integer
-      read GetNormalheight write Setnormalheight;
-    property Caption;//String            read Gettexti         write Settexti;
-    property Kind;
-    property ButtonEnter: Tocolor read fbutonen write fbutonen;
-    property ButtonLeave: Tocolor read fbutonle write fbutonle;
-    property ButtonDown: Tocolor read fbutondown write fbutondown;
-    property ButtonPosition: Tbutondirection
-      read fbutondirection write fbutondirection;
+    property OnExpand       : TNotifyEvent    read FOnExpand       write SetOnExpand;
+    property OnCollapse     : TNotifyEvent    read FOnCollapse     write SetOnCollapse;
+    property AutoCollapse   : boolean         read FAutoCollapse   write SetAutoCollapse;
+    property Status         : ToExpandStatus  read FStatus         write SetStatus;
+    property Minheight      : integer         read GetMinheight    write Setminheight;
+    property Normalheight   : integer         read GetNormalheight write Setnormalheight;
+    property ButtonEnter    : Tocolor         read fbutonen        write fbutonen;
+    property ButtonLeave    : Tocolor         read fbutonle        write fbutonle;
+    property ButtonDown     : Tocolor         read fbutondown      write fbutondown;
+    property ButtonPosition : Tbutondirection read fbutondirection write fbutondirection;
     property Background;
+    property Caption;
+    property Kind;
     property Action;
     property Align;
     property Anchors;
@@ -543,20 +530,15 @@ type
 
   Toswich = class(ToGraphicControl)
    private
-    obenter, obleave, obdown, obdisabled: ToColor;
-    fstate      : Tobutonstate;
-    fswichstate : ToswichState;
-    fcheckwidth : integer;
-    froundx,froundy : integer;
-    fcaptionoff,fcaptionon:string;
-   // fchecked    : boolean;
-   // fcaptiondirection : Tcapdirection;
-    FOnChange : TNotifyEvent;
-    function GetChecWidth: integer;
+    obenter, obleave, obdown, obdisabled : ToColor;
+    fstate                               : Tobutonstate;
+    fswichstate                          : ToswichState;
+    fcheckwidth                          : integer;
+    froundx,froundy                      : integer;
+    fcaptionoff,fcaptionon               : string;
+    FOnChange                            : TNotifyEvent;
+    function GetChecWidth                : integer;
     procedure SetChecWidth(AValue: integer);
-   // procedure SetCaptionmod(const val: Tcapdirection);
-   // procedure SetChecked(const Value: boolean);
-   // function GetChecked: boolean;
     procedure SetState(const Value: Tobutonstate);
     function GetState: Tobutonstate;
     procedure SetSwState(const Value: ToswichState);
@@ -577,22 +559,19 @@ type
     destructor Destroy; override;
     procedure paint; override;
   published
-    property ColorEnter: Tocolor read obenter write obenter;
-    property ColorLeave: Tocolor read obleave write obleave;
-    property ColorDown: Tocolor read obdown write obdown;
-    property ColorDisable: Tocolor read obdisabled write obdisabled;
-    property CaptionOn  : String read fcaptionon write fcaptionon;
-    property CaptionOff : String read fcaptionoff write fcaptionoff;
-    property State: Tobutonstate read GetState write SetState;
-    property SwichState: ToswichState read GetSwState write SetSwState;
-    property RoundX : integer read froundx write froundx;
-    property RoundY : integer read froundy write froundy;
-
-  //  property Checked: boolean read GetChecked write SetChecked;
-    property ChecWidth: integer read GetChecWidth write SetChecWidth;
-  //  property CaptionDirection: Tcapdirection read GetCaptionmod write SetCaptionmod;
+    property ColorEnter   : Tocolor      read obenter      write obenter;
+    property ColorLeave   : Tocolor      read obleave      write obleave;
+    property ColorDown    : Tocolor      read obdown       write obdown;
+    property ColorDisable : Tocolor      read obdisabled   write obdisabled;
+    property CaptionOn    : String       read fcaptionon   write fcaptionon;
+    property CaptionOff   : String       read fcaptionoff  write fcaptionoff;
+    property State        : Tobutonstate read GetState     write SetState;
+    property SwichState   : ToswichState read GetSwState   write SetSwState;
+    property RoundX       : integer      read froundx      write froundx;
+    property RoundY       : integer      read froundy      write froundy;
+    property ChecWidth    : integer      read GetChecWidth write SetChecWidth;
+    property OnChange     : TNotifyEvent read FOnChange    write FOnChange;
     property Transparent;
-    property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property Action;
     property Align;
     property Anchors;
@@ -657,13 +636,12 @@ type
     destructor Destroy; override;
     procedure paint; override;
   published
-    property Picture: TPortableNetworkGraphic{ TPicture} read fres write Setbitmap;
-    property PictureKind : Tokindstate read fkind write fkind;
-    property Transparent: boolean read GetTransparent
-      write SetTransparent default True;
-    property FrameCount : integer read fframe write SetFrame;
-    Property Frameindex : integer read fframee write SetFframe;//fframee;
-    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property Picture       : TPortableNetworkGraphic read fres            write Setbitmap;
+    property PictureKind   : Tokindstate             read fkind           write fkind;
+    property Transparent   : boolean                 read GetTransparent  write SetTransparent default True;
+    property FrameCount    : integer                 read fframe          write SetFrame;
+    Property Frameindex    : integer                 read fframee         write SetFframe;//fframee;
+    property OnChange      : TNotifyEvent            read FOnChange       write FOnChange;
     property Action;
     property Align;
     property Anchors;
@@ -713,21 +691,18 @@ type
   protected
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
       X: integer; Y: integer); override;
- //   procedure DoOnChange; virtual;
   public
     constructor Create(Aowner: TComponent); override;
     destructor Destroy; override;
     procedure paint; override;
-
   published
-    property Picture     : TPortableNetworkGraphic{TPicture} read fres       write Setbitmap;
-    property PictureKind : Tokindstate                       read fkind      write fkind;
-    property Transparent : boolean                           read GetTransparent
-      write SetTransparent;// default True;
-    property FrameCount  : integer                           read fframe     write SetFrame;
-    property Frameindex  : integer                           read fframee    write SetFframe;// fframee;
-    property Clickable   : Boolean                           read fclickable write fclickable;//SetClickable;//  Default False;
-    property OnChange    : TNotifyEvent                      read FOnChange  write FOnChange;
+    property Picture     : TPortableNetworkGraphic read fres           write Setbitmap;
+    property PictureKind : Tokindstate             read fkind          write fkind;
+    property Transparent : boolean                 read GetTransparent write SetTransparent;
+    property FrameCount  : integer                 read fframe         write SetFrame;
+    property Frameindex  : integer                 read fframee        write SetFframe;
+    property Clickable   : Boolean                 read fclickable     write fclickable;
+    property OnChange    : TNotifyEvent            read FOnChange      write FOnChange;
     property Action;
     property Align;
     property Anchors;
@@ -762,12 +737,14 @@ type
 
   Tocheckbox = class(ToGraphicControl)
   private
-    obenter, obleave, obdown, obdisabled, obcheckenters, obcheckleaves: ToColor;
-    fstate: Tobutonstate;
-    fcheckwidth: integer;
-    fchecked: boolean;
-    fcaptiondirection: Tcapdirection;
-    FOnChange: TNotifyEvent;
+    obenter, obleave, obdown,
+    obdisabled,
+    obcheckenters, obcheckleaves   : ToColor;
+    fstate                         : Tobutonstate;
+    fcheckwidth                    : integer;
+    fchecked                       : boolean;
+    fcaptiondirection              : Tcapdirection;
+    FOnChange                      : TNotifyEvent;
     function GetChecWidth: integer;
     procedure SetChecWidth(AValue: integer);
     procedure SetCaptionmod(const val: Tcapdirection);
@@ -793,19 +770,19 @@ type
     destructor Destroy; override;
     procedure paint; override;
   published
-    property ColorEnter: Tocolor read obenter write obenter;
-    property ColorLeave: Tocolor read obleave write obleave;
-    property ColorDown: Tocolor read obdown write obdown;
-    property ColorCheckEnter: Tocolor read obcheckenters write obcheckenters;
-    property ColorCheckLeave: Tocolor read obcheckleaves write obcheckleaves;
-    property ColorDisable: Tocolor read obdisabled write obdisabled;
     property Caption;
-    property State: Tobutonstate read GetState write SetState;
-    property Checked: boolean read GetChecked write SetChecked;
-    property ChecWidth: integer read GetChecWidth write SetChecWidth;
-    property CaptionDirection: Tcapdirection read GetCaptionmod write SetCaptionmod;
     property Transparent;
-    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property ColorEnter       : Tocolor       read obenter        write obenter;
+    property ColorLeave       : Tocolor       read obleave        write obleave;
+    property ColorDown        : Tocolor       read obdown         write obdown;
+    property ColorCheckEnter  : Tocolor       read obcheckenters  write obcheckenters;
+    property ColorCheckLeave  : Tocolor       read obcheckleaves  write obcheckleaves;
+    property ColorDisable     : Tocolor       read obdisabled     write obdisabled;
+    property State            : Tobutonstate  read GetState       write SetState;
+    property Checked          : boolean       read GetChecked     write SetChecked;
+    property ChecWidth        : integer       read GetChecWidth   write SetChecWidth;
+    property CaptionDirection : Tcapdirection read GetCaptionmod  write SetCaptionmod;
+    property OnChange         : TNotifyEvent  read FOnChange      write FOnChange;
     property Action;
     property Align;
     property Anchors;
@@ -846,11 +823,13 @@ type
 
   ToRadiobutton = class(ToGraphicControl)
     private
-    obenter, obleave, obdown, obdisabled, obcheckenters, obcheckleaves: ToColor;
-    fstate: Tobutonstate;
-    fcheckwidth: integer;
-    fchecked: boolean;
-    fcaptiondirection: Tcapdirection;
+    obenter, obleave,
+    obdown, obdisabled,
+    obcheckenters, obcheckleaves : ToColor;
+    fstate                       : Tobutonstate;
+    fcheckwidth                  : integer;
+    fchecked                     : boolean;
+    fcaptiondirection            : Tcapdirection;
     FOnChange: TNotifyEvent;
     function GetChecWidth: integer;
     procedure SetChecWidth(AValue: integer);
@@ -877,21 +856,19 @@ type
     destructor Destroy; override;
     procedure paint; override;
   published
-    property ColorEnter: Tocolor read obenter write obenter;
-    property ColorLeave: Tocolor read obleave write obleave;
-    property ColorDown: Tocolor read obdown write obdown;
-    property ColorCheckEnter: Tocolor read obcheckenters write obcheckenters;
-    property ColorCheckLeave: Tocolor read obcheckleaves write obcheckleaves;
-    property ColorDisable: Tocolor read obdisabled write obdisabled;
     property Caption;
-    property State: Tobutonstate read GetState write SetState;
-    property Checked: boolean read GetChecked write SetChecked;
-    property ChecWidth: integer read GetChecWidth write SetChecWidth;
-    property CaptionDirection: Tcapdirection read GetCaptionmod write SetCaptionmod;
+    property ColorEnter       : Tocolor       read obenter        write obenter;
+    property ColorLeave       : Tocolor       read obleave        write obleave;
+    property ColorDown        : Tocolor       read obdown         write obdown;
+    property ColorCheckEnter  : Tocolor       read obcheckenters  write obcheckenters;
+    property ColorCheckLeave  : Tocolor       read obcheckleaves  write obcheckleaves;
+    property ColorDisable     : Tocolor       read obdisabled     write obdisabled;
+    property State            : Tobutonstate  read GetState       write SetState;
+    property Checked          : boolean       read GetChecked     write SetChecked;
+    property ChecWidth        : integer       read GetChecWidth   write SetChecWidth;
+    property CaptionDirection : Tcapdirection read GetCaptionmod  write SetCaptionmod;
+    property OnChange         : TNotifyEvent  read FOnChange      write FOnChange;
     property Transparent;
-    property OnChange: TNotifyEvent read FOnChange write FOnChange;
-
-
     property Action;
     property Align;
     property Anchors;
@@ -904,7 +881,6 @@ type
     property Enabled;
     property Font;
     property ParentBidiMode;
-
     property OnChangeBounds;
     property OnClick;
     property OnContextPopup;
@@ -933,14 +909,16 @@ type
 
   TOTrackBar = class(ToGraphicControl)
   private
-    obenter, obleave, obdown, fdisabled: ToColor;
-    fcbutons: Tobutonstate;
-    fcenterbuttonarea: TRect;
-    FW, FH: integer;
-    FPosition, FXY, FPosValue: integer;
-    FMin, FMax: integer;
-    FIsPressed: boolean;
-    FOnChange: TNotifyEvent;
+    obenter, obleave,
+    obdown, fdisabled   : ToColor;
+    fcbutons            : Tobutonstate;
+    fcenterbuttonarea   : TRect;
+    FW, FH              : integer;
+    FPosition,
+    FXY, FPosValue      : integer;
+    FMin, FMax          : integer;
+    FIsPressed          : boolean;
+    FOnChange           : TNotifyEvent;
     procedure centerbuttonareaset;
     function CheckRange(const Value: integer): integer;
     function Getcolors(xx: Tobutonstate): Tocolor;
@@ -967,20 +945,19 @@ type
       X, Y: integer); override;
     procedure MouseMove(Shift: TShiftState; X, Y: integer); override;
     function GetPercentage: integer;
-    //    property Positioning : Boolean read FIsPressed;
   published
     { Published declarations }
-    property Background;//   : Tocolor          read fbackground    write fbackground;
-    property ButtonLeave: Tocolor read obleave write obleave;
-    property ButtonEnter: Tocolor read obenter write obenter;
-    property ButtonDown: Tocolor read obdown write obdown;
-    property ButtonDisabled: Tocolor read fdisabled write fdisabled;
-    property Position: integer read GetPosition write SetPosition;
-    property Percentage: integer read GetPercentage write SetPercentage;
-    property Kind;//         : Tokindstate    read Getkind          write Setkind;
-    property Max: integer read FMax write SetMax;
-    property Min: integer read FMin write SetMin;
-    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property ButtonLeave     : Tocolor      read obleave       write obleave;
+    property ButtonEnter     : Tocolor      read obenter       write obenter;
+    property ButtonDown      : Tocolor      read obdown        write obdown;
+    property ButtonDisabled  : Tocolor      read fdisabled     write fdisabled;
+    property Position        : integer      read GetPosition   write SetPosition;
+    property Percentage      : integer      read GetPercentage write SetPercentage;
+    property Max             : integer      read FMax          write SetMax;
+    property Min             : integer      read FMin          write SetMin;
+    property OnChange        : TNotifyEvent read FOnChange     write FOnChange;
+    property Kind;
+    property Background;
     property Action;
     property Align;
     property Anchors;
@@ -1021,14 +998,20 @@ type
 
   ToScrollBar = class(ToGraphicControl)
   private
-    obenter, obleave, obdown, fdisabled: ToColor;
-    fcbutons, flbutons, frbutons: Tobutonstate;
-    flbuttonrect, frbuttonrect, Ftrackarea, fcenterbuttonarea: TRect;
-    FW, FH: integer;
-    FPosition, FXY, FPosValue: integer;
-    FMin, FMax: integer;
-    FIsPressed: boolean;
-    FOnChange: TNotifyEvent;
+    obenter, obleave,
+    obdown, fdisabled    : ToColor;
+    fcbutons, flbutons,
+    frbutons             : Tobutonstate;
+    flbuttonrect,
+    frbuttonrect,
+    Ftrackarea,
+    fcenterbuttonarea    : TRect;
+    FW, FH               : integer;
+    FPosition, FXY,
+    FPosValue            : integer;
+    FMin, FMax           : integer;
+    FIsPressed           : boolean;
+    FOnChange            : TNotifyEvent;
     procedure centerbuttonareaset;
     function Getcolors(xx: Tobutonstate): Tocolor;
     procedure SetPosition(Value: integer);
@@ -1049,7 +1032,6 @@ type
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
       X: integer; Y: integer); override;
     procedure MouseMove(Shift: TShiftState; X, Y: integer); override;
-
     procedure CMonmouseenter(var Messages: Tmessage); message CM_MOUSEENTER;
     procedure CMonmouseleave(var Messages: Tmessage); message CM_MOUSELEAVE;
   public
@@ -1108,15 +1090,15 @@ type
 
   ToListBox = class(ToCustomcontrol)
   private
-    Flist: TStrings;//List;
-    findex: integer;
-    fvert, fhorz: ToScrollBar;
-    FItemsShown, FitemHeight, Fitemoffset: integer;
-    //FFocusedItem: integer;
-    Fselectedcolor:Tcolor;
+    Flist           : TStrings;
+    findex          : integer;
+    fvert, fhorz    : ToScrollBar;
+    FItemsShown,
+    FitemHeight,
+    Fitemoffset     : integer;
+    Fselectedcolor  : Tcolor;
     function DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): Boolean; override;
     function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): Boolean;   override;
-
     function GetItemAt(Pos: TPoint): integer;
     function getitemheight: integer;
     function GetItemIndex: integer;
@@ -1134,7 +1116,6 @@ type
   protected
     procedure KeyDown(var Key: word; Shift: TShiftState);virtual;
     procedure SetString(AValue: TStrings); virtual;
-   // procedure KeyDown(var Key: word; Shift: TShiftState); override;
   public
     constructor Create(Aowner: TComponent); override;
     destructor Destroy; override;
@@ -1194,19 +1175,24 @@ type
 
   ToChecklistbox = class(ToCustomcontrol)
   private
-    obenter, obleave, obdown, obdisabled, obcheckenters, obcheckleaves: ToColor;
-    Flist: TStrings;
-    findex,fstateindex: integer;
-    Fstate:Tobutonstate;
-    Fstatelist,Fchecklist: TList;
-    fvert, fhorz: ToScrollBar;
-    FItemsShown, FitemHeight, Fitemoffset: integer;
-    Fbuttonheight:integer;
-    Fselectedcolor:Tcolor;
-    FOnCheck 	  : TCheckEvent;
-    FOnUnCheck    : TCheckEvent;
-    FUserCheck    : Boolean;
-    FClickInBox   : Boolean;
+    obenter, obleave,
+    obdown, obdisabled,
+    obcheckenters,
+    obcheckleaves         : ToColor;
+    Flist                 : TStrings;
+    findex,fstateindex    : integer;
+    Fstate                : Tobutonstate;
+    Fstatelist,Fchecklist : TList;
+    fvert, fhorz          : ToScrollBar;
+    FItemsShown,
+    FitemHeight,
+    Fitemoffset           : integer;
+    Fbuttonheight         : integer;
+    Fselectedcolor        : Tcolor;
+    FOnCheck 	          : TCheckEvent;
+    FOnUnCheck            : TCheckEvent;
+    FUserCheck            : Boolean;
+    FClickInBox           : Boolean;
     function DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): Boolean; override;
     function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): Boolean;   override;
     function getbuttonheight: integer;
@@ -1250,22 +1236,22 @@ type
     procedure CheckSelection(AChecked : Boolean);
     procedure Toggle(Index : Integer);
     procedure CheckAll(AChecked : Boolean);
-    property Checked[Index : Integer] : Boolean read 	IsChecked write Check;
+    property Checked[Index : Integer] : Boolean read  IsChecked write Check;
   published
-    property Items            : TStrings    read Flist          write SetString;
-    property ItemIndex        : integer     read GetItemIndex   write SetItemIndex;
+    property Items            : TStrings    read Flist           write SetString;
+    property ItemIndex        : integer     read GetItemIndex    write SetItemIndex;
     property ButtonHeight     : integer     read GetButtonHeight write SetButtonHeight;
-    property HorizontalScroll : ToScrollBar read fhorz          write fhorz;
-    property VertialScroll    : ToScrollBar read fvert          write fvert;
-    property Selectedcolor    : Tcolor      read Fselectedcolor write Fselectedcolor;
-    property OnCheck 	      : TCheckEvent read FOnCheck       write FOnCheck;
-    property OnUncheck 	      : TCheckEvent read FOnUncheck     write FOnUnCheck;
-    property ColorEnter       : Tocolor     read obenter        write obenter;
-    property ColorLeave       : Tocolor     read obleave        write obleave;
-    property ColorDown        : Tocolor     read obdown         write obdown;
-    property ColorDisable     : Tocolor     read obdisabled     write obdisabled;
-    property ColorCheckEnter  : Tocolor     read obcheckenters  write obcheckenters;
-    property ColorCheckLeave  : Tocolor     read obcheckleaves  write obcheckleaves;
+    property HorizontalScroll : ToScrollBar read fhorz           write fhorz;
+    property VertialScroll    : ToScrollBar read fvert           write fvert;
+    property Selectedcolor    : Tcolor      read Fselectedcolor  write Fselectedcolor;
+    property OnCheck 	      : TCheckEvent read FOnCheck        write FOnCheck;
+    property OnUncheck 	      : TCheckEvent read FOnUncheck      write FOnUnCheck;
+    property ColorEnter       : Tocolor     read obenter         write obenter;
+    property ColorLeave       : Tocolor     read obleave         write obleave;
+    property ColorDown        : Tocolor     read obdown          write obdown;
+    property ColorDisable     : Tocolor     read obdisabled      write obdisabled;
+    property ColorCheckEnter  : Tocolor     read obcheckenters   write obcheckenters;
+    property ColorCheckLeave  : Tocolor     read obcheckleaves   write obcheckleaves;
     property AllChecked       : Boolean     read GetAllChecked;
     property NoneChecked      : Boolean     read GetNoneChecked;
     property Background;
@@ -1311,11 +1297,11 @@ type
 
   Toncaret = class(TOPersistent)
   private
-    parent: Tocustomedit;
-    FHeight, FWidth: integer;
-    fvisibled: boolean;
-    fblinkcolor: Tcolor;
-    fblinktime: integer;
+    parent           : Tocustomedit;
+    FHeight, FWidth  : integer;
+    fvisibled        : boolean;
+    fblinkcolor      : Tcolor;
+    fblinktime       : integer;
     function Getblinktime: integer;
     procedure Setblinktime(const Value: integer);
     function Getvisible: boolean;
@@ -1323,24 +1309,17 @@ type
     procedure ontimerblink(Sender: TObject);
     function Paint: boolean;
   public
-    CaretPos: TPoint;
-    //PositionX, PositionY: integer;
-    caretvisible: boolean;
-    blinktimer: Ttimer;
+    CaretPos     : TPoint;
+    caretvisible : boolean;
+    blinktimer   : Ttimer;
     constructor Create(aowner: TPersistent);
     destructor Destroy; override;
   published
-    //    property PositionX : integer read FPosx        write FPosx;
-    //    property PositionY : integer read FPosy        write FPosy;
-    property Visible: boolean read Getvisible write Setvisible;
-    //    property Caretvisible : boolean read fcaretvisible write fcaretvisible;
-    property Blinktime: integer read Getblinktime write Setblinktime;
-    property Height: integer read FHeight write FHeight;
-    property Width: integer read FWidth write FWidth;
-    property Color: Tcolor read fblinkcolor write fblinkcolor;
-    //    property Blink     : TTimer  read fblinktimer  write fblinktimer;
-
-
+    property Visible   : boolean read Getvisible   write Setvisible;
+    property Blinktime : integer read Getblinktime write Setblinktime;
+    property Height    : integer read FHeight      write FHeight;
+    property Width     : integer read FWidth       write FWidth;
+    property Color     : Tcolor  read fblinkcolor  write fblinkcolor;
   end;
 
 
@@ -1356,11 +1335,8 @@ type
     fSelLength: integer;
     fVisibleTextStart: TPoint;
     fMultiLine: boolean;
-    //  fLines: TStrings; // Just a reference, never Free
     fFullyVisibleLinesCount, fLineHeight: integer;
-    // Filled on drawing to be used in customdrawncontrols.pas
     fPasswordChar: char;
-    // customizable extra margins, zero is the base value
     fLeftTextMargin, fRightTextMargin: integer;
     FNumbersOnly: boolean;
     Fcharcase: ToCharCase;
@@ -1378,11 +1354,8 @@ type
     function GetEchoMode: TOEchoMode;
     function GetLeftTextMargin: integer;
     function GetMultiLine: boolean;
-
-
     function GetRightTextMargin: integer;
     function GetPasswordChar: char;
-    //    procedure HandleCaretTimer(Sender: TObject);
     procedure DoDeleteSelection;
     procedure DoClearSelection;
     procedure DoManageVisibleTextStart;
@@ -1399,16 +1372,12 @@ type
     procedure SetPasswordChar(AValue: char);
     function MousePosToCaretPos(X, Y: integer): TPoint;
     function IsSomethingSelected: boolean;
-//    function GetMeasures(AMeasureID: integer): integer;// virtual; abstract;
-  protected
+ protected
     function GetText: string; virtual;
     function GetNumberOnly: boolean; virtual;
     function GetReadOnly: boolean; virtual;
     procedure setreadonly(avalue: boolean); virtual;
     procedure RealSetText(const Value: TCaption); override;
-
-    // to update on caption changes, don't change this as it might break descendents
-    // for descendents to override
     procedure DoChange; virtual;
     // keyboard
     procedure DoEnter; override;
@@ -1634,15 +1603,9 @@ type
     property Buttonheight  : integer       read GetButtonheight write SetButtonheight;
     property OnChange      : TNotifyEvent  read FOnChange       write FOnChange;
     property ReadOnly      : boolean       read freadonly       write freadonly;
-{    property ButtonEnter   : Tocolor      read fobenter       write fobenter;
-    property ButtonLeave   : Tocolor      read fobleave       write fobleave;
-    property ButtonDown    : Tocolor      read fobdown        write fobdown;
-    property ButtonDisable : Tocolor      read ffdisabled     write ffdisabled;     }
-  //  property Background;
     property Action;
     property Align;
     property Anchors;
-//    property AutoSize;
     property BidiMode;
     property Constraints;
     property DragCursor;
@@ -1754,7 +1717,6 @@ type
     property ButtonDown    : Tocolor      read fobdown        write SetButtonDown;
     property ButtonDisable : Tocolor      read ffdisabled     write SetButtonDisable;
     property ItemHeight    : integer      read FitemHeight    write SetItemHeight;
-  //  property Background;
     property Action;
     property Align;
     property Anchors;
@@ -1802,8 +1764,6 @@ type
 
   Tpopupformcombobox= class(TcustomForm)
     procedure listboxDblClick(Sender: TObject);
-//    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
-//    procedure FormCreate(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
   private
     FCaller: Tocombobox;
@@ -2131,10 +2091,9 @@ type
     fbackgroundvisible     : Boolean;
     freadonly              : Boolean;
     frowselect             : Boolean;
-    FCells: array of array of string;
-    FcolwitdhA :array of integer;
-    FSize: TPoint;
-
+    FCells                 : array of array of string;
+    FcolwitdhA             : array of integer;
+    FSize                  : TPoint;
 
     procedure editchange(sender: TObject);
     function GetColWidths(aCol: Integer): Integer;
@@ -2147,8 +2106,6 @@ type
     procedure SetColWidths(aCol: Integer; AValue: Integer);
     procedure VscrollBarChange(Sender: Tobject);
     procedure HScrollBarChange(Sender: TObject);
-
-
     function GetCell(X, Y: integer): string;
     function GetColCount: integer;
     function GetRowCount: integer;
@@ -2156,22 +2113,17 @@ type
     procedure SetColCount(AValue: integer);
     procedure SetRowCount(AValue: integer);
     procedure SetSize(AValue: TPoint);
-
-
   public
     constructor Create(Aowner: TComponent); override;
     destructor Destroy; override;
-
     procedure SaveToFile(s: string);
     procedure LoadFromFile(s: string);
-
     procedure Clear;
     function Searchstring(col: integer; Search: string): integer;
     property Cells[Col, Row: integer]: string read GetCell write SetCell;
     property ColCount: integer read GetColCount write SetColCount;
     property RowCount: integer read GetRowCount write SetRowCount;
     property Size: TPoint read FSize write SetSize;
-
     procedure MouseDown(Button : TMouseButton; Shift : TShiftState; X,Y : Integer); override;
     procedure MouseUp(Button : TMouseButton; Shift : TShiftState; X,Y : Integer); override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
@@ -2182,8 +2134,6 @@ type
     function DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): boolean; override;
     function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): boolean; override;
     procedure DblClick; override;
-
-
   published
     property ItemHeight            : integer         read FItemHeight     write FItemHeight;
     Property VScrollbar            : ToScrollBar     read fscroll         write fscroll;
@@ -2239,9 +2189,9 @@ type
 
   TOnurStrings = class
   private
-    fparent :Tcontrol;
-    FCells: array of string;
-    FSize: integer;
+    fparent : Tcontrol;
+    FCells  : array of string;
+    FSize   : integer;
     function GetCell(X: integer): string;
     function GetRowCount: integer;
     procedure SetCell(X: integer; AValue: string);
@@ -2262,20 +2212,19 @@ type
 
    Totransprentlistbox= class(TGraphicControl)
    private
-    FBackground: Tocolor;
-    ffdisabled: Tocolor;
-    fobdown: Tocolor;
-    fobenter: Tocolor;
-    fobleave: Tocolor;
-
-    FCells: TOnurStrings;//array of array of string;
-    FItemHeight:integer;
-    FItemhOffset:Integer;
-    FItemOffset:Integer;
-    fcolwidth:integer;
-    fcolvisible:integer;
-    fscroll:ToScrollBar;
-    yscroll:ToScrollBar;
+    FBackground   : Tocolor;
+    ffdisabled    : Tocolor;
+    fobdown       : Tocolor;
+    fobenter      : Tocolor;
+    fobleave      : Tocolor;
+    FCells        : TOnurStrings;//array of array of string;
+    FItemHeight   : integer;
+    FItemhOffset  : Integer;
+    FItemOffset   : Integer;
+    fcolwidth     : integer;
+    fcolvisible   : integer;
+    fscroll       : ToScrollBar;
+    yscroll       : ToScrollBar;
     procedure SetBackground(AValue: Tocolor);
     procedure SetButtonDisable(AValue: Tocolor);
     procedure SetButtonDown(AValue: Tocolor);
@@ -2339,26 +2288,25 @@ type
 
   Totransprentlist= class(TGraphicControl)
     private
-      FCells: array of array of string;
-      FSize: TPoint;
-      fitemindex : Integer;
-      FItemHeight:integer;
-      FItemhOffset:Integer;
-      FItemsvShown : integer;
-      FItemsHShown : integer;
-      FItemvOffset:Integer;
-      fcolwidth:integer;
-      fcolvisible:integer;
-      fscroll:ToScrollBar;
-      yscroll:ToScrollBar;
-      Fselectedcolor:Tcolor;
+      FCells         : array of array of string;
+      FSize          : TPoint;
+      fitemindex     : Integer;
+      FItemHeight    : integer;
+      FItemhOffset   : Integer;
+      FItemsvShown   : integer;
+      FItemsHShown   : integer;
+      FItemvOffset   : Integer;
+      fcolwidth      : integer;
+      fcolvisible    : integer;
+      fscroll        : ToScrollBar;
+      yscroll        : ToScrollBar;
+      Fselectedcolor : Tcolor;
       procedure VScrollBarChange(Sender: Tobject);
       function GetCell(X, Y: Integer): string;
       function GetColCount: Integer;
       function GetItemAt(Pos: TPoint): integer;
       function GetItemIndex: integer;
       function GetRowCount: Integer;
-
       procedure SetCell(X, Y: Integer; AValue: string);
       procedure SetColCount(AValue: Integer);
       Procedure Setcolwidth(Const Avalue: Integer);
@@ -2368,7 +2316,6 @@ type
       procedure HScrollBarChange(Sender: TObject);
       procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
       X: integer; Y: integer); override;
-
   public
     constructor Create(Aowner: TComponent); override;
     destructor Destroy; override;
@@ -2438,7 +2385,6 @@ type
     FCurPos     : Integer;
     FWait       : Integer;
     FWaiting    : Boolean;
- //   Fmousemm    : Boolean;
     FCaption    : TCaption;
     FScale      : Real;
     fCharWidth,fCharHeight:integer;
@@ -2470,19 +2416,18 @@ type
 
   published
     { Published declarations }
-    property Strings    : TStrings    read Flist      write SetString;
-    property Active     : Boolean read FActive write SetActive;
-    property Stretch    : Boolean read FStretch write SetStretch;
-    property ScrollBy   : Integer read GetScrollBy write FScrollBy;
-    property Interval   : Cardinal read FInterval write SetInterval;
-    property CharHeight  : integer read fCharHeight write SetCharHeight default 75;
-    property CharWidth   : integer read fCharWidth write SetCharWidth default 44;
-    property WaitOnEnd  : Integer read FWait write FWait;
-    property SkinBitmap : TPortableNetworkGraphic read FPicture write SetPicture;// TPicture read FPicture write SetPicture;
+    property Strings     : TStrings                 read Flist        write SetString;
+    property Active      : Boolean                  read FActive      write SetActive;
+    property Stretch     : Boolean                  read FStretch     write SetStretch;
+    property ScrollBy    : Integer                  read GetScrollBy  write FScrollBy;
+    property Interval    : Cardinal                 read FInterval    write SetInterval;
+    property CharHeight  : integer                  read fCharHeight  write SetCharHeight default 75;
+    property CharWidth   : integer                  read fCharWidth   write SetCharWidth default 44;
+    property WaitOnEnd   : Integer                  read FWait        write FWait;
+    property SkinBitmap  : TPortableNetworkGraphic  read FPicture     write SetPicture;// TPicture read FPicture write SetPicture;
+    property Transparent : boolean                  read fTransparent write SetTransparent default True;
+    property Caption     : TCaption                 read FCaption     write SetCaption;
     property Align;
-    property Transparent : boolean    read fTransparent     write SetTransparent default True;
-    property Caption   : TCaption      read FCaption   write SetCaption;
-//    property Caption;
     property ParentColor;
     property Visible;
     property OnClick;
@@ -2499,29 +2444,26 @@ type
 
   TONormalLabel = class(TGraphicControl)
   private
-    clr        : Tcolor;
-    FBuffer    : TBitmap;//TPortableNetworkGraphic;
-    FText      : string;
-    FAnimate   : boolean;
-    fbilink    : boolean;
-    fbilinki   : boolean;
-    fblinktimer: TTimer;
-    FTimer     : TTimer;
-    FDirection : TTextDirection;
-    FStyle     : TTextStylee;
-    FWait      : byte;
-    FPos       : integer;
-    FScrollBy  : integer;
-    Fwaiting   : byte;
-    fyazibuyuk : boolean;
+    clr            : Tcolor;
+    FBuffer        : TBitmap;//TPortableNetworkGraphic;
+    FText          : string;
+    FAnimate       : boolean;
+    fbilink        : boolean;
+    fbilinki       : boolean;
+    fblinktimer    : TTimer;
+    FTimer         : TTimer;
+    FDirection     : TTextDirection;
+    FStyle         : TTextStylee;
+    FWait          : byte;
+    FPos           : integer;
+    FScrollBy      : integer;
+    Fwaiting       : byte;
+    fyazibuyuk     : boolean;
     fblinkinterval : integer;
     ftimerinterval : integer;
-
     const
-    wWaiting    : byte = 15;
+    wWaiting       : byte = 15;
 
-
-//    procedure DrawFontTextcolor(incolor, outcolor: TColor);
     function GetScroll: integer;
     function GetTextDefaultPos: smallint;
     procedure SetAnimate(AValue: boolean);
@@ -2559,8 +2501,6 @@ type
     property Scroll          : integer      read GetScroll      write SetScrollBy;
     property Align;
     property Font;
-    //property Yazibuyuk : boolean read fyazibuyuk write SetYazibuyuk;
-
     property ParentColor;
     property Visible;
     property OnClick;
@@ -2574,17 +2514,20 @@ type
 
  TOKnob = class(TOGraphicControl)//Customcontrol)
   private
-    FClick: Boolean;
-    FPos: Integer;
-    FValue: Integer;
-    FInit: Integer;
-    FMaxValue: Integer;
-    FMinValue: Integer;
-    FStep: Integer;
-    FScroolStep: Integer;
-    fstate: Tobutonstate;
-    FOnChange: TNotifyEvent;
-    obenter, obleave, obdown, obdisabled: ToColor;
+    FClick      : Boolean;
+    FPos        : Integer;
+    FValue      : Integer;
+    FInit       : Integer;
+    FMaxValue   : Integer;
+    FMinValue   : Integer;
+    FStep       : Integer;
+    FScroolStep : Integer;
+    fstate      : Tobutonstate;
+    FOnChange   : TNotifyEvent;
+    obenter,
+    obleave,
+    obdown,
+    obdisabled  : ToColor;
     procedure SetMaxValue(const aValue: Integer);
     procedure SetMinValue(const aValue: Integer);
   protected
@@ -2604,17 +2547,17 @@ type
     procedure Paint;override;
 
   published
-    property MaxValue: Integer read FMaxValue write SetMaxValue;
-    property MinValue: Integer read FMinValue write SetMinValue;
-    property Step: Integer read FStep write FStep;
-    property ScroolStep: Integer read FScroolStep write FScroolStep;
-    property CurrentValue: Integer read FValue write SetValue;
-    property ColorEnter: Tocolor read obenter write obenter;
-    property ColorLeave: Tocolor read obleave write obleave;
-    property ColorDown: Tocolor read obdown write obdown;
-    property ColorDisable: Tocolor read obdisabled write obdisabled;
+    property MaxValue     : Integer      read FMaxValue   write SetMaxValue;
+    property MinValue     : Integer      read FMinValue   write SetMinValue;
+    property Step         : Integer      read FStep       write FStep;
+    property ScroolStep   : Integer      read FScroolStep write FScroolStep;
+    property CurrentValue : Integer      read FValue      write SetValue;
+    property ColorEnter   : Tocolor      read obenter     write obenter;
+    property ColorLeave   : Tocolor      read obleave     write obleave;
+    property ColorDown    : Tocolor      read obdown      write obdown;
+    property ColorDisable : Tocolor      read obdisabled  write obdisabled;
+    property OnChange     : TNotifyEvent read FOnChange   write FOnChange;
     property Transparent;
-    property OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
 
 
@@ -4141,7 +4084,7 @@ Begin
   fscroll.Left:=self.Left+self.Width;
   fscroll.top:=self.top;
   fscroll.Width:=20;
-  fscroll.Height:=self.Height;
+  fscroll.Height:=self.clientHeight;
   fscroll.OnChange:=@VScrollBarChange;
   fscroll.Visible:=false;
 
@@ -4151,7 +4094,7 @@ Begin
   yscroll.Kind:=oHorizontal;
   yscroll.Left:=self.Left;
   yscroll.top:=self.top+self.Height;
-  yscroll.Width:=self.Width;
+  yscroll.Width:=self.clientWidth;
   yscroll.Height:=20;
   yscroll.OnChange:=@HScrollBarChange;
   yscroll.Visible:=false;
@@ -4184,14 +4127,13 @@ begin
   if Visible=false then exit;
   inherited paint;
 
-
   if fsize.x-1 > 0 then
   begin
      try
       a := 1;
       x4:=0;
-      FItemsvShown := Height div FitemHeight;
-      FItemsHShown := (self.Width div fcolwidth)-1;
+      FItemsvShown := self.clientHeight div FitemHeight;
+      FItemsHShown := (self.clientWidth div fcolwidth)-1;
 
       canvas.Brush.Style := bsClear;
         for z:=0+FItemhOffset to fsize.x -1 do  // columns
@@ -4200,7 +4142,7 @@ begin
          b:=a;
           if z<>fcolvisible then
           begin
-            for i := FItemvOffset to (FItemvOffset + (Height) div FItemHeight) - 1 do
+            for i := FItemvOffset to (FItemvOffset + (self.clientHeight) div FItemHeight) - 1 do
             begin
                 if (i < GetRowCount) and (i>-1) then
                 begin
@@ -4213,7 +4155,7 @@ begin
                   Canvas.TextOut(a+x4, b, GetCell(z,i));
 
                   b := b + FitemHeight;
-                  if (b >= Height) then Break;
+                  if (b >= self.clientHeight) then Break;
                 end;
              //   b := a+FItemHeight;
             end;
@@ -4324,9 +4266,9 @@ Procedure Toimgswich.Paint;
       Pen.Color := clBlack;
       Pen.Style := psDash;
       MoveTo(0, 0);
-      LineTo(Self.Width-1, 0);
-      LineTo(Self.Width-1, Self.Height-1);
-      LineTo(0, Self.Height-1);
+      LineTo(Self.clientWidth-1, 0);
+      LineTo(Self.clientWidth-1, Self.clientHeight-1);
+      LineTo(0, Self.clientHeight-1);
       LineTo(0, 0);
     end;
   end;
@@ -4354,7 +4296,7 @@ begin
    framewi:=fres.Width div fframe;
    DstRect := Rect(framewi*fframee, 0, framewi*(fframee+1), fres.Height);
   end;
-  SrcRect := Rect(0, 0,self.Width,self.Height);
+  SrcRect := Rect(0, 0,self.clientWidth,self.clientHeight);
 
   Canvas.CopyRect(SrcRect,fres.Canvas,DstRect);
 
@@ -4391,14 +4333,14 @@ begin
 
     if Pos.Y >= 0 then
     begin
-      Result := ({fframe + }Pos.Y div (Height div fframe));
+      Result := ({fframe + }Pos.Y div (self.clientHeight div fframe));
     end;
   End else
   begin
 
     if Pos.X >= 0 then
     begin
-      Result := ({fframe + }Pos.X div (Width div fframe));
+      Result := ({fframe + }Pos.X div (self.clientWidth div fframe));
     end;
   End;
 end;
@@ -7890,7 +7832,8 @@ var
   xx,yy:integer;
   s:string;
 begin
-  if csDesigning in ComponentState then Exit;
+  //if csDesigning in ComponentState then Exit;
+ if (not visible) and not (csDesigning in ComponentState)then exit;
   inherited paint;
   centerbuttonareaset;
   Drawtorect(self.canvas, fcenterbuttonarea, Getcolors(fcbutons), Kind);
@@ -8234,8 +8177,7 @@ var
   Textx, Texty,textw,Texth: integer;
 
 begin
-  if csDesigning in ComponentState then
-    Exit;
+//  if csDesigning in ComponentState then    Exit;
   if not Visible then Exit;
   inherited paint;
   centerbuttonareaset;
@@ -12536,46 +12478,47 @@ begin
   fubutton := Tobuton.Create(self);
   with fubutton do
   begin
-   parent := self;
-   Width  := self.Height div 2;
-   Height := Width;
-   Left   := self.Width-(Width+self.Background.Border);
-   top    := self.Background.Border;
-   OnClick :=@kclick;
-   Caption :='▲';     //► ◄ ▲ ▼  // ALT+30 ALT+31 ALT+16 ALT+17
+   parent  := self;
+   Width   := self.Height div 2;
+   Height  := Width;
+   Left    := self.Width-(Width+self.Background.Border);
+   top     := self.Background.Border;
+   OnClick := @kclick;
+   Caption := '▲';     //► ◄ ▲ ▼  // ALT+30 ALT+31 ALT+16 ALT+17
   end;
 
 
   Fdbutton := Tobuton.Create(self);
   with Fdbutton do
   begin
-   parent := self;
-   Width  := self.Height div 2;
-   Height := Width;
-   Left   := self.Width-(Width+self.Background.Border);
-   top    := fdbutton.Height+self.Background.Border;
-   OnClick :=@kclick;
-   Caption :='▼';
+   parent  := self;
+   Width   := self.Height div 2;
+   Height  := Width;
+   Left    := self.Width-(Width+self.Background.Border);
+   top     := fdbutton.Height+self.Background.Border;
+   OnClick := @kclick;
+   Caption := '▼';
   end;
 
-  Fedit:=Toedit.Create(self);
+  Fedit := Toedit.Create(self);
   with Fedit do
   begin
-    Parent := Self;
-   Enabled:= true;
-   Width  := self.Width-(Fubutton.Width+self.Background.Border);
-   Height := self.Height-(self.Background.Border *2);
-   Left   := self.Background.Border;
-   top    := self.Background.Border;
-   text   := '0';
-   NumberOnly:=true;
-   onChange:=@Feditchange;
+   Parent     := Self;
+   Enabled    := true;
+   Width      := self.Width-(Fubutton.Width+self.Background.Border);
+   Height     := self.Height-(self.Background.Border *2);
+   Left       := self.Background.Border;
+   top        := self.Background.Border;
+   text       := '0';
+   NumberOnly := true;
+   onChange   := @Feditchange;
   end;
-  fedit.onKeyDown :=@KeyDown;
+  if Assigned(fedit) then
+   fedit.onKeyDown :=@KeyDown;
 
- fmin := 0;
- fmax := 0;
- fvalue:= 0;
+   fmin   := 0;
+   fmax   := 0;
+   fvalue := 0;
 end;
 
 destructor tospinedit.destroy;
@@ -12846,14 +12789,14 @@ Begin
 
   If blnPosition = blnArrowTopLeft Then
    Begin
-    Left := blnLeft - (Width - 20);
-    Top  := blnTop - (Height);
+    Left := blnLeft - (self.clientWidth - 20);
+    Top  := blnTop - (self.clientHeight);
    End;
 
   If blnPosition = blnArrowTopRight Then
    Begin
     Left := blnLeft - 20;
-    Top  := blnTop - (Height);
+    Top  := blnTop - (self.clientHeight);
    End;
 
   If blnPosition = blnArrowBottomRight Then
@@ -12864,7 +12807,7 @@ Begin
 
   If blnPosition = blnArrowBottomLeft Then
    Begin
-    Left := blnLeft - (Width - 20);
+    Left := blnLeft - (self.clientWidth - 20);
     Top  := blnTop - 2;
    End;
 
@@ -12872,25 +12815,25 @@ Begin
 
   If blnPosition = blnArrowTopLeft Then
    Begin
-    FormRegion := CreateRoundRectRgn(0, 0, Width, Height - (ArrowHeight - 2), 7, 7);
+    FormRegion := CreateRoundRectRgn(0, 0, self.clientWidth, self.clientHeight - (ArrowHeight - 2), 7, 7);
 
-    Arrow[0] := Point(Width - ArrowWidth - 20, Height - ArrowHeight);
-    Arrow[1] := Point(Width - 20, Height);
-    Arrow[2] := Point(Width - 20, Height - ArrowHeight);
+    Arrow[0] := Point(self.clientWidth - ArrowWidth - 20, self.clientHeight - ArrowHeight);
+    Arrow[1] := Point(self.clientWidth - 20, self.clientHeight);
+    Arrow[2] := Point(self.clientWidth - 20, self.clientHeight - ArrowHeight);
    End;
 
   If blnPosition = blnArrowTopRight Then
    Begin
-    FormRegion := CreateRoundRectRgn(0, 0, Width, Height - (ArrowHeight - 2), 7, 7);
+    FormRegion := CreateRoundRectRgn(0, 0, self.clientWidth, self.clientHeight - (ArrowHeight - 2), 7, 7);
 
-    Arrow[0] := Point(20, Height - ArrowHeight);
-    Arrow[1] := Point(20, Height);
+    Arrow[0] := Point(20, self.clientHeight - ArrowHeight);
+    Arrow[1] := Point(20, self.clientHeight);
     Arrow[2] := Point(20 + ArrowWidth, Height - ArrowHeight);
    End;
 
   If blnPosition = blnArrowBottomRight Then
    Begin
-    FormRegion := CreateRoundRectRgn(0, ArrowHeight + 2, Width, Height, 7, 7);
+    FormRegion := CreateRoundRectRgn(0, ArrowHeight + 2, self.clientWidth, self.clientHeight, 7, 7);
 
     Arrow[0] := Point(20, 2);
     Arrow[1] := Point(20, ArrowHeight + 2);
@@ -12899,11 +12842,11 @@ Begin
 
   If blnPosition = blnArrowBottomLeft Then
    Begin
-    FormRegion := CreateRoundRectRgn(0, ArrowHeight + 2, Width, Height, 7, 7);
+    FormRegion := CreateRoundRectRgn(0, ArrowHeight + 2, self.clientWidth, self.clientHeight, 7, 7);
 
-    Arrow[0] := Point(Width - 20, 2);
-    Arrow[1] := Point(Width - 20, ArrowHeight + 2);
-    Arrow[2] := Point(Width - 20 - ArrowWidth, ArrowHeight + 2);
+    Arrow[0] := Point(self.clientWidth - 20, 2);
+    Arrow[1] := Point(self.clientWidth - 20, ArrowHeight + 2);
+    Arrow[2] := Point(self.clientWidth - 20 - ArrowWidth, ArrowHeight + 2);
    End;
 
   ArrowRegion := CreatePolygonRgn(Arrow, 3, WINDING);
@@ -13210,7 +13153,7 @@ begin
   Texty := (Height div 2) - (self.canvas.TextHeight(fcaptionon) div 2);
   //  fbuttoncenter := (Height div 2) - (fcheckwidth div 2);
 
-  borderect := Rect(0,0,Width ,Height);
+  borderect := Rect(0,0,self.clientWidth ,self.clientHeight);
 
 
   {gradienrect1 := Rect(borderect.left + fborderWidth, borderect.top + fborderWidth,
