@@ -8,9 +8,7 @@ uses
   Classes, LMessages,
   {$IFDEF UNIX}unix{$ELSE} Windows{$ENDIF}, SysUtils,
   Forms, Controls, Graphics, Messages, Dialogs,
-  ExtCtrls, Types,LCLType,  LazUTF8,StdCtrls;
-
-
+  ExtCtrls, Types,LCLType,  LazUTF8, StdCtrls, ComponentEditors, PropEdits;
 
 
 type
@@ -18,7 +16,7 @@ type
   Tobutonstate    = (obEnters, obLeaves, obDowns);
   ToExpandStatus  = (oExpanded, oCollapsed); // collapsed panel
   Tcapdirection   = (ocUp, ocDown, ocLeft, ocRight);
-  Tbutondirection = (obLeft, obRight);
+  Tbutondirection = (obUp, obDown, obLeft, obRight);
   Tokindstate     = (oVertical, oHorizontal);
   ToswichState    = (FOn,FOff);
 
@@ -1952,6 +1950,7 @@ type
     procedure CMEnabledChanged(var Message: TMessage); message CM_ENABLEDCHANGED;
     Function Getcells(Acol, Arow: Integer): String;
     function Getgridview: Boolean;
+    procedure LoadFromFile(s: string);
     Procedure Setbuttondisable(Avalue: Tocolor);
     Procedure Setbuttondown(Avalue: Tocolor);
     Procedure Setbuttonenter(Avalue: Tocolor);
@@ -1984,6 +1983,7 @@ type
 //    procedure FindItem(Texti: String);
     procedure Delete(indexi: integer);
     property  Cells[ACol, ARow: Integer]: string read GetCells write SetCells;
+    procedure SaveToFile(s: string);
 
   published
     property OnCellClick           : TOnCellClick   read FOnCellclick          write FOnCellclick;
@@ -2561,11 +2561,299 @@ type
   end;
 
 
+ TOPageControl = class;
+
+       { TONURPageButton }
+
+ { TOPageButton }
+
+ TOPageButton = class(TOGraphicControl)
+ private
+   fenter, Fnormal, FPress, fdisable: Tocolor;
+   Fstate     : Tobutonstate;
+   FAutoWidth : boolean;
+ protected
+   procedure SetAutoWidth(const Value: boolean);
+   procedure CheckAutoWidth;
+   procedure MouseEnter; override;
+   procedure MouseLeave; override;
+   procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
+     X: integer; Y: integer); override;
+   procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
+     X: integer; Y: integer); override;
+ public
+   constructor Create(AOwner: TComponent); override;
+   destructor Destroy; override;
+   procedure Paint; override;
+ published
+   property AutoWidth: boolean read FAutoWidth write SetAutoWidth default True;
+   property OnMouseDown;
+   property OnMouseEnter;
+   property OnMouseLeave;
+   property OnMouseUp;
+   property OnMouseMove;
+   property OnClick;
+   property Align;
+   property Anchors;
+   property AutoSize;
+   property BidiMode;
+   property ClientHeight;
+   property ClientWidth;
+   property Color;
+   property Constraints;
+   property Enabled;
+   property ParentBidiMode;
+   property ParentFont;
+   property ParentShowHint;
+   property PopupMenu;
+   property ShowHint;
+   property Visible;
+   property OnContextPopup;
+   property OnDblClick;
+   property OnMouseWheel;
+   property OnMouseWheelDown;
+   property OnMouseWheelUp;
+   property OnPaint;
+   property OnResize;
+ end;
+
+
+   { TONURPage}
+
+   TOPage = class(TOCustomControl)
+   private
+     Fcaption: TCaption;
+     FPageControl: TOPageControl;
+     Fleft, FTopleft, FBottomleft, FRight, FTopRight, FBottomRight,
+     FTop, FBottom, FCenter: Tocolor;
+     function GetAutoWidth: boolean;
+     function getbutonw: integer;
+     function GetPageOrderIndex: integer;
+     procedure Getposition;
+     procedure SetAutoWidth(AValue: boolean);
+     procedure SetButtonwidth(AValue: integer);
+     procedure SetCaption(AValue: TCaption);
+     procedure SetPageControl(ANotebookControl: TOPageControl);
+     procedure SetPageOrderIndex(Value: integer);
+   protected
+     procedure ReadState(Reader: TReader); override;
+     procedure Loaded; override;
+   public
+     constructor Create(AOwner: TComponent); override;
+     destructor Destroy; override;
+     procedure Paint; override;
+     property PageControl  : TOPageControl read FPageControl write SetPageControl;
+   published
+     Fbutton: TOPageButton;
+     property AutoCaptionWidth: boolean read GetAutoWidth write SetAutoWidth default True;
+     property Buttonwidth: integer read getbutonw write SetButtonwidth;
+     property Caption: TCaption read Fcaption write SetCaption;
+     property Font;
+     property Hint;
+     property ParentShowHint;
+     property PopupMenu;
+     property ShowHint;
+     property ParentFont;
+     property ParentColor;
+     property PageOrderIndex: integer read GetPageOrderIndex
+       write SetPageOrderIndex stored False;
+     property OnEnter;
+     property OnExit;
+     property OnResize;
+     property OnMouseDown;
+     property OnMouseEnter;
+     property OnMouseLeave;
+     property OnMouseUp;
+     property OnMouseMove;
+     property OnClick;
+     property Anchors;
+     property AutoSize;
+     property BidiMode;
+     property ClientHeight;
+     property ClientWidth;
+     property Constraints;
+     property Enabled;
+     property ParentBidiMode;
+     property Visible;
+     property OnContextPopup;
+     property OnDblClick;
+     property OnMouseWheel;
+     property OnMouseWheelDown;
+     property OnMouseWheelUp;
+     property OnPaint;
+   end;
+
+       { TonbuttonareaCntrl }
+
+   { TOButtonAreaCntrl }
+
+   TOButtonAreaCntrl = class(TOCustomControl)
+   private
+     Fbttnarea: Tocolor;
+   public
+     constructor Create(AOwner: TComponent); override;
+     destructor Destroy; override;
+     procedure Paint; override;
+   end;
+
+   TPageChangingEvent = procedure(Sender: TObject; NewPageIndex: integer;
+     var AllowChange: boolean) of object;
+
+       { TONURPageControlu }
+
+   { TOPageControl }
+
+   TOPageControl = class(TOCustomControl)
+   private
+     FPages: TList;
+     FActivePage: TOPage;
+     FPageChanged: TNotifyEvent;
+     FPageChanging: TPageChangingEvent;
+     Fleft, FTopleft, FBottomleft, FRight, FTopRight, FBottomRight,
+     FTop, FBottom, FCenter, Fbuttonarea: Tocolor;
+     fbuttondirection: Tbutondirection;
+     FbuttonbarHeight: integer;
+     procedure buttonclicke(Sender: TObject);
+     function GetPage(Index: integer): TOPage;
+     function GetPageCount: integer;
+     function GetActivePageIndex: integer;
+     procedure SetButtonDirection(val: Tbutondirection);
+   protected
+     procedure GetChildren(Proc: TGetChildProc; Root: TComponent); override;
+     procedure SetChildOrder(Child: TComponent; Order: integer); override;
+     procedure ShowControl(AControl: TControl); override;
+     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+     procedure SetActivePage(Page: TOPage); virtual;
+     procedure SetActivePageIndex(PageIndex: integer); virtual;
+     procedure DoPageChanged; virtual;
+     function DoPageChanging(NewPageIndex: integer): boolean; virtual;
+     property ActivePageIndex: integer read GetActivePageIndex
+       write SetActivePageIndex stored False;
+     property OnPageChanging: TPageChangingEvent read FPageChanging write FPageChanging;
+     property OnPageChanged: TNotifyEvent read FPageChanged write FPageChanged;
+   public
+     procedure Paint; override;
+     constructor Create(AOwner: TComponent); override;
+     destructor Destroy; override;
+     function NewPage: TOPage;
+     procedure InsertPage(Page: TOPage); virtual;
+     procedure RemovePage(Page: TOPage); virtual;
+     function FindNextPage(CurPage: TOPage; GoForward: boolean): TOPage;
+     procedure SelectNextPage(GoForward: boolean);
+     property PageCount: integer read GetPageCount;
+     property Pages[Index: integer]: TOPage read GetPage;
+   published
+     btnarea: TOButtonAreaCntrl;
+     property ActivePage: TOPage read FActivePage write SetActivePage;
+     property ButtonDirection: Tbutondirection
+       read fbuttondirection write SetButtonDirection;
+     property Align;
+     property Anchors;
+     property AutoSize;
+     property BorderSpacing;
+     property BidiMode;
+     property Caption;
+     property ChildSizing;
+     property ClientHeight;
+     property ClientWidth;
+     property Color;
+     property Constraints;
+     property DockSite;
+     property DoubleBuffered;
+     property DragCursor;
+     property DragKind;
+     property DragMode;
+     property Enabled;
+     property Font;
+     property ParentBackground;
+     property ParentBidiMode;
+     property ParentColor;
+     property ParentDoubleBuffered;
+     property ParentFont;
+     property ParentShowHint;
+     property PopupMenu;
+     property ShowHint;
+     property TabOrder;
+     property TabStop;
+     property UseDockManager default True;
+     property Visible;
+     property OnClick;
+     property OnContextPopup;
+     property OnDockDrop;
+     property OnDockOver;
+     property OnDblClick;
+     property OnDragDrop;
+     property OnDragOver;
+     property OnEndDock;
+     property OnEndDrag;
+     property OnEnter;
+     property OnExit;
+     property OnGetSiteInfo;
+     property OnGetDockCaption;
+     property OnMouseDown;
+     property OnMouseEnter;
+     property OnMouseLeave;
+     property OnMouseMove;
+     property OnMouseUp;
+     property OnMouseWheel;
+     property OnMouseWheelDown;
+     property OnMouseWheelUp;
+     property OnPaint;
+     property OnResize;
+     property OnStartDock;
+     property OnStartDrag;
+     property OnUnDock;
+   end;
+
+   { TOPageControlEditor }
+
+   TOPageControlEditor = class(TComponentEditor)
+   private
+     procedure Addpage;
+   public
+     function GetVerb(Index: integer): string; override;
+     function GetVerbCount: integer; override;
+     procedure ExecuteVerb(Index: integer); override;
+   end;
+
+
+
+   { TONURPageActivePageProperty }
+
+   { TOPageActivePageProperty }
+
+   TOPageActivePageProperty = class(TComponentProperty)
+   public
+     function GetAttributes: TPropertyAttributes; override;
+     procedure GetValues(Proc: TGetStrProc); override;
+   end;
+
+
+   { TOnStringProperty }
+
+   TOnStringProperty = class(TStringProperty)
+   public
+     function GetAttributes: TPropertyAttributes; override;
+     procedure GetValueList(List: TStrings); virtual; abstract;
+     procedure GetValues(Proc: TGetStrProc); override;
+     function GetOnComponent: TPersistent; virtual;
+   end;
+
+
+
+
 procedure Register;
+
  {$R Balloon.res}
+
 implementation
 uses strutils,LazUnicode,Math,IntfGraphics, FPImage, GraphType,LazCanvas;//,utf8scanner;
 {$IFDEF UNIX}uses math;{$ENDIF}
+
+const
+  StringAddPage = 'New Page';
+  StringNextPage = 'Next Page';
+  StringPrevPage = 'Previous Page';
 
 procedure Register;
 begin
@@ -2596,7 +2884,14 @@ begin
   RegisterComponents('Standard', [ToImgswich]);
   RegisterComponents('Standard', [ToImgradio]);
   RegisterComponents('Standard', [TOKnob]);
+  RegisterComponents('Standard', [TOPageControl]);
 
+  RegisterClasses([TOPageControl, TOPage]);
+  RegisterNoIcon([TOPage]);
+  RegisterPropertyEditor(TypeInfo(TOPage), TOPageControl, 'ActivePage',
+    TOPageActivePageProperty);
+  RegisterComponentEditor(TOPage, TOPageControlEditor);
+  RegisterComponentEditor(TOPageControl, TOPageControlEditor);
 
 end;
 
@@ -2917,6 +3212,850 @@ begin
   Canvas.TextOut((ClientWidth - w)div 2, (ClientHeight - h)div 2,  Caption);
 
 end;
+
+{ TOPageButton }
+
+procedure TOPageButton.SetAutoWidth(const Value: boolean);
+begin
+  FAutoWidth := Value;
+  CheckAutoWidth;
+end;
+
+procedure TOPageButton.CheckAutoWidth;
+var
+  a: Tsize;
+begin
+  if FAutoWidth then
+  begin
+
+    a := self.Canvas.TextExtent(Caption);
+    self.Width:=a.cx;
+ //   self.Height:=a.cy;
+
+ //   resim.SetSize(a.cX, self.Height);
+ //   Width := a.cx;// resim.Width;
+    // Height :=a.cy;// resim.Height;
+{  end else
+  begin
+   Width :=  resim.Width;
+   Height := resim.Height;   }
+  end;
+
+end;
+
+procedure TOPageButton.MouseEnter;
+begin
+    if (csDesigning in ComponentState) then
+    exit;
+  if (Enabled = False) or (Fstate = obEnters) then
+    Exit;
+
+  inherited MouseEnter;
+  Fstate := obEnters;
+  Invalidate;
+end;
+
+procedure TOPageButton.MouseLeave;
+begin
+  if (csDesigning in ComponentState) then
+    exit;
+  if (Enabled = False) or (Fstate = obLeaves) then
+    Exit;
+
+  inherited MouseLeave;
+  Fstate := obLeaves;
+  Invalidate;
+ end;
+
+procedure TOPageButton.MouseDown(Button: TMouseButton; Shift: TShiftState;
+  X: integer; Y: integer);
+begin
+  if (csDesigning in ComponentState) then
+    exit;
+  if (Enabled = False) or (Fstate = obDowns) then
+    Exit;
+
+  inherited MouseDown(Button, Shift, X, Y);
+  if Button = mbLeft then
+  begin
+    Fstate := obDowns;
+    Invalidate;
+  end;
+end;
+
+procedure TOPageButton.MouseUp(Button: TMouseButton; Shift: TShiftState;
+  X: integer; Y: integer);
+begin
+   inherited MouseUp(Button, Shift, X, Y);
+  Fstate := obLeaves;
+  Invalidate;
+end;
+
+constructor TOPageButton.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  Width := 100;
+  Height := 30;
+  FAutoWidth := True;
+  Fstate := obLeaves;
+
+  FEnter := Tocolor.Create;
+  with FEnter do
+  begin
+    border := 1;
+    bordercolor := clblack;
+    startcolor := $00CDCDCD;
+    stopcolor := clmenu;
+    Fontcolor := clBlue;
+  end;
+
+  FNormal := Tocolor.Create(self);
+  with FNormal do
+  begin
+    border := 1;
+    bordercolor := $006E6E6E;
+    startcolor := clActiveBorder;
+    stopcolor := clmenu;
+    Fontcolor := clblack;
+  end;
+  FPress := Tocolor.Create(self);
+  with FPress do
+  begin
+    border := 1;
+    bordercolor := clblack;
+    startcolor := clmenu;
+    stopcolor := $00A0A0A0;
+    Fontcolor := clRed;
+  end;
+
+  fdisable := Tocolor.Create(self);
+  with fdisable do
+  begin
+    border := 1;
+    bordercolor := clblack;
+    startcolor := clmenu;
+    stopcolor := $005D5D5D;
+    Fontcolor := $002C2C2C;
+  end;
+end;
+
+destructor TOPageButton.Destroy;
+begin
+   FreeAndNil(fenter);
+   FreeAndNil(Fnormal);
+   FreeAndNil(FPress);
+   FreeAndNil(fdisable);
+   inherited Destroy;
+end;
+
+procedure TOPageButton.Paint;
+var
+  textx, Texty: integer;
+  fontcolor: Tcolor;
+begin
+  inherited paint;
+
+  if Enabled = False then
+  begin
+    Drawtorect(Self.Canvas, ClientRect, fdisable, Fkind);
+    fontcolor := fdisable.Fontcolor;
+  end
+  else
+  begin
+    case fstate of
+      obleaves:
+      begin
+        Drawtorect(Self.Canvas, ClientRect, Fnormal, Fkind);
+        fontcolor := Fnormal.Fontcolor;
+      end;
+      obenters:
+      begin
+        Drawtorect(Self.Canvas, ClientRect, fenter, Fkind);
+        fontcolor := fenter.Fontcolor;
+      end;
+      obdowns:
+      begin
+        Drawtorect(Self.Canvas, ClientRect, FPress, Fkind);
+        fontcolor := FPress.Fontcolor;
+      end;
+    end;
+  end;
+
+
+
+  textx := (self.Width div 2) - (self.canvas.TextWidth(Caption) div 2);
+  Texty := (self.Height div 2) - (self.canvas.TextHeight(Caption) div 2);
+
+  self.Font.Color := fontcolor;
+  if Length(Caption) > 0 then
+  begin
+    self.canvas.Brush.Style := bsClear;
+    self.canvas.TextOut(Textx, Texty, Caption);
+  end;
+end;
+
+function TOPage.GetAutoWidth: boolean;
+begin
+    if Assigned(Fbutton) then
+    Result := Fbutton.AutoWidth;
+end;
+
+function TOPage.getbutonw: integer;
+begin
+ if Assigned(Fbutton) then
+    Result := Fbutton.Width;
+end;
+
+function TOPage.GetPageOrderIndex: integer;
+begin
+  if FPageControl <> nil then
+     Result := FPageControl.FPages.IndexOf(Self)
+   else
+     Result := -1;
+end;
+
+procedure TOPage.Getposition;
+begin
+
+  case FPageControl.ButtonDirection of
+    obup:
+    begin
+      Fbutton.Align := alLeft;
+      Fbutton.Width := 100;
+      Fbutton.Font.Orientation := 0;
+      left := 5;//FPageControl.Fleft.Width;
+      top :={ FPageControl.FTop.Height} 5+ FPageControl.btnarea.Height;
+      Width := FPageControl.Width-5;//FPageControl.Width - (FPageControl.Fleft.Width +    FPageControl.FRight.Width);
+      Height := FPageControl.Height -(5+ FPageControl.btnarea.Height);
+//      (FPageControl.FTop.Height +  FPageControl.FBottom.Height + FPageControl.btnarea.Height);
+    end;
+    obdown:
+    begin
+      Fbutton.Align := alLeft;
+      Fbutton.Width := 100;
+      Fbutton.Font.Orientation := 0;
+      left := 5;// FPageControl.Fleft.Width;
+      top := 5;//FPageControl.FTop.Height;
+      Width := FPageControl.Width-5;//FPageControl.Width - (FPageControl.Fleft.Width +  FPageControl.FRight.Width);
+      Height := FPageControl.Height -(Fbutton.Height+5+FPageControl.btnarea.Height);//(FPageControl.FTop.Height + FPageControl.FBottom.Height + FPageControl.btnarea.Height);
+    end;
+    obleft:
+    begin
+      Fbutton.Font.Orientation := 900;
+      Fbutton.Height := 100;              //  Fbutton.Width:=FPageControl.btnarea.Width;
+
+      Fbutton.Align := altop;
+    {  left := FPageControl.Fleft.Width + FPageControl.btnarea.Width;
+      top := FPageControl.FTop.Height;
+      Width := FPageControl.Width - (FPageControl.Fleft.Width +
+        FPageControl.FRight.Width + FPageControl.btnarea.Width);
+      Height := FPageControl.Height - (FPageControl.FTop.Height +
+        FPageControl.FBottom.Height);  }
+    end;
+    obright:
+    begin
+      Fbutton.Font.Orientation := 900;
+      Fbutton.Height := 100;   // Fbutton.Width:=FPageControl.btnarea.Width;
+
+      Fbutton.Align := altop;
+     { left := FPageControl.Fleft.Width;
+      top := FPageControl.FTop.Height;
+      Width := FPageControl.Width - (FPageControl.Fleft.Width +
+        FPageControl.FRight.Width + FPageControl.btnarea.Width);
+      Height := FPageControl.Height - (FPageControl.FTop.Height +
+        FPageControl.FBottom.Height); }
+    end;
+  end;
+end;
+
+procedure TOPage.SetAutoWidth(AValue: boolean);
+begin
+ if Assigned(Fbutton) then
+    Fbutton.AutoWidth := AValue;
+end;
+
+procedure TOPage.SetButtonwidth(AValue: integer);
+begin
+ if Assigned(Fbutton) then
+  begin
+    if Fbutton.Width = AValue then exit;
+    Fbutton.Width := AValue;
+  end;
+end;
+
+procedure TOPage.SetCaption(AValue: TCaption);
+begin
+ if Fcaption = AValue then Exit;
+  Fcaption := AValue;
+  if Assigned(Fbutton) then
+    fbutton.Caption := AValue;
+end;
+
+procedure TOPage.SetPageControl(ANotebookControl: TOPageControl);
+begin
+  if FPageControl <> ANotebookControl then
+   begin
+
+     if FPageControl <> nil then
+       FPageControl.RemovePage(Self);
+
+     FPageControl := ANotebookControl;
+
+     Parent := FPageControl;
+
+     if FPageControl <> nil then
+     begin
+       FPageControl.InsertPage(Self);
+
+       Fbutton := TOPageButton.Create(self);
+
+       with fbutton do
+       begin
+         parent := FPageControl.btnarea;
+         align := alleft;
+         tag := self.GetPageOrderIndex;
+         OnClick := @self.FPageControl.buttonclicke;
+         Caption := self.Caption;
+         AutoWidth := self.AutoCaptionWidth;
+         // BorderSpacing.Bottom:=5;
+       end;
+       Getposition;
+       Invalidate;
+
+     end;
+   end;
+end;
+
+procedure TOPage.SetPageOrderIndex(Value: integer);
+ var
+  MaxPageIndex: integer;
+begin
+  if FPageControl <> nil then
+  begin
+    MaxPageIndex := FPageControl.FPages.Count - 1;
+    if Value > MaxPageIndex then
+      raise EListError.CreateFmt('Sheet Index Error', [Value, MaxPageIndex]);
+    FPageControl.FPages.Move(PageOrderIndex, Value);
+  end;
+end;
+
+procedure TOPage.ReadState(Reader: TReader);
+begin
+  inherited ReadState(Reader);
+  if Reader.Parent is TOPageControl then
+    PageControl := TOPageControl(Reader.Parent);
+end;
+
+procedure TOPage.Loaded;
+begin
+  inherited Loaded;
+  if (csDesigning in ComponentState) and not Visible then
+    SendToBack;
+end;
+
+constructor TOPage.Create(AOwner: TComponent);
+begin
+    inherited Create(AOwner);
+  parent := TWinControl(Aowner);
+  ControlStyle := ControlStyle + [csParentBackground, csAcceptsControls,
+    csClickEvents, csCaptureMouse, csDoubleClicks];
+
+  DoubleBuffered := True;
+  ParentBackground := True;
+  Self.Height := 190;
+  Self.Width := 190;
+  Visible := False;
+end;
+
+destructor TOPage.Destroy;
+begin
+  inherited Destroy;
+end;
+
+procedure TOPage.Paint;
+begin
+  if FPageControl = nil then exit;
+  if not Visible then exit;
+
+  inherited Paint;
+end;
+
+{ TOButtonAreaCntrl }
+
+constructor TOButtonAreaCntrl.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  parent := TWinControl(Aowner);
+  Width := 50;
+  Height := 50;
+  Fbttnarea := Tocolor.Create;
+  with Fbttnarea do
+  begin
+    border := 1;
+    bordercolor := clblack;
+    startcolor := clmenu;
+    stopcolor := $005D5D5D;
+    Fontcolor := $002C2C2C;
+  end;
+end;
+
+destructor TOButtonAreaCntrl.Destroy;
+begin
+  FreeAndNil(Fbttnarea);
+  inherited Destroy;
+end;
+
+procedure TOButtonAreaCntrl.Paint;
+begin
+  if not Visible then exit;
+  Drawtorect(Self.Canvas, ClientRect, Fbttnarea, Fkind);
+  inherited Paint;
+end;
+
+{ TOPageControl }
+
+procedure TOPageControl.buttonclicke(Sender: TObject);
+ var
+  i: integer;
+begin
+  i := TOPageButton(Sender).Tag;
+  if GetActivePageIndex = i then exit;
+  SetActivePageIndex(i);
+end;
+
+function TOPageControl.GetPage(Index: integer): TOPage;
+begin
+  Result := TOPage(FPages[Index]);
+end;
+
+function TOPageControl.GetPageCount: integer;
+begin
+  Result := FPages.Count;
+end;
+
+function TOPageControl.GetActivePageIndex: integer;
+begin
+   if Assigned(FActivePage) then
+    Result := FPages.IndexOf(FActivePage)
+  else
+    Result := -1;
+end;
+
+procedure TOPageControl.SetButtonDirection(val: Tbutondirection);
+var
+  c: integer;
+begin
+  if fbuttondirection = val then exit;
+  fbuttondirection := val;
+
+  case fbuttondirection of
+    obup:
+    begin
+      btnarea.Align := alTop;
+      btnarea.Height := 30;
+    end;
+    obdown:
+    begin
+      btnarea.Align := alBottom;
+      btnarea.Height := 30;
+    end;
+    obleft:
+    begin
+      btnarea.Align := alLeft;
+      btnarea.Width := 30;
+    end;
+    obright:
+    begin
+      btnarea.Align := alRight;
+      btnarea.Width := 30;
+    end;
+  end;
+
+  if FPages.Count > 0 then
+    for c := 0 to FPages.Count - 1 do
+      Pages[c].Getposition;
+
+  Invalidate;
+
+end;
+
+procedure TOPageControl.GetChildren(Proc: TGetChildProc; Root: TComponent);
+begin
+  inherited GetChildren(Proc, Root);
+end;
+
+procedure TOPageControl.SetChildOrder(Child: TComponent; Order: integer);
+begin
+   inherited SetChildOrder(Child, Order);
+  TOPage(Child).PageOrderIndex := Order;
+end;
+
+procedure TOPageControl.ShowControl(AControl: TControl);
+begin
+  if (AControl is TOPage) and (TOPage(AControl).PageControl = Self) then
+    SetActivePage(TOPage(AControl));
+  inherited ShowControl(AControl);
+end;
+
+procedure TOPageControl.Notification(AComponent: TComponent;
+  Operation: TOperation);
+begin
+    inherited Notification(AComponent, Operation);
+  if Operation = opRemove then
+  begin
+    if (AComponent is TOPage) and (TOPage(AComponent).PageControl = Self) then
+      RemovePage(TOPage(AComponent));
+  end;
+end;
+
+procedure TOPageControl.SetActivePage(Page: TOPage);
+var
+  AOldPage: TOPage;
+  APageChanged: boolean;
+begin
+  APageChanged := False;
+  if not (csDestroying in ComponentState) then
+  begin
+    if (Assigned(Page) and (Page.PageControl = Self)) or (Page = nil) then
+    begin
+      if Assigned(FActivePage) then
+      begin
+        if FActivePage <> Page then
+        begin
+          AOldPage := FActivePage;
+          FActivePage := Page;
+          AOldPage.Visible := False;
+          AOldPage.Fbutton.Enabled := True;
+          FActivePage.Fbutton.Enabled := False;
+          FActivePage.Visible := True;
+          if csDesigning in ComponentState then
+          begin
+            FActivePage.BringToFront;
+            AOldPage.SendToBack;
+            Invalidate;
+          end;
+
+
+          APageChanged := True;
+        end;
+      end
+      else
+      begin
+        FActivePage := Page;
+        FActivePage.Visible := True;
+        FActivePage.Fbutton.Enabled := False;
+        APageChanged := True;
+      end;
+    end;
+  end;
+  if APageChanged then DoPageChanged;
+
+
+end;
+
+procedure TOPageControl.SetActivePageIndex(PageIndex: integer);
+begin
+  if not (csLoading in ComponentState) then
+    SetActivePage(Pages[PageIndex]);
+end;
+
+procedure TOPageControl.DoPageChanged;
+begin
+   if not (csDestroying in ComponentState) and Assigned(FPageChanged) then
+    FPageChanged(Self);
+end;
+
+function TOPageControl.DoPageChanging(NewPageIndex: integer): boolean;
+begin
+   Result := True;
+  if Assigned(FPageChanging) then
+    FPageChanging(Self, NewPageIndex, Result);
+end;
+
+procedure TOPageControl.Paint;
+begin
+
+  if not Visible then exit;
+
+  inherited Paint;
+end;
+
+constructor TOPageControl.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  parent := TWinControl(Aowner);
+  //  ControlStyle := ControlStyle - [csAcceptsControls] + [csParentBackground, csClickEvents, csCaptureMouse, csDoubleClicks];
+  Width := 300;
+  Height := 300;
+  TabStop := True;
+  FPages := TList.Create;
+  fbuttondirection := obup;
+  FbuttonbarHeight := 24;
+  Font.Name := 'Calibri';
+  Font.Size := 9;
+  TabStop := True;
+
+
+  btnarea := TOButtonAreaCntrl.Create(self);
+  btnarea.Parent := self;
+  //  btnarea.Skindata:=nil;//self.Skindata;
+  btnarea.Height := 30;
+  btnarea.Align := alTop;
+ // Captionvisible := False;
+end;
+
+destructor TOPageControl.Destroy;
+begin
+  FPages.Free;
+  btnarea.Free;
+  inherited Destroy;
+end;
+
+function TOPageControl.NewPage: TOPage;
+begin
+   Result := TOPage.Create(nil);
+  Result.PageControl := Self;
+  ActivePage := Result;
+end;
+
+procedure TOPageControl.InsertPage(Page: TOPage);
+begin
+ FPages.Add(Page);
+  Page.FPageControl := Self;
+  Page.FreeNotification(Self);
+end;
+
+procedure TOPageControl.RemovePage(Page: TOPage);
+var
+  APage: TOPage;
+begin
+  if FActivePage = Page then
+  begin
+    APage := FindNextPage(FActivePage, True);
+    if APage = Page then FActivePage := nil
+    else
+      FActivePage := APage;
+  end;
+  FPages.Remove(Page);
+  Page.FPageControl := nil;
+  if not (csDestroying in ComponentState) then
+    Invalidate;
+
+end;
+
+function TOPageControl.FindNextPage(CurPage: TOPage; GoForward: boolean
+  ): TOPage;
+var
+  StartIndex: integer;
+begin
+  Result := nil;
+  if FPages.Count <> 0 then
+  begin
+    StartIndex := FPages.IndexOf(CurPage);
+    if StartIndex = -1 then
+    begin
+      if GoForward then
+        StartIndex := FPages.Count - 1
+      else
+        StartIndex := 0;
+    end;
+    if GoForward then
+    begin
+      Inc(StartIndex);
+      if StartIndex = FPages.Count then
+        StartIndex := 0;
+    end
+    else
+    begin
+      if StartIndex = 0 then
+        StartIndex := FPages.Count;
+      Dec(StartIndex);
+    end;
+    Result := Pages[StartIndex];
+  end;
+
+end;
+
+procedure TOPageControl.SelectNextPage(GoForward: boolean);
+begin
+ SetActivePage(FindNextPage(ActivePage, GoForward));
+end;
+
+{ TOPageControlEditor }
+
+procedure TOPageControlEditor.Addpage;
+var
+  P: TOPage;
+  C: TOPageControl;
+  Hook: TPropertyEditorHook = nil;
+begin
+  if not GetHook(Hook) then
+    Exit;
+
+  if Component is TOPage then
+    c := TOPage(Component).PageControl
+  else
+    c := TOPageControl(Component);
+
+
+  P := TOPage.Create(C.Owner);
+  try
+    P.Parent := C;
+    P.Name := GetDesigner.CreateUniqueComponentName(p.ClassName);
+    p.Caption := p.Name;
+    P.PageControl := C;
+    C.ActivePage := P;
+    Hook.PersistentAdded(P, True);
+    //     GetDesigner.SelectOnlyThisComponent(P);
+    GlobalDesignHook.SelectOnlyThis(P);
+    Modified;
+  except
+    P.Free;
+    raise;
+  end;
+
+end;
+
+function TOPageControlEditor.GetVerb(Index: integer): string;
+var
+  PageControl: TOPageControl;
+begin
+  case Index of
+    0: Result := StringAddPage;
+    1: Result := StringNextPage;
+    2: Result := StringPrevPage;
+    else
+    begin
+      Result := '';
+      if Component is TOPage then
+        PageControl := TOPage(Component).PageControl
+      else
+        PageControl := TOPageControl(Component);
+
+      if PageControl <> nil then
+      begin
+        Dec(Index, 3);
+        if Index < PageControl.PageCount then
+          Result := 'Open ' + PageControl.Pages[Index].Name;
+      end;
+    end;
+  end;
+end;
+
+function TOPageControlEditor.GetVerbCount: integer;
+var
+  PageControl: TOPageControl;
+  PageCount: integer;
+begin
+  PageCount := 0;
+  if Component is TOPage then
+    PageControl := TOPage(Component).PageControl
+  else
+    PageControl := TOPageControl(Component);
+
+  if PageControl <> nil then
+    PageCount := PageControl.PageCount;
+
+
+  Result := 3 + PageCount;
+end;
+
+procedure TOPageControlEditor.ExecuteVerb(Index: integer);
+var
+  PageControl: TOPageControl;
+  Page: TOPage;
+  //Hook: TPropertyEditorHook;
+begin
+  if Component is TOPage then
+    PageControl := TOPage(Component).PageControl
+  else
+    PageControl := TOPageControl(Component);
+  if PageControl <> nil then
+  begin
+    if Index = 0 then
+    begin
+      Addpage;
+    end
+    else
+    if Index < 3 then
+    begin
+      Page := PageControl.FindNextPage(PageControl.ActivePage, Index = 1);
+      if (Page <> nil) and (Page <> PageControl.ActivePage) then
+      begin
+        PageControl.ActivePage := Page;
+        if Component is TOPage then
+          GetDesigner.SelectOnlyThisComponent(Page);
+        GetDesigner.Modified;
+      end;
+    end
+    else
+    begin
+      Dec(Index, 3);
+      if Index < PageControl.PageCount then
+      begin
+        Page := PageControl.Pages[Index];
+        if (Page <> nil) and (Page <> PageControl.ActivePage) then
+        begin
+          PageControl.ActivePage := Page;
+          if Component is TOPage then
+            GetDesigner.SelectOnlyThisComponent(Page);
+          GetDesigner.Modified;
+        end;
+      end;
+    end;
+  end;
+end;
+
+{ TOPageActivePageProperty }
+
+function TOPageActivePageProperty.GetAttributes: TPropertyAttributes;
+begin
+ Result := [paValueList];
+end;
+
+procedure TOPageActivePageProperty.GetValues(Proc: TGetStrProc);
+var
+  I: integer;
+  Component: TComponent;
+begin
+  if (GlobalDesignHook <> nil) and (GlobalDesignHook.LookupRoot <> nil) and
+    (GlobalDesignHook.LookupRoot is TComponent) then
+    for I := 0 to TComponent(GlobalDesignHook.LookupRoot).ComponentCount - 1 do
+    begin
+      Component := TComponent(GlobalDesignHook.LookupRoot).Components[I];
+      if (Component.Name <> '') and (Component is TOPage) and
+        (TOPage(Component).PageControl = GetComponent(0)) then
+        Proc(Component.Name);
+    end;
+end;
+
+{ TOnStringProperty }
+
+function TOnStringProperty.GetAttributes: TPropertyAttributes;
+begin
+ Result := [paValueList, paSortList, paReadOnly];
+end;
+
+procedure TOnStringProperty.GetValues(Proc: TGetStrProc);
+ var
+   i: integer;
+   Values: TStringList;
+ begin
+   Values := TStringList.Create;
+   try
+     GetValueList(Values);
+     for i := 0 to Pred(Values.Count) do
+       Proc(Values[i]);
+   finally
+     Values.Free;
+   end;
+end;
+
+function TOnStringProperty.GetOnComponent: TPersistent;
+begin
+   Result := GetComponent(0);
+end;
+
 { Totransprentlistbox }
 
 
@@ -5420,6 +6559,57 @@ procedure TOlist.Delete(indexi: integer);
  begin
   for i:=0 to Columns.Count-1 do
    Columns[i].items.delete(Indexi);
+end;
+
+procedure TOlist.SaveToFile(s: string);
+var
+  f: TextFile;
+  i, k: integer;
+begin
+  AssignFile(f, s);
+  Rewrite(f);
+  Writeln(f, Columns.Count);
+
+  for i := 0 to Columns.Count - 1 do
+  begin
+     Writeln(f, Columns[i].Items.count-1);
+    for k := 0 to Columns[i].Items.count - 1 do
+    begin
+      Writeln(F, Cells[i, k]);
+
+    end;
+  end;
+  //    end;
+  CloseFile(F);
+end;
+
+procedure TOlist.LoadFromFile(s: string);
+var
+  f: TextFile;
+  iTmp,iTmp1, i, k: integer;
+  strTemp: string;
+begin
+  AssignFile(f, s);
+  Reset(f);
+
+  // Get number of columns
+  Readln(f, iTmp1);
+ // Columns.Count := iTmp;
+  // Get number of rows
+
+ // RowCount := iTmp;
+  // loop through cells & fill in values
+  for i := 0 to iTmp1 - 1 do
+  begin
+    Readln(f, iTmp);
+    for k := 0 to iTmp - 1 do
+    begin
+      Readln(f, strTemp);
+      Cells[i, k] := strTemp;
+    end;
+  end;
+
+  CloseFile(f);
 end;
 
 
